@@ -13,17 +13,100 @@
       "doc_url": "https://guides.data.gouv.fr/api",
       "description": "Catalogue officiel des données publiques françaises",
       "facets": [
-        { "key": "topic", "label": "Thème", "type": "select",
-          "values": ["transport","logement","santé","éducation","économie","environnement","social","culture","sécurité","agriculture"] },
-        { "key": "frequency", "label": "Fréquence", "type": "select",
-          "values": ["daily","weekly","monthly","quarterly","annual","unknown"] },
-        { "key": "license", "label": "Licence", "type": "select",
-          "values": ["fr-lo","odc-odbl","cc-by","cc-by-sa","other-open"] },
-        { "key": "organization", "label": "Organisation", "type": "text", "placeholder": "ex: insee" },
-        { "key": "tag", "label": "Tag", "type": "text", "placeholder": "ex: emploi, chômage" }
+        {
+          "key": "topic",
+          "label": "Thème",
+          "type": "select",
+          "values": [
+            "transport",
+            "housing",
+            "health",
+            "education",
+            "economy",
+            "environment",
+            "society",
+            "culture",
+            "security",
+            "agriculture",
+            "energy",
+            "spatial-planning",
+            "justice",
+            "employment"
+          ],
+          "labels": {
+            "transport": "Transport",
+            "housing": "Logement",
+            "health": "Santé",
+            "education": "Éducation",
+            "economy": "Économie",
+            "environment": "Environnement",
+            "society": "Social",
+            "culture": "Culture",
+            "security": "Sécurité",
+            "agriculture": "Agriculture",
+            "energy": "Énergie",
+            "spatial-planning": "Aménagement",
+            "justice": "Justice",
+            "employment": "Emploi"
+          }
+        },
+        {
+          "key": "frequency",
+          "label": "Fréquence",
+          "type": "select",
+          "values": [
+            "daily",
+            "weekly",
+            "monthly",
+            "quarterly",
+            "annual",
+            "unknown"
+          ],
+          "labels": {
+            "daily": "Quotidien",
+            "weekly": "Hebdomadaire",
+            "monthly": "Mensuel",
+            "quarterly": "Trimestriel",
+            "annual": "Annuel",
+            "unknown": "Inconnu"
+          }
+        },
+        {
+          "key": "license",
+          "label": "Licence",
+          "type": "select",
+          "values": [
+            "fr-lo",
+            "odc-odbl",
+            "cc-by",
+            "cc-by-sa",
+            "other-open"
+          ]
+        },
+        {
+          "key": "organization",
+          "label": "Organisation",
+          "type": "text",
+          "placeholder": "ex: insee"
+        },
+        {
+          "key": "tag",
+          "label": "Tag",
+          "type": "text",
+          "placeholder": "ex: emploi, chômage"
+        }
       ],
-      "query_params": { "page_size": 8, "sort": "-created" },
-      "example_queries": ["chômage", "température", "immigration", "logement", "salaires"]
+      "query_params": {
+        "page_size": 8,
+        "sort": "-created"
+      },
+      "example_queries": [
+        "chômage",
+        "température",
+        "immigration",
+        "logement",
+        "salaires"
+      ]
     },
     {
       "id": "insee-bdm",
@@ -36,14 +119,52 @@
       "doc_url": "https://portail-api.insee.fr/catalog/api/eebab65a-9aef-4da5-bab6-5a9aefeda552",
       "description": "Banque de données macroéconomiques INSEE — 150 000+ séries chronologiques",
       "facets": [
-        { "key": "idBank", "label": "Identifiant série (idBank)", "type": "text",
-          "placeholder": "ex: 001694087" },
-        { "key": "theme", "label": "Thème", "type": "select",
-          "values": ["Prix","Emploi","Salaires","Population","PIB","Commerce","Industrie","Construction","Agriculture","Démographie"] },
-        { "key": "frequency", "label": "Fréquence", "type": "select",
-          "values": ["M (mensuelle)","T (trimestrielle)","A (annuelle)"] },
-        { "key": "geo", "label": "Territoire", "type": "select",
-          "values": ["France","Île-de-France","Métropole","DOM-TOM","Région","Département"] }
+        {
+          "key": "idBank",
+          "label": "Identifiant série (idBank)",
+          "type": "text",
+          "placeholder": "ex: 001694087"
+        },
+        {
+          "key": "theme",
+          "label": "Thème",
+          "type": "select",
+          "values": [
+            "Prix",
+            "Emploi",
+            "Salaires",
+            "Population",
+            "PIB",
+            "Commerce",
+            "Industrie",
+            "Construction",
+            "Agriculture",
+            "Démographie"
+          ]
+        },
+        {
+          "key": "frequency",
+          "label": "Fréquence",
+          "type": "select",
+          "values": [
+            "M (mensuelle)",
+            "T (trimestrielle)",
+            "A (annuelle)"
+          ]
+        },
+        {
+          "key": "geo",
+          "label": "Territoire",
+          "type": "select",
+          "values": [
+            "France",
+            "Île-de-France",
+            "Métropole",
+            "DOM-TOM",
+            "Région",
+            "Département"
+          ]
+        }
       ],
       "query_params": {},
       "example_queries": [
@@ -65,16 +186,43 @@
       "doc_url": "https://www.infoclimat.fr/opendata/",
       "description": "Données météo historiques et temps réel — réseau de stations France",
       "facets": [
-        { "key": "station", "label": "Station (ID)", "type": "text",
-          "placeholder": "ex: 07149 (Brest)" },
-        { "key": "format", "label": "Format", "type": "select",
-          "values": ["json","csv"] },
-        { "key": "debut", "label": "Date début", "type": "text",
-          "placeholder": "ex: 2024-01-01" },
-        { "key": "fin", "label": "Date fin", "type": "text",
-          "placeholder": "ex: 2024-12-31" },
-        { "key": "methode", "label": "Résolution", "type": "select",
-          "values": ["horaire","quotidienne","mensuelle"] }
+        {
+          "key": "station",
+          "label": "Station (ID)",
+          "type": "text",
+          "placeholder": "ex: 07149 (Brest)"
+        },
+        {
+          "key": "format",
+          "label": "Format",
+          "type": "select",
+          "values": [
+            "json",
+            "csv"
+          ]
+        },
+        {
+          "key": "debut",
+          "label": "Date début",
+          "type": "text",
+          "placeholder": "ex: 2024-01-01"
+        },
+        {
+          "key": "fin",
+          "label": "Date fin",
+          "type": "text",
+          "placeholder": "ex: 2024-12-31"
+        },
+        {
+          "key": "methode",
+          "label": "Résolution",
+          "type": "select",
+          "values": [
+            "horaire",
+            "quotidienne",
+            "mensuelle"
+          ]
+        }
       ],
       "query_params": {},
       "example_queries": [
@@ -96,22 +244,45 @@
       "doc_url": "https://portail-api.meteofrance.fr/web/",
       "description": "Données officielles Météo-France — observations, prévisions, climatologie",
       "facets": [
-        { "key": "dataset", "label": "Jeu de données", "type": "select",
+        {
+          "key": "dataset",
+          "label": "Jeu de données",
+          "type": "select",
           "values": [
             "climatologie-quotidienne",
             "observations-synop",
             "observations-radar",
             "previsions-arome",
             "previsions-arpege"
-          ] },
-        { "key": "station_id", "label": "ID Station", "type": "text",
-          "placeholder": "ex: 07110 (Brest-Guipavas)" },
-        { "key": "date_deb", "label": "Date début", "type": "text",
-          "placeholder": "ex: 2024-01-01T00:00:00Z" },
-        { "key": "date_fin", "label": "Date fin", "type": "text",
-          "placeholder": "ex: 2024-12-31T23:59:59Z" },
-        { "key": "format", "label": "Format", "type": "select",
-          "values": ["json","csv"] }
+          ]
+        },
+        {
+          "key": "station_id",
+          "label": "ID Station",
+          "type": "text",
+          "placeholder": "ex: 07110 (Brest-Guipavas)"
+        },
+        {
+          "key": "date_deb",
+          "label": "Date début",
+          "type": "text",
+          "placeholder": "ex: 2024-01-01T00:00:00Z"
+        },
+        {
+          "key": "date_fin",
+          "label": "Date fin",
+          "type": "text",
+          "placeholder": "ex: 2024-12-31T23:59:59Z"
+        },
+        {
+          "key": "format",
+          "label": "Format",
+          "type": "select",
+          "values": [
+            "json",
+            "csv"
+          ]
+        }
       ],
       "query_params": {},
       "example_queries": [
@@ -132,16 +303,45 @@
       "doc_url": "https://wikis.ec.europa.eu/display/EUROSTATHELP/API",
       "description": "Statistiques officielles de l'Union Européenne — accès libre",
       "facets": [
-        { "key": "datasetCode", "label": "Code dataset", "type": "text",
-          "placeholder": "ex: nama_10_gdp" },
-        { "key": "geo", "label": "Pays", "type": "select",
-          "values": ["FR","DE","IT","ES","BE","NL","PL","EU27_2020","EA19"] },
-        { "key": "time", "label": "Période", "type": "text",
-          "placeholder": "ex: 2020,2021,2022,2023" },
-        { "key": "unit", "label": "Unité", "type": "text",
-          "placeholder": "ex: PC_GDP, MIO_EUR" }
+        {
+          "key": "datasetCode",
+          "label": "Code dataset",
+          "type": "text",
+          "placeholder": "ex: nama_10_gdp"
+        },
+        {
+          "key": "geo",
+          "label": "Pays",
+          "type": "select",
+          "values": [
+            "FR",
+            "DE",
+            "IT",
+            "ES",
+            "BE",
+            "NL",
+            "PL",
+            "EU27_2020",
+            "EA19"
+          ]
+        },
+        {
+          "key": "time",
+          "label": "Période",
+          "type": "text",
+          "placeholder": "ex: 2020,2021,2022,2023"
+        },
+        {
+          "key": "unit",
+          "label": "Unité",
+          "type": "text",
+          "placeholder": "ex: PC_GDP, MIO_EUR"
+        }
       ],
-      "query_params": { "format": "JSON", "lang": "FR" },
+      "query_params": {
+        "format": "JSON",
+        "lang": "FR"
+      },
       "example_queries": [
         "PIB — nama_10_gdp",
         "Chômage — une_rt_m",
