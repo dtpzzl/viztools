@@ -5,7 +5,7 @@
  * @version 1.0
  * @sampleData [{"label":"2019","value":42},{"label":"2020","value":58},{"label":"2021","value":51},{"label":"2022","value":67},{"label":"2023","value":73},{"label":"2024","value":69}]
  */
-export function draw(svg, g, data, W, H, color) {
+function draw(svg, g, data, W, H, color, p) {
   const x = d3.scalePoint()
     .domain(data.map(d => d.label))
     .range([0, W]);
@@ -15,10 +15,12 @@ export function draw(svg, g, data, W, H, color) {
     .range([H, 0]);
 
   // Grille
-  g.append('g').attr('class', 'grid')
-    .call(d3.axisLeft(y).ticks(5).tickSize(-W).tickFormat(''))
-    .selectAll('line').attr('stroke', '#e4e4ed').attr('stroke-dasharray', '3,3');
-  g.select('.grid .domain').remove();
+  if (p.showGrid ?? true) {
+    g.append('g').attr('class', 'grid')
+      .call(d3.axisLeft(y).ticks(p.ticks ?? 5).tickSize(-W).tickFormat(''))
+      .selectAll('line').attr('stroke', '#e4e4ed').attr('stroke-dasharray', '3,3');
+    g.select('.grid .domain').remove();
+  }
 
   // Dégradé
   const gradId = 'area-grad-' + Math.random().toString(36).slice(2);
@@ -35,14 +37,14 @@ export function draw(svg, g, data, W, H, color) {
     .call(d3.axisBottom(x))
     .selectAll('text')
     .attr('font-family', 'DM Sans, sans-serif')
-    .attr('font-size', 12)
+    .attr('font-size', p.fontSize ?? 12)
     .attr('fill', '#7a7a90');
 
   g.append('g')
-    .call(d3.axisLeft(y).ticks(5))
+    .call(d3.axisLeft(y).ticks(p.ticks ?? 5))
     .selectAll('text')
     .attr('font-family', 'DM Sans, sans-serif')
-    .attr('font-size', 12)
+    .attr('font-size', p.fontSize ?? 12)
     .attr('fill', '#7a7a90');
 
   g.selectAll('.domain').attr('stroke', '#e4e4ed');
@@ -71,7 +73,7 @@ export function draw(svg, g, data, W, H, color) {
     .attr('d', line)
     .attr('fill', 'none')
     .attr('stroke', color)
-    .attr('stroke-width', 2.5);
+    .attr('stroke-width', p.stroke ?? 2.5);
 
   // Points
   g.selectAll('.dot')
@@ -80,7 +82,7 @@ export function draw(svg, g, data, W, H, color) {
     .append('circle')
     .attr('cx', d => x(d.label))
     .attr('cy', d => y(d.value))
-    .attr('r', 4)
+    .attr('r', p.radius ?? 4)
     .attr('fill', color)
     .attr('stroke', 'white')
     .attr('stroke-width', 2);
