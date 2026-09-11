@@ -11,9 +11,11 @@ function draw(svg, g, data, W, H, color, p) {
     .range([0, W])
     .padding(0.28);
 
+  const yMax = d3.max(data, d => d.value) * 1.1;
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.value) * 1.1])
+    .domain([0, yMax])
     .range([H, 0]);
+  const fmtY = v => formatAxisValue(v, p.unitMode, p.decimals, yMax);
 
   // Grille horizontale
   if (p.showGrid ?? true) {
@@ -32,7 +34,7 @@ function draw(svg, g, data, W, H, color, p) {
     .attr('fill', '#7a7a90');
 
   g.append('g')
-    .call(d3.axisLeft(y).ticks(p.ticks ?? 5))
+    .call(d3.axisLeft(y).ticks(p.ticks ?? 5).tickFormat(fmtY))
     .selectAll('text')
     .attr('font-family', 'DM Sans, sans-serif')
     .attr('font-size', p.fontSize ?? 12)
@@ -66,6 +68,23 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-family', 'DM Mono, monospace')
       .attr('font-size', (p.fontSize ?? 12) - 1)
       .attr('fill', '#7a7a90')
-      .text(d => d.value);
+      .text(d => fmtY(d.value));
   }
+}
+
+// Formatage unité/décimales des valeurs d'axe (cohérent avec le Studio DataViz)
+function formatAxisValue(value, unitMode, decimals, domainMax) {
+  const divisors = { unit: 1, k: 1e3, M: 1e6, Md: 1e9 };
+  const suffixes = { unit: '', k: 'k', M: 'M', Md: 'Md' };
+  let unit = unitMode || 'auto';
+  if (unit === 'auto') {
+    const abs = Math.abs(domainMax || 0);
+    unit = abs >= 1e9 ? 'Md' : abs >= 1e6 ? 'M' : abs >= 1e3 ? 'k' : 'unit';
+  }
+  const div = divisors[unit] ?? 1;
+  const suf = suffixes[unit] ?? '';
+  return (value / div).toLocaleString('fr-FR', {
+    minimumFractionDigits: decimals ?? 0,
+    maximumFractionDigits: decimals ?? 0,
+  }) + suf;
 }

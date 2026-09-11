@@ -8,6 +8,8 @@
 function draw(svg, g, data, W, H, color, p) {
   const radius = Math.min(W, H) / 2 - 20;
   const total = d3.sum(data, d => d.value) || 1;
+  const valueMax = d3.max(data, d => d.value);
+  const fmtVal = v => formatAxisValue(v, p.unitMode, p.decimals, valueMax);
 
   // Palette basée sur la couleur principale
   const palette = data.map((_, i) =>
@@ -43,7 +45,7 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-size', p.fontSize ?? 11)
       .attr('fill', 'white')
       .attr('font-weight', '500')
-      .text(d => `${Math.round(d.data.value / total * 100)}%`);
+      .text(d => p.donutMode === 'value' ? fmtVal(d.data.value) : `${Math.round(d.data.value / total * 100)}%`);
   }
 
   // Légende à droite
@@ -62,6 +64,23 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-size', p.fontSize ?? 12)
       .attr('fill', '#7a7a90')
-      .text(`${d.label} (${d.value})`);
+      .text(`${d.label} (${fmtVal(d.value)})`);
   });
+}
+
+// Formatage unité/décimales des valeurs d'axe (cohérent avec le Studio DataViz)
+function formatAxisValue(value, unitMode, decimals, domainMax) {
+  const divisors = { unit: 1, k: 1e3, M: 1e6, Md: 1e9 };
+  const suffixes = { unit: '', k: 'k', M: 'M', Md: 'Md' };
+  let unit = unitMode || 'auto';
+  if (unit === 'auto') {
+    const abs = Math.abs(domainMax || 0);
+    unit = abs >= 1e9 ? 'Md' : abs >= 1e6 ? 'M' : abs >= 1e3 ? 'k' : 'unit';
+  }
+  const div = divisors[unit] ?? 1;
+  const suf = suffixes[unit] ?? '';
+  return (value / div).toLocaleString('fr-FR', {
+    minimumFractionDigits: decimals ?? 0,
+    maximumFractionDigits: decimals ?? 0,
+  }) + suf;
 }

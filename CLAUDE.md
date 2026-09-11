@@ -123,6 +123,9 @@ p.fontSize      // taille police des labels en px
 p.showLabels    // boolean
 p.showGrid      // boolean
 p.ticks         // nombre de ticks sur l'axe Y
+p.unitMode      // 'auto' | 'unit' | 'k' | 'M' | 'Md' — échelle des valeurs affichées
+p.decimals      // nombre de décimales (0–3) appliquées après mise à l'échelle
+p.donutMode     // 'percent' | 'value' — spécifique au visuel Donut (% du total ou valeur brute)
 ```
 
 ### Contraintes de sécurité (sandbox buildDrawFn)
@@ -135,6 +138,8 @@ Le code est exécuté dans `new Function('d3', …)` avec `"use strict"`.
 - `setTimeout`, `setInterval`
 - `img.src=`, `script.src=`, `iframe.src=`
 - `import(`
+- `Function`, `constructor`, `globalThis`, `Reflect` (évasions connues du sandbox
+  `new Function` — ex: `x.constructor.constructor(...)` pour atteindre `window`)
 
 Ne pas utiliser `eval` ni `arguments` (mots réservés JS en strict mode).
 Ne pas faire de requêtes réseau dans un DataTool.
@@ -166,6 +171,11 @@ function draw(svg, g, data, W, H, color, p) {
     .attr('rx', p.radius);
 }
 ```
+
+Pour le formatage unité/décimales (`p.unitMode`/`p.decimals`) sur un axe de valeurs,
+voir `default/bar.js` — le motif `formatAxisValue()` en fin de fichier est répété à
+l'identique dans les 7 DataTools par défaut (aucun `import` possible dans le sandbox,
+donc pas de helper partagé : chaque fichier doit être autonome).
 
 ### Ajouter un nouveau DataTool
 

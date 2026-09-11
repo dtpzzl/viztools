@@ -12,9 +12,11 @@ function draw(svg, g, data, W, H, color, p) {
   const x = d3.scaleBand().domain(xVals).range([0, W]).padding(0.05);
   const y = d3.scaleBand().domain(yVals).range([0, H]).padding(0.05);
   const values = data.map(d => d.value);
+  const valueMax = d3.max(values);
+  const fmtVal = v => formatAxisValue(v, p.unitMode, p.decimals, valueMax);
   const colorScale = d3.scaleSequential()
     .interpolator(d3.interpolate('#f0f0f5', color))
-    .domain([d3.min(values), d3.max(values)]);
+    .domain([d3.min(values), valueMax]);
 
   // Axes
   g.append('g').attr('transform', `translate(0,${H})`)
@@ -58,6 +60,23 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-family', 'DM Mono, monospace')
       .attr('font-size', (p.fontSize ?? 12) - 1)
       .attr('fill', '#0f0f1a')
-      .text(d => d.value);
+      .text(d => fmtVal(d.value));
   }
+}
+
+// Formatage unité/décimales des valeurs d'axe (cohérent avec le Studio DataViz)
+function formatAxisValue(value, unitMode, decimals, domainMax) {
+  const divisors = { unit: 1, k: 1e3, M: 1e6, Md: 1e9 };
+  const suffixes = { unit: '', k: 'k', M: 'M', Md: 'Md' };
+  let unit = unitMode || 'auto';
+  if (unit === 'auto') {
+    const abs = Math.abs(domainMax || 0);
+    unit = abs >= 1e9 ? 'Md' : abs >= 1e6 ? 'M' : abs >= 1e3 ? 'k' : 'unit';
+  }
+  const div = divisors[unit] ?? 1;
+  const suf = suffixes[unit] ?? '';
+  return (value / div).toLocaleString('fr-FR', {
+    minimumFractionDigits: decimals ?? 0,
+    maximumFractionDigits: decimals ?? 0,
+  }) + suf;
 }

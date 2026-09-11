@@ -192,10 +192,7 @@
           "type": "select",
           "values": [
             "climatologie-quotidienne",
-            "observations-synop",
-            "observations-radar",
-            "previsions-arome",
-            "previsions-arpege"
+            "observations-synop"
           ]
         },
         {
@@ -232,7 +229,7 @@
         "Observations SYNOP temps réel",
         "Prévisions AROME"
       ],
-      "notes": "Données gratuites depuis jan 2024. Créer un compte sur portail-api.meteofrance.fr, s'abonner aux APIs souhaitées, générer une clé API puis renseigner dans Vercel sous METEOFRANCE_KEY."
+      "notes": "Données gratuites depuis jan 2024. Créer un compte sur portail-api.meteofrance.fr, s'abonner aux APIs souhaitées, générer une clé API puis renseigner dans Vercel sous METEOFRANCE_KEY. Seul 'climatologie-quotidienne' (DPClim) est testé de bout en bout côté proxy ; 'observations-synop' (DPObs) reste best-effort selon l'abonnement de ta clé."
     },
     {
       "id": "eurostat",

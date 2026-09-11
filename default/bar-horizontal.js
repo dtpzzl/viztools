@@ -9,9 +9,11 @@ function draw(svg, g, data, W, H, color, p) {
   // Trier par valeur décroissante
   const sorted = [...data].sort((a, b) => b.value - a.value);
 
+  const xMax = d3.max(sorted, d => d.value) * 1.1;
   const x = d3.scaleLinear()
-    .domain([0, d3.max(sorted, d => d.value) * 1.1])
+    .domain([0, xMax])
     .range([0, W]);
+  const fmtX = v => formatAxisValue(v, p.unitMode, p.decimals, xMax);
 
   const y = d3.scaleBand()
     .domain(sorted.map(d => d.label))
@@ -20,7 +22,7 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Axe X
   g.append('g').attr('transform', `translate(0,${H})`)
-    .call(d3.axisBottom(x).ticks(p.ticks ?? 5))
+    .call(d3.axisBottom(x).ticks(p.ticks ?? 5).tickFormat(fmtX))
     .selectAll('text')
     .attr('font-family', 'DM Sans, sans-serif')
     .attr('font-size', p.fontSize ?? 12)
@@ -71,6 +73,23 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-family', 'DM Mono, monospace')
       .attr('font-size', p.fontSize ?? 12)
       .attr('fill', '#7a7a90')
-      .text(d => d.value);
+      .text(d => fmtX(d.value));
   }
+}
+
+// Formatage unité/décimales des valeurs d'axe (cohérent avec le Studio DataViz)
+function formatAxisValue(value, unitMode, decimals, domainMax) {
+  const divisors = { unit: 1, k: 1e3, M: 1e6, Md: 1e9 };
+  const suffixes = { unit: '', k: 'k', M: 'M', Md: 'Md' };
+  let unit = unitMode || 'auto';
+  if (unit === 'auto') {
+    const abs = Math.abs(domainMax || 0);
+    unit = abs >= 1e9 ? 'Md' : abs >= 1e6 ? 'M' : abs >= 1e3 ? 'k' : 'unit';
+  }
+  const div = divisors[unit] ?? 1;
+  const suf = suffixes[unit] ?? '';
+  return (value / div).toLocaleString('fr-FR', {
+    minimumFractionDigits: decimals ?? 0,
+    maximumFractionDigits: decimals ?? 0,
+  }) + suf;
 }
