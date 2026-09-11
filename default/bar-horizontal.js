@@ -4,6 +4,7 @@
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"Paris","value":92},{"label":"Lyon","value":74},{"label":"Marseille","value":68},{"label":"Toulouse","value":61},{"label":"Bordeaux","value":55},{"label":"Nantes","value":49}]
+ * @params {"opacity":{"group":"general","type":"range","label":"Opacité de la première barre","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   // Trier par valeur décroissante
