@@ -3,17 +3,20 @@
  * @description Intensité de valeurs selon deux dimensions : angle et rayon
  * @author datapuzzle
  * @version 1.0
- * @sampleData [{"label":"Lun-0h","x":"0h","y":"Lun","value":12},{"label":"Lun-3h","x":"3h","y":"Lun","value":8},{"label":"Lun-6h","x":"6h","y":"Lun","value":34},{"label":"Lun-9h","x":"9h","y":"Lun","value":96},{"label":"Lun-12h","x":"12h","y":"Lun","value":71},{"label":"Lun-15h","x":"15h","y":"Lun","value":63},{"label":"Lun-18h","x":"18h","y":"Lun","value":88},{"label":"Lun-21h","x":"21h","y":"Lun","value":41},{"label":"Mar-0h","x":"0h","y":"Mar","value":9},{"label":"Mar-3h","x":"3h","y":"Mar","value":6},{"label":"Mar-6h","x":"6h","y":"Mar","value":38},{"label":"Mar-9h","x":"9h","y":"Mar","value":92},{"label":"Mar-12h","x":"12h","y":"Mar","value":68},{"label":"Mar-15h","x":"15h","y":"Mar","value":59},{"label":"Mar-18h","x":"18h","y":"Mar","value":84},{"label":"Mar-21h","x":"21h","y":"Mar","value":37},{"label":"Mer-0h","x":"0h","y":"Mer","value":14},{"label":"Mer-3h","x":"3h","y":"Mer","value":7},{"label":"Mer-6h","x":"6h","y":"Mer","value":29},{"label":"Mer-9h","x":"9h","y":"Mer","value":78},{"label":"Mer-12h","x":"12h","y":"Mer","value":74},{"label":"Mer-15h","x":"15h","y":"Mer","value":52},{"label":"Mer-18h","x":"18h","y":"Mer","value":91},{"label":"Mer-21h","x":"21h","y":"Mer","value":45}]
+ * @sampleData [{"label":"Lun-0h","theta":"0h","r":"Lun","value":12},{"label":"Lun-3h","theta":"3h","r":"Lun","value":8},{"label":"Lun-6h","theta":"6h","r":"Lun","value":34},{"label":"Lun-9h","theta":"9h","r":"Lun","value":96},{"label":"Lun-12h","theta":"12h","r":"Lun","value":71},{"label":"Lun-15h","theta":"15h","r":"Lun","value":63},{"label":"Lun-18h","theta":"18h","r":"Lun","value":88},{"label":"Lun-21h","theta":"21h","r":"Lun","value":41},{"label":"Mar-0h","theta":"0h","r":"Mar","value":9},{"label":"Mar-3h","theta":"3h","r":"Mar","value":6},{"label":"Mar-6h","theta":"6h","r":"Mar","value":38},{"label":"Mar-9h","theta":"9h","r":"Mar","value":92},{"label":"Mar-12h","theta":"12h","r":"Mar","value":68},{"label":"Mar-15h","theta":"15h","r":"Mar","value":59},{"label":"Mar-18h","theta":"18h","r":"Mar","value":84},{"label":"Mar-21h","theta":"21h","r":"Mar","value":37},{"label":"Mer-0h","theta":"0h","r":"Mer","value":14},{"label":"Mer-3h","theta":"3h","r":"Mer","value":7},{"label":"Mer-6h","theta":"6h","r":"Mer","value":29},{"label":"Mer-9h","theta":"9h","r":"Mer","value":78},{"label":"Mer-12h","theta":"12h","r":"Mer","value":74},{"label":"Mer-15h","theta":"15h","r":"Mer","value":52},{"label":"Mer-18h","theta":"18h","r":"Mer","value":91},{"label":"Mer-21h","theta":"21h","r":"Mer","value":45}]
+ * @dataFields {"theta":{"type":"category","required":true,"label":"Secteur","description":"Dimension angulaire, déployée autour du cercle"},"r":{"type":"category","required":true,"label":"Anneau","description":"Dimension radiale, du centre vers l'extérieur"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"}}
  * @params {"thickness":{"group":"visuel","type":"number","label":"Épaisseur des anneaux","default":null,"placeholder":"auto","unit":"px"},"radialGap":{"group":"visuel","type":"range","label":"Espacement radial","min":0,"max":30,"step":1,"default":2,"unit":"px"},"angularGap":{"group":"visuel","type":"range","label":"Espacement circulaire","min":0,"max":15,"step":0.5,"default":1,"unit":"°"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse de l'échelle","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne médiane de l'échelle","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute de l'échelle","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur de la borne basse","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur de la borne médiane","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur de la borne haute","default":null,"placeholder":"couleur principale"},"opacity":{"group":"general","type":"range","label":"Opacité des cellules","min":0,"max":1,"step":0.05,"default":1},"stroke":{"group":"general","type":"range","label":"Bordure des cellules","min":0,"max":8,"step":0.5,"default":0,"unit":"px"},"radius":{"group":"general","type":"range","label":"Arrondi des cellules","min":0,"max":12,"step":1,"default":2,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
 
-  // x = dimension angulaire (tour du cercle), y = dimension radiale (anneaux, du centre vers l'extérieur)
-  const xVals = [...new Set(data.map(d => d.x))];
-  const yVals = [...new Set(data.map(d => d.y))];
-  const m = xVals.length;
-  const n = yVals.length;
+  // theta = dimension angulaire (tour du cercle), r = dimension radiale
+  // (anneaux, du centre vers l'extérieur). Les variables internes restent
+  // nommées sectors/rings : r0, rIn et rOut sont déjà des rayons en pixels.
+  const sectors = [...new Set(data.map(d => d.theta))];
+  const rings = [...new Set(data.map(d => d.r))];
+  const m = sectors.length;
+  const n = rings.length;
 
   const values = data.map(d => d.value).filter(v => Number.isFinite(v));
   if (!values.length) return;
@@ -74,12 +77,12 @@ function draw(svg, g, data, W, H, color, p) {
   const band = (2 * Math.PI) / m;
   const pad = Math.min(Math.max(0, p.angularGap ?? 1) * Math.PI / 180, band * 0.8);
 
-  const xi = new Map(xVals.map((v, i) => [v, i]));
-  const yi = new Map(yVals.map((v, k) => [v, k]));
-  const rIn = d => r0 + yi.get(d.y) * (t + radialGap);
+  const sectorIndex = new Map(sectors.map((v, i) => [v, i]));
+  const ringIndex = new Map(rings.map((v, k) => [v, k]));
+  const rIn = d => r0 + ringIndex.get(d.r) * (t + radialGap);
   const rOut = d => rIn(d) + t;
-  const a0 = d => xi.get(d.x) * band + pad / 2;
-  const a1 = d => (xi.get(d.x) + 1) * band - pad / 2;
+  const a0 = d => sectorIndex.get(d.theta) * band + pad / 2;
+  const a1 = d => (sectorIndex.get(d.theta) + 1) * band - pad / 2;
 
   const arc = d3.arc().cornerRadius(p.radius ?? 2);
   const cg = g.append('g').attr('transform', `translate(${cx},${cy})`);
@@ -122,7 +125,7 @@ function draw(svg, g, data, W, H, color, p) {
 
   // ---- Labels de la dimension angulaire (autour du cercle) ---------------
   const lr = maxR + 12;
-  xVals.forEach((v, i) => {
+  sectors.forEach((v, i) => {
     const a = (i + 0.5) * band;
     const sx = Math.sin(a);
     cg.append('text')
@@ -137,7 +140,7 @@ function draw(svg, g, data, W, H, color, p) {
   });
 
   // ---- Labels de la dimension radiale (verticale, sur les anneaux) -------
-  yVals.forEach((v, k) => {
+  rings.forEach((v, k) => {
     cg.append('text')
       .attr('x', 0)
       .attr('y', -(r0 + k * (t + radialGap) + t / 2))
