@@ -104,7 +104,8 @@ Les DataTools sont des fichiers JS avec une fonction `draw` et des métadonnées
 function draw(svg, g, data, W, H, color, p) {
   // svg  — sélection D3 du SVG complet
   // g    — groupe principal (déjà translaté aux marges)
-  // data — array [{label, value}] après agrégation.
+  // data — array d'objets après agrégation. Les champs attendus dépendent du
+  //        visuel et sont déclarés par son tag `@dataFields` : voir plus bas.
   //        Champ `series` optionnel : Aire et Nuage de points groupent dessus
   //        (aires empilées / couleur par série + légende). Absent ou valeur
   //        unique, le rendu est identique à celui d'une série simple.
@@ -148,6 +149,52 @@ p.colorMin      // Heatmap circulaire — couleurs des trois bornes, par défaut
 p.colorMid      // #f0f0f5, milieu interpolé, puis la couleur principale
 p.colorMax
 ```
+
+### Déclarer les dimensions attendues — `@dataFields`
+
+Les visuels n'attendent pas les mêmes dimensions : un Donut prend une catégorie
+et une valeur, une Heatmap en prend deux plus une intensité, un Nuage de points
+prend deux nombres. Chaque DataTool déclare donc ses champs d'entrée dans une
+ligne `@dataFields` du bloc JSDoc, avant `@params`. Le Studio s'en sert pour
+proposer le mapping des colonnes de la source vers les champs du visuel, et
+pour signaler qu'un visuel est inapplicable à un jeu de données.
+
+```
+ * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses"}}
+```
+
+| Champ | Rôle |
+|---|---|
+| `type` | `category` ou `number` |
+| `required` | `false` : le visuel se rend correctement sans ce champ |
+| `label` | Libellé du slot dans l'interface de mapping |
+| `description` | Ce que le visuel fait de ce champ |
+
+**Ce que chaque visuel attend aujourd'hui :**
+
+| Visuel | Requis | Optionnels |
+|---|---|---|
+| Barres, barres horizontales, courbe, donut | `label`, `value` | — |
+| Aire empilée | `label`, `value` | `series` |
+| Heatmap | `x`, `y`, `value` | — |
+| Heatmap circulaire | `theta`, `r`, `value` | — |
+| Nuage de points | `x`, `y` | `label`, `series` |
+
+**Deux pièges :**
+
+1. `x` et `y` sont des **catégories** pour la Heatmap et des **nombres** pour le
+   Nuage de points. Ne pas générer le mapping sur le seul nom du champ, lire le
+   `type`. La Heatmap circulaire, elle, nomme ses deux dimensions `theta`
+   (angulaire, les secteurs) et `r` (radiale, les anneaux) : des coordonnées
+   polaires plutôt que cartésiennes, plus fidèles à ce qu'elle trace.
+2. La clé nommée `label` est un champ de données, pas un libellé d'interface.
+   C'est l'axe des catégories pour les barres et la courbe, mais une simple
+   annotation de point pour le Nuage de points, où elle est optionnelle. Les
+   deux heatmaps ne la lisent pas du tout.
+
+La règle de cohérence est la même que pour `@params` : la liste déclarée doit
+correspondre aux champs réellement lus par `draw`, et le `type` déclaré doit
+correspondre à ce que porte `@sampleData`.
 
 ### Déclarer les paramètres applicables — `@params`
 
@@ -244,7 +291,8 @@ donc pas de helper partagé : chaque fichier doit être autonome).
 ### Ajouter un nouveau DataTool
 
 1. Créer `viztools/default/mon-outil.js`
-2. Inclure le bloc JSDoc avec `@name`, `@description`, `@sampleData` et `@params`
+2. Inclure le bloc JSDoc avec `@name`, `@description`, `@sampleData`,
+   `@dataFields` et `@params`
 3. Implémenter `function draw(svg, g, data, W, H, color, p)`
 4. Le fichier apparaît automatiquement dans la bibliothèque du Studio au prochain chargement
 
