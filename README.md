@@ -11,6 +11,7 @@ viztools/
 │   ├── line.js
 │   ├── area.js
 │   ├── heatmap.js
+│   ├── circular-heatmap.js
 │   ├── donut.js
 │   ├── bar-horizontal.js
 │   └── scatter.js

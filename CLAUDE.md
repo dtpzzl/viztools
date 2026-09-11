@@ -19,6 +19,7 @@ viztools/
     ├── line.js
     ├── area.js
     ├── heatmap.js
+    ├── circular-heatmap.js
     ├── donut.js
     └── scatter.js
 ```
@@ -126,6 +127,17 @@ p.ticks         // nombre de ticks sur l'axe Y
 p.unitMode      // 'auto' | 'unit' | 'k' | 'M' | 'Md' — échelle des valeurs affichées
 p.decimals      // nombre de décimales (0–3) appliquées après mise à l'échelle
 p.donutMode     // 'percent' | 'value' — spécifique au visuel Donut (% du total ou valeur brute)
+
+// Spécifiques à la Heatmap circulaire
+p.thickness     // épaisseur d'un anneau en px — réparti automatiquement si absent
+p.radialGap     // espacement entre deux anneaux en px
+p.angularGap    // espacement entre deux secteurs en degrés
+p.scaleMin      // bornes de l'échelle de couleur, en dur — par défaut
+p.scaleMid      // min / moyenne / max des données
+p.scaleMax
+p.colorMin      // couleurs des trois bornes — par défaut #f0f0f5,
+p.colorMid      // milieu interpolé, puis la couleur principale
+p.colorMax
 ```
 
 ### Contraintes de sécurité (sandbox buildDrawFn)
