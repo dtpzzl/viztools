@@ -37,7 +37,7 @@ Fichier de configuration des sources de données, chargé au démarrage du back-
   "id":           "identifiant-unique",
   "name":         "Nom affiché",
   "url":          "https://url-de-base-de-l-api/",
-  "type":         "datagouv | opendatasoft | insee-bdm | infoclimat | meteofrance | eurostat | generic",
+  "type":         "datagouv | opendatasoft | insee-bdm | meteofrance | eurostat | generic",
   "builtin":      true,
   "status":       "active | key_required | soon",
   "auth":         "none | api_key",
@@ -67,7 +67,6 @@ Fichier de configuration des sources de données, chargé au démarrage du back-
 | `datagouv` | Workflow en 3 étapes : catalog → dataset → Tabular API |
 | `opendatasoft` | Détecté automatiquement par URL `/api/explore/v2.1/` |
 | `insee-bdm` | Proxy `/api/insee` — SDMX → JSON plat |
-| `infoclimat` | Proxy `/api/infoclimat` — clé via `INFOCLIMAT_KEY` ou oneshot |
 | `meteofrance` | Proxy `/api/meteofrance` — clé via `METEOFRANCE_KEY` ou oneshot |
 | `eurostat` | Via proxy générique |
 | `generic` | Via proxy générique — tente `?q=mot-clé` |

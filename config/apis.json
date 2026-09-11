@@ -175,64 +175,6 @@
       "notes": "L'API BDM est en accès libre sans clé. Les séries sont identifiées par leur idBank disponible sur insee.fr."
     },
     {
-      "id": "infoclimat",
-      "name": "Infoclimat",
-      "url": "https://www.infoclimat.fr/public-api",
-      "type": "infoclimat",
-      "builtin": true,
-      "status": "key_required",
-      "auth": "api_key",
-      "env_key": "INFOCLIMAT_KEY",
-      "doc_url": "https://www.infoclimat.fr/opendata/",
-      "description": "Données météo historiques et temps réel — réseau de stations France",
-      "facets": [
-        {
-          "key": "station",
-          "label": "Station (ID)",
-          "type": "text",
-          "placeholder": "ex: 07149 (Brest)"
-        },
-        {
-          "key": "format",
-          "label": "Format",
-          "type": "select",
-          "values": [
-            "json",
-            "csv"
-          ]
-        },
-        {
-          "key": "debut",
-          "label": "Date début",
-          "type": "text",
-          "placeholder": "ex: 2024-01-01"
-        },
-        {
-          "key": "fin",
-          "label": "Date fin",
-          "type": "text",
-          "placeholder": "ex: 2024-12-31"
-        },
-        {
-          "key": "methode",
-          "label": "Résolution",
-          "type": "select",
-          "values": [
-            "horaire",
-            "quotidienne",
-            "mensuelle"
-          ]
-        }
-      ],
-      "query_params": {},
-      "example_queries": [
-        "Températures Brest 2024",
-        "Précipitations Paris 2023",
-        "Vent Marseille 2024"
-      ],
-      "notes": "Clé API gratuite pour usage non-commercial. Créer un compte sur infoclimat.fr > Open Data puis renseigner la clé dans Vercel sous INFOCLIMAT_KEY."
-    },
-    {
       "id": "meteofrance",
       "name": "Météo-France",
       "url": "https://public-api.meteofrance.fr/public",
