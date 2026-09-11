@@ -4,6 +4,7 @@
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"2019","value":42},{"label":"2020","value":58},{"label":"2021","value":51},{"label":"2022","value":67},{"label":"2023","value":73},{"label":"2024","value":69}]
+ * @params {"curve":{"group":"visuel","type":"select","label":"Lissage","default":"catmullRom","options":[{"value":"catmullRom","label":"Lissé"},{"value":"monotone","label":"Lissé sans dépassement"},{"value":"linear","label":"Linéaire"},{"value":"step","label":"En marches"}]},"opacity":{"group":"general","type":"range","label":"Opacité du remplissage","min":0,"max":1,"step":0.02,"default":0.08},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"radius":{"group":"general","type":"range","label":"Rayon des points","min":0,"max":12,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   const x = d3.scalePoint()
@@ -42,24 +43,25 @@ function draw(svg, g, data, W, H, color, p) {
   g.selectAll('.domain').attr('stroke', '#e4e4ed');
   g.selectAll('.tick line').attr('stroke', 'none');
 
-  // Zone sous la courbe (gradient subtil)
+  // Zone sous la courbe
+  const curve = resolveCurve(p.curve);
   const area = d3.area()
     .x(d => x(d.label))
     .y0(H)
     .y1(d => y(d.value))
-    .curve(d3.curveCatmullRom);
+    .curve(curve);
 
   g.append('path')
     .datum(data)
     .attr('d', area)
     .attr('fill', color)
-    .attr('opacity', 0.08);
+    .attr('opacity', p.opacity ?? 0.08);
 
   // Ligne
   const line = d3.line()
     .x(d => x(d.label))
     .y(d => y(d.value))
-    .curve(d3.curveCatmullRom);
+    .curve(curve);
 
   g.append('path')
     .datum(data)
@@ -94,6 +96,16 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('fill', '#7a7a90')
       .text(d => fmtY(d.value));
   }
+}
+
+// Type de lissage appliqué à la courbe et à sa zone de remplissage.
+// curveCatmullRom reste le défaut historique ; curveMonotoneX évite les
+// dépassements sous zéro sur des séries très irrégulières.
+function resolveCurve(mode) {
+  if (mode === 'linear') return d3.curveLinear;
+  if (mode === 'monotone') return d3.curveMonotoneX;
+  if (mode === 'step') return d3.curveStep;
+  return d3.curveCatmullRom;
 }
 
 // Formatage unité/décimales des valeurs d'axe (cohérent avec le Studio DataViz)

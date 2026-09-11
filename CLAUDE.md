@@ -104,7 +104,10 @@ Les DataTools sont des fichiers JS avec une fonction `draw` et des métadonnées
 function draw(svg, g, data, W, H, color, p) {
   // svg  — sélection D3 du SVG complet
   // g    — groupe principal (déjà translaté aux marges)
-  // data — array [{label, value}] après agrégation
+  // data — array [{label, value}] après agrégation.
+  //        Champ `series` optionnel : Aire et Nuage de points groupent dessus
+  //        (aires empilées / couleur par série + légende). Absent ou valeur
+  //        unique, le rendu est identique à celui d'une série simple.
   // W    — largeur utile du groupe (SVG width - margin.left - margin.right)
   // H    — hauteur utile du groupe (SVG height - margin.top - margin.bottom)
   // color — couleur principale (hex string)
@@ -128,17 +131,66 @@ p.unitMode      // 'auto' | 'unit' | 'k' | 'M' | 'Md' — échelle des valeurs a
 p.decimals      // nombre de décimales (0–3) appliquées après mise à l'échelle
 p.donutMode     // 'percent' | 'value' — spécifique au visuel Donut (% du total ou valeur brute)
 
-// Spécifiques à la Heatmap circulaire
-p.thickness     // épaisseur d'un anneau en px — réparti automatiquement si absent
-p.radialGap     // espacement entre deux anneaux en px
-p.angularGap    // espacement entre deux secteurs en degrés
-p.scaleMin      // bornes de l'échelle de couleur, en dur — par défaut
-p.scaleMid      // min / moyenne / max des données
+// Spécifiques à un seul visuel
+p.donutMode     // Donut — 'percent' | 'value'
+p.thickness     // Donut — épaisseur de l'anneau en px (défaut : 48 % du rayon)
+                // Heatmap circulaire — épaisseur d'un anneau en px (défaut : auto)
+p.curve         // Courbe — 'catmullRom' | 'monotone' | 'linear' | 'step'
+p.areaMode      // Aire — 'value' | 'percent' (part dans la pile, ou du total)
+p.pointShape    // Nuage de points — 'circle' | 'square' | 'triangle' |
+                // 'diamond' | 'cross' | 'star' | 'wye'
+p.radialGap     // Heatmap circulaire — espacement entre anneaux en px
+p.angularGap    // Heatmap circulaire — espacement entre secteurs en degrés
+p.scaleMin      // Heatmap circulaire — bornes de l'échelle de couleur en dur,
+p.scaleMid      // par défaut min / moyenne / max des données
 p.scaleMax
-p.colorMin      // couleurs des trois bornes — par défaut #f0f0f5,
-p.colorMid      // milieu interpolé, puis la couleur principale
+p.colorMin      // Heatmap circulaire — couleurs des trois bornes, par défaut
+p.colorMid      // #f0f0f5, milieu interpolé, puis la couleur principale
 p.colorMax
 ```
+
+### Déclarer les paramètres applicables — `@params`
+
+Tous les visuels ne lisent pas les mêmes réglages : le Donut ignore `radius`,
+l'Aire n'a pas de valeurs à afficher, la Heatmap circulaire a neuf réglages qui
+n'existent nulle part ailleurs. Chaque DataTool déclare donc ses paramètres dans
+une ligne `@params` du bloc JSDoc, en JSON, à côté de `@sampleData`. Le
+back-office lit cette ligne pour n'afficher que les contrôles pertinents, puis
+transmet les valeurs à `draw` via l'objet `p`.
+
+```
+ * @params {"opacity":{"type":"range","label":"Opacité","min":0,"max":1,"step":0.05,"default":0.9}}
+```
+
+| Champ | Rôle |
+|---|---|
+| `group` | `general` ou `visuel` — voir ci-dessous |
+| `type` | `range`, `toggle`, `select`, `color` ou `number` |
+| `label` | Libellé affiché dans le panneau de réglages |
+| `default` | Valeur par défaut — `null` signifie « calculé automatiquement » |
+| `min` / `max` / `step` | Bornes du curseur, pour `range` |
+| `options` | Liste `{value, label}`, pour `select` |
+| `unit` | Suffixe affiché à côté de la valeur (`px`, `°`) |
+| `placeholder` | Texte grisé quand `default` vaut `null` |
+
+`group` dit où le contrôle s'affiche dans l'éditeur. `general` regroupe les
+réglages partagés par la plupart des visuels — opacité, trait, arrondi, taille
+du texte, valeurs, grille, graduations, unité, décimales — que le main affiche
+par défaut. `visuel` regroupe ce qui n'existe que dans ce DataTool, affiché dans
+le panneau « paramètres du visuel » une fois le visuel choisi.
+
+**Deux règles à respecter, sinon l'UI ment sur le rendu :**
+
+1. La liste déclarée doit correspondre exactement aux `p.*` lus par `draw`.
+   Un paramètre déclaré mais jamais lu produit un curseur sans effet ; un
+   paramètre lu mais non déclaré n'est pas réglable.
+   `p.margin` est l'exception : il est fourni par le Studio, pas par
+   l'utilisateur, et ne se déclare pas.
+2. Le `default` déclaré doit être celui du code. Construire `p` uniquement à
+   partir des `default` déclarés doit produire exactement le même rendu que
+   d'appeler `draw` sans aucun paramètre. Attention aux replis multiples pour
+   un même paramètre : un texte secondaire s'écrit `(p.fontSize ?? 12) - 1`,
+   jamais `p.fontSize ?? 11`, qui rendrait le défaut déclaré faux.
 
 ### Contraintes de sécurité (sandbox buildDrawFn)
 
@@ -192,7 +244,7 @@ donc pas de helper partagé : chaque fichier doit être autonome).
 ### Ajouter un nouveau DataTool
 
 1. Créer `viztools/default/mon-outil.js`
-2. Inclure le bloc JSDoc avec `@name`, `@description`, `@sampleData`
+2. Inclure le bloc JSDoc avec `@name`, `@description`, `@sampleData` et `@params`
 3. Implémenter `function draw(svg, g, data, W, H, color, p)`
 4. Le fichier apparaît automatiquement dans la bibliothèque du Studio au prochain chargement
 
