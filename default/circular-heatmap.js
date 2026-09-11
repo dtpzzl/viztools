@@ -118,8 +118,10 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('dy', '0.35em')
       .attr('font-family', 'DM Mono, monospace')
       .attr('font-size', (p.fontSize ?? 12) - 2)
-      // Contraste automatique selon le remplissage de la cellule
-      .attr('fill', d => (d3.hsl(colorScale(d.value)).l > 0.62 ? '#0f0f1a' : '#ffffff'))
+      // Contraste automatique sur la clarté perceptuelle (Lab) et non la
+      // clarté HSL, qui surestime les bleus : #6c63ff passe pour clair en HSL
+      // alors qu'un texte sombre y est peu lisible.
+      .attr('fill', d => (d3.lab(colorScale(d.value)).l > 62 ? '#0f0f1a' : '#ffffff'))
       .text(d => fmtVal(d.value));
   }
 
