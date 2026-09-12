@@ -81,7 +81,7 @@ function draw(svg, g, data, W, H, color, p) {
   // ---- Géométrie des cases ----------------------------------------------
   // p.cellRatio fige le rapport largeur/hauteur d'une case (1 = carré) ;
   // sans lui les cases remplissent toute la surface disponible.
-  const captionH = allFilters.length > 1 ? (p.fontSize ?? 12) + 10 : 0;
+  const captionH = shown === null ? 0 : (p.fontSize ?? 12) + 10;
   const plotH = Math.max(10, H - captionH);
 
   const ratio = Number.isFinite(+p.cellRatio) && +p.cellRatio > 0 ? +p.cellRatio : null;
@@ -126,16 +126,14 @@ function draw(svg, g, data, W, H, color, p) {
   g.selectAll('.tick line').attr('stroke', 'none');
 
   // Nom de la série affichée : sans lui on lit une grille sans savoir laquelle
-  if (allFilters.length > 1) {
+  if (shown !== null) {
     g.append('text')
       .attr('x', 0).attr('y', (p.fontSize ?? 12))
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-size', p.fontSize ?? 12)
       .attr('font-weight', '500')
       .attr('fill', '#0f0f1a')
-      .text(shown === null
-        ? `Toutes les valeurs (${allFilters.length})`
-        : `${shown}  (sur ${allFilters.length})`);
+      .text(shown);
   }
 
   // ---- Cellules ----------------------------------------------------------

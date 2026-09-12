@@ -5,18 +5,61 @@
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"A","value":35},{"label":"B","value":25},{"label":"C","value":20},{"label":"D","value":12},{"label":"E","value":8}]
- * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Une part du total par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée, sommée pour obtenir le total"}}
- * @params {"showName":{"group":"visuel","type":"toggle","label":"Étiquette","default":false},"showValue":{"group":"visuel","type":"toggle","label":"Valeur","default":false},"showPercent":{"group":"visuel","type":"toggle","label":"Pourcentage","default":true},"thickness":{"group":"visuel","type":"number","label":"Épaisseur de l'anneau","default":null,"placeholder":"48 % du rayon","unit":"px"},"stroke":{"group":"general","type":"range","label":"Liseré entre les parts","min":0,"max":8,"step":0.5,"default":2,"unit":"px"},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Une part du total par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée, sommée pour obtenir le total"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"showName":{"group":"visuel","type":"toggle","label":"Étiquette","default":false},"showValue":{"group":"visuel","type":"toggle","label":"Valeur","default":false},"showPercent":{"group":"visuel","type":"toggle","label":"Pourcentage","default":true},"thickness":{"group":"visuel","type":"number","label":"Épaisseur de l'anneau","default":null,"placeholder":"48 % du rayon","unit":"px"},"stroke":{"group":"general","type":"range","label":"Liseré entre les parts","min":0,"max":8,"step":0.5,"default":2,"unit":"px"},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
-  const radius = Math.min(W, H) / 2 - 20;
+  if (!data || !data.length) return;
+
+  // Filtre optionnel : p.filterValue isole un sous-ensemble ; laissé vide,
+  // aucun filtre n'est appliqué et les parts homonymes sont cumulées.
+  const allFilters = [...new Set(data.map(d => d.filter))]
+    .filter(v => v !== undefined && v !== null && v !== '');
+  let shown = null;
+  if (allFilters.length > 1) {
+    const wanted = String(p.filterValue ?? '').trim();
+    const match = wanted ? allFilters.find(v => String(v) === wanted) : undefined;
+    if (match !== undefined) {
+      shown = match;
+      data = data.filter(d => String(d.filter) === String(match));
+    }
+  }
+
+  // Cumule les parts de même nom : sans filtre, chaque valeur de filtre en
+  // crée une, et le donut afficherait plusieurs parts portant le même label.
+  const parts = new Map();
+  data.forEach(d => {
+    if (!Number.isFinite(d.value)) return;
+    const cle = String(d.label);
+    if (parts.has(cle)) parts.get(cle).value += d.value;
+    else parts.set(cle, { label: d.label, value: d.value });
+  });
+  data = [...parts.values()];
+  if (!data.length) return;
+
+  const fontSize = p.fontSize ?? 12;
+  const captionH = shown === null ? 0 : fontSize + 10;
+
+  // La légende est posée à droite : on lui réserve sa largeur et on décale le
+  // cercle vers la gauche, sinon les libellés sortent du cadre et sont coupés.
+  const legendChars = data.reduce(
+    (max, d) => Math.max(max, `${d.label} (${formatAxisValue(d.value, p.unitMode, p.decimals, d.value)})`.length), 0);
+  const legendW = Math.min(W * 0.45, 24 + legendChars * fontSize * 0.58);
+  const dispoW = Math.max(40, W - legendW - 16);
+  const dispoH = Math.max(40, H - captionH);
+
+  const radius = Math.min(dispoW, dispoH) / 2 - 20;
+  const cx = dispoW / 2;
+  const cy = captionH + dispoH / 2;
   const total = d3.sum(data, d => d.value) || 1;
   const valueMax = d3.max(data, d => d.value);
   const fmtVal = v => formatAxisValue(v, p.unitMode, p.decimals, valueMax);
 
-  // Palette basée sur la couleur principale
+  // Palette dérivée de la couleur principale. La clarté cycle dans une bande
+  // bornée au lieu de croître : en 0.4 + i * 0.08 elle dépassait 1 dès la 8e
+  // part, qui devenait blanc pur — dessinée, mais invisible sur fond blanc.
   const palette = data.map((_, i) =>
-    d3.hsl(d3.hsl(color).h + i * 30, 0.7, 0.4 + i * 0.08).toString()
+    d3.hsl((d3.hsl(color).h + i * 30) % 360, 0.7, 0.4 + (i % 4) * 0.09).toString()
   );
 
   // Épaisseur de l'anneau : 48 % du rayon par défaut, bornée pour que le trou
@@ -32,7 +75,18 @@ function draw(svg, g, data, W, H, color, p) {
   const arcLabel = d3.arc().innerRadius(mid).outerRadius(mid);
 
   const pg = g.append('g')
-    .attr('transform', `translate(${W / 2},${H / 2})`);
+    .attr('transform', `translate(${cx},${cy})`);
+
+  // Valeur du filtre, affichée seulement quand un filtre est réellement actif
+  if (shown !== null) {
+    g.append('text')
+      .attr('x', 0).attr('y', fontSize)
+      .attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-size', fontSize)
+      .attr('font-weight', '500')
+      .attr('fill', '#0f0f1a')
+      .text(shown);
+  }
 
   // Arcs
   pg.selectAll('.arc')
@@ -60,7 +114,9 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('text-anchor', 'middle')
       .attr('font-family', 'DM Mono, monospace')
       .attr('font-size', (p.fontSize ?? 12) - 1)
-      .attr('fill', 'white')
+      // Contraste sur la clarté perceptuelle : du blanc sur une part claire
+      // est illisible, et c'est justement ce qui masquait les dernières parts.
+      .attr('fill', (d, i) => (d3.lab(palette[i]).l > 62 ? '#0f0f1a' : '#ffffff'))
       .attr('font-weight', '500')
       .text(d => {
         const parts = [];
@@ -72,21 +128,23 @@ function draw(svg, g, data, W, H, color, p) {
       });
   }
 
-  // Légende à droite
+  // Légende à droite, dans la bande qui lui a été réservée. L'interligne se
+  // resserre plutôt que de déborder quand les parts sont nombreuses.
+  const rowH = Math.min(26, dispoH / data.length);
   const legend = g.append('g')
-    .attr('transform', `translate(${W / 2 + radius + 30}, ${H / 2 - data.length * 13})`);
+    .attr('transform', `translate(${dispoW + 16}, ${Math.max(captionH, cy - data.length * rowH / 2)})`);
 
   data.forEach((d, i) => {
     legend.append('rect')
-      .attr('x', 0).attr('y', i * 26)
+      .attr('x', 0).attr('y', i * rowH)
       .attr('width', 12).attr('height', 12)
       .attr('rx', 3)
       .attr('fill', palette[i]);
 
     legend.append('text')
-      .attr('x', 18).attr('y', i * 26 + 10)
+      .attr('x', 18).attr('y', i * rowH + 10)
       .attr('font-family', 'DM Sans, sans-serif')
-      .attr('font-size', p.fontSize ?? 12)
+      .attr('font-size', fontSize)
       .attr('fill', '#7a7a90')
       .text(`${d.label} (${fmtVal(d.value)})`);
   });

@@ -1,17 +1,34 @@
 /**
- * @name Bandes de réchauffement
+ * @name Bandes
  * @description Une bande colorée par période, façon warming stripes
  * @icon <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="2.7" height="16" opacity=".22"/><rect x="6.4" y="4" width="2.7" height="16" opacity=".42"/><rect x="9.8" y="4" width="2.7" height="16" opacity=".3"/><rect x="13.2" y="4" width="2.7" height="16" opacity=".6"/><rect x="16.6" y="4" width="2.7" height="16" opacity=".8"/><rect x="20" y="4" width="1.9" height="16"/></svg>
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"1995","value":-0.42},{"label":"1996","value":-0.31},{"label":"1997","value":-0.18},{"label":"1998","value":0.12},{"label":"1999","value":-0.22},{"label":"2000","value":-0.05},{"label":"2001","value":0.08},{"label":"2002","value":0.21},{"label":"2003","value":0.44},{"label":"2004","value":0.17},{"label":"2005","value":0.35},{"label":"2006","value":0.29},{"label":"2007","value":0.41},{"label":"2008","value":0.19},{"label":"2009","value":0.38},{"label":"2010","value":0.52},{"label":"2011","value":0.33},{"label":"2012","value":0.47},{"label":"2013","value":0.55},{"label":"2014","value":0.68},{"label":"2015","value":0.81},{"label":"2016","value":0.94},{"label":"2017","value":0.79},{"label":"2018","value":0.72},{"label":"2019","value":0.88},{"label":"2020","value":0.97},{"label":"2021","value":0.76},{"label":"2022","value":0.91},{"label":"2023","value":1.12},{"label":"2024","value":1.25}]
- * @dataFields {"label":{"type":"category","required":true,"label":"Période","description":"Une bande par valeur distincte, dans l'ordre reçu"},"value":{"type":"number","required":true,"label":"Écart","description":"Détermine la couleur de la bande"}}
- * @params {"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#2166ac"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"#f7f7f7"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"#b2182b"},"stripeGap":{"group":"visuel","type":"range","label":"Espacement entre bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"stripeRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"pleine hauteur"},"showValues":{"group":"visuel","type":"toggle","label":"Afficher les extrêmes","default":false},"opacity":{"group":"general","type":"range","label":"Opacité des bandes","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les périodes","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @dataFields {"label":{"type":"category","required":true,"label":"Période","description":"Une bande par valeur distincte, dans l'ordre reçu"},"value":{"type":"number","required":true,"label":"Écart","description":"Détermine la couleur de la bande"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#2166ac"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"#f7f7f7"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"#b2182b"},"stripeGap":{"group":"visuel","type":"range","label":"Espacement entre bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"stripeRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"pleine hauteur"},"showValues":{"group":"visuel","type":"toggle","label":"Afficher les extrêmes","default":false},"opacity":{"group":"general","type":"range","label":"Opacité des bandes","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les périodes","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
 
-  // Une bande par label, dans l'ordre reçu ; les doublons sont sommés
+  // Filtre optionnel : plusieurs séries peuvent cohabiter dans le même jeu
+  // (l'écart de température par année ET par station). p.filterValue en isole
+  // une ; laissé vide, aucun filtre n'est appliqué et les valeurs sont cumulées.
+  const allFilters = [...new Set(data.map(d => d.filter))]
+    .filter(v => v !== undefined && v !== null && v !== '');
+  let shown = null; // null = toutes valeurs confondues
+  if (allFilters.length > 1) {
+    const wanted = String(p.filterValue ?? '').trim();
+    const match = wanted ? allFilters.find(v => String(v) === wanted) : undefined;
+    if (match !== undefined) {
+      shown = match;
+      data = data.filter(d => String(d.filter) === String(match));
+      if (!data.length) return;
+    }
+  }
+
+  // Une bande par label, dans l'ordre reçu ; les doublons sont sommés, ce qui
+  // cumule aussi les valeurs des différents filtres quand aucun n'est choisi
   const labels = [...new Set(data.map(d => d.label))];
   const totals = new Map(labels.map(l => [l, 0]));
   data.forEach(d => {
@@ -51,7 +68,8 @@ function draw(svg, g, data, W, H, color, p) {
   const fmtVal = v => formatAxisValue(v, p.unitMode, p.decimals, sMax);
   const fontSize = p.fontSize ?? 12;
   const labelH = p.showLabels ? fontSize + 8 : 0;
-  const bandH = Math.max(10, H - labelH);
+  const captionH = shown === null ? 0 : fontSize + 10;
+  const bandH = Math.max(10, H - labelH - captionH);
 
   // ---- Géométrie des bandes ---------------------------------------------
   // p.stripeRatio fige le rapport largeur/hauteur d'une bande ; sans lui les
@@ -62,7 +80,18 @@ function draw(svg, g, data, W, H, color, p) {
 
   const ratio = Number.isFinite(+p.stripeRatio) && +p.stripeRatio > 0 ? +p.stripeRatio : null;
   const stripeH = ratio ? Math.min(bandH, stripeW / ratio) : bandH;
-  const offY = (bandH - stripeH) / 2; // bande contrainte : centrée verticalement
+  const offY = captionH + (bandH - stripeH) / 2; // bande contrainte : centrée
+
+  // Nom du filtre appliqué : sans lui on lit un sous-ensemble sans le savoir
+  if (shown !== null) {
+    g.append('text')
+      .attr('x', 0).attr('y', fontSize)
+      .attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-size', fontSize)
+      .attr('font-weight', '500')
+      .attr('fill', '#0f0f1a')
+      .text(shown);
+  }
 
   g.selectAll('.stripe')
     .data(labels)

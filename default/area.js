@@ -5,11 +5,42 @@
  * @author datapuzzle
  * @version 1.1
  * @sampleData [{"label":"2019","value":42,"series":"Nord"},{"label":"2020","value":58,"series":"Nord"},{"label":"2021","value":51,"series":"Nord"},{"label":"2022","value":67,"series":"Nord"},{"label":"2023","value":73,"series":"Nord"},{"label":"2024","value":69,"series":"Nord"},{"label":"2019","value":28,"series":"Sud"},{"label":"2020","value":31,"series":"Sud"},{"label":"2021","value":44,"series":"Sud"},{"label":"2022","value":39,"series":"Sud"},{"label":"2023","value":52,"series":"Sud"},{"label":"2024","value":61,"series":"Sud"}]
- * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses, ordonné tel que reçu"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée, sommée en cas de doublon label/série"},"series":{"type":"category","required":false,"label":"Série","description":"Empile une aire par valeur distincte. Absent ou unique : aire simple"}}
- * @params {"areaMode":{"group":"visuel","type":"select","label":"Étiquettes","default":"value","options":[{"value":"value","label":"Valeur"},{"value":"percent","label":"Pourcentage"}]},"opacity":{"group":"general","type":"range","label":"Opacité de l'aire","min":0,"max":1,"step":0.05,"default":1},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"radius":{"group":"general","type":"range","label":"Rayon des points","min":0,"max":12,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses, ordonné tel que reçu"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée, sommée en cas de doublon label/série"},"series":{"type":"category","required":false,"label":"Série","description":"Empile une aire par valeur distincte. Absent ou unique : aire simple"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"areaMode":{"group":"visuel","type":"select","label":"Étiquettes","default":"value","options":[{"value":"value","label":"Valeur"},{"value":"percent","label":"Pourcentage"}]},"opacity":{"group":"general","type":"range","label":"Opacité de l'aire","min":0,"max":1,"step":0.05,"default":1},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"radius":{"group":"general","type":"range","label":"Rayon des points","min":0,"max":12,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
+  if (!data || !data.length) return;
+
+  // Filtre optionnel : p.filterValue isole un sous-ensemble ; laissé vide,
+  // aucun filtre n'est appliqué et les valeurs sont cumulées.
+  const allFilters = [...new Set(data.map(d => d.filter))]
+    .filter(v => v !== undefined && v !== null && v !== '');
+  let shown = null;
+  if (allFilters.length > 1) {
+    const wanted = String(p.filterValue ?? '').trim();
+    const match = wanted ? allFilters.find(v => String(v) === wanted) : undefined;
+    if (match !== undefined) {
+      shown = match;
+      data = data.filter(d => String(d.filter) === String(match));
+      if (!data.length) return;
+    }
+  }
+
+  // Valeur du filtre, affichée seulement quand un filtre est réellement actif.
+  // Le dessin est alors décalé dans un sous-groupe pour lui laisser la place.
+  if (shown !== null) {
+    const capH = (p.fontSize ?? 12) + 10;
+    g.append('text')
+      .attr('x', 0).attr('y', (p.fontSize ?? 12))
+      .attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-size', p.fontSize ?? 12)
+      .attr('font-weight', '500')
+      .attr('fill', '#0f0f1a')
+      .text(shown);
+    g = g.append('g').attr('transform', `translate(0,${capH})`);
+    H = Math.max(10, H - capH);
+  }
 
   // Une série par valeur distincte du champ `series`. Champ absent ou valeur
   // unique : rendu simple, identique à la version sans séries.
@@ -45,9 +76,11 @@ function draw(svg, g, data, W, H, color, p) {
   const y = d3.scaleLinear().domain([0, yMax]).range([plotH, 0]);
   const fmtY = v => formatAxisValue(v, p.unitMode, p.decimals, yMax);
 
-  // Palette dérivée de la couleur principale, comme le Donut
+  // Palette dérivée de la couleur principale. La clarté cycle dans une bande
+  // bornée au lieu de croître : en 0.4 + i * 0.08 elle dépassait 1 dès la 8e
+  // part, qui devenait blanc pur — dessinée, mais invisible sur fond blanc.
   const palette = keys.map((_, i) => (grouped
-    ? d3.hsl(d3.hsl(color).h + i * 30, 0.7, 0.4 + i * 0.08).toString()
+    ? d3.hsl((d3.hsl(color).h + i * 30) % 360, 0.7, 0.4 + (i % 4) * 0.09).toString()
     : color));
 
   const pg = g.append('g').attr('transform', `translate(0,${legendH})`);
@@ -149,7 +182,9 @@ function draw(svg, g, data, W, H, color, p) {
         .attr('text-anchor', d => edgeAnchor(d.data.label))
         .attr('font-family', 'DM Mono, monospace')
         .attr('font-size', fontSize - 1)
-        .attr('fill', grouped ? '#ffffff' : '#7a7a90')
+        .attr('fill', grouped
+          ? (d3.lab(palette[i]).l > 62 ? '#0f0f1a' : '#ffffff')
+          : '#7a7a90')
         .attr('font-weight', grouped ? '500' : null)
         .text(d => {
           const value = d[1] - d[0];
