@@ -1,14 +1,28 @@
 /**
  * @name Heatmap
  * @description Intensité de valeurs sur une grille 2D
+ * @icon <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="5.5" height="5.5" rx="1" opacity=".25"/><rect x="9.25" y="3" width="5.5" height="5.5" rx="1" opacity=".9"/><rect x="15.5" y="3" width="5.5" height="5.5" rx="1" opacity=".5"/><rect x="3" y="9.25" width="5.5" height="5.5" rx="1" opacity=".7"/><rect x="9.25" y="9.25" width="5.5" height="5.5" rx="1" opacity=".35"/><rect x="15.5" y="9.25" width="5.5" height="5.5" rx="1"/><rect x="3" y="15.5" width="5.5" height="5.5" rx="1" opacity=".55"/><rect x="9.25" y="15.5" width="5.5" height="5.5" rx="1" opacity=".8"/><rect x="15.5" y="15.5" width="5.5" height="5.5" rx="1" opacity=".3"/></svg>
  * @author datapuzzle
  * @version 1.1
  * @sampleData [{"label":"Lun-6h","x":"Lun","y":"6h","value":0.2},{"label":"Lun-9h","x":"Lun","y":"9h","value":0.8},{"label":"Lun-12h","x":"Lun","y":"12h","value":0.6},{"label":"Mar-6h","x":"Mar","y":"6h","value":0.1},{"label":"Mar-9h","x":"Mar","y":"9h","value":0.9},{"label":"Mar-12h","x":"Mar","y":"12h","value":0.5},{"label":"Mer-6h","x":"Mer","y":"6h","value":0.4},{"label":"Mer-9h","x":"Mer","y":"9h","value":0.7},{"label":"Mer-12h","x":"Mer","y":"12h","value":0.3}]
- * @dataFields {"x":{"type":"category","required":true,"label":"Colonne","description":"Dimension horizontale de la grille"},"y":{"type":"category","required":true,"label":"Ligne","description":"Dimension verticale de la grille"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"}}
- * @params {"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @dataFields {"x":{"type":"category","required":true,"label":"Colonne","description":"Dimension horizontale de la grille"},"y":{"type":"category","required":true,"label":"Ligne","description":"Dimension verticale de la grille"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"series":{"type":"category","required":false,"label":"Série","description":"Filtre : le visuel n'affiche qu'une série à la fois"}}
+ * @params {"seriesValue":{"group":"visuel","type":"text","label":"Série affichée","default":null,"placeholder":"première série"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
+
+  // Filtre optionnel par série : plusieurs grilles peuvent cohabiter dans le
+  // même jeu (la pluie par mois ET par ville). Le visuel n'en montre qu'une,
+  // celle nommée par p.seriesValue, sinon la première rencontrée.
+  const allSeries = [...new Set(data.map(d => d.series))]
+    .filter(v => v !== undefined && v !== null && v !== '');
+  let shown = null;
+  if (allSeries.length > 1) {
+    const wanted = String(p.seriesValue ?? '').trim();
+    shown = allSeries.find(v => String(v) === wanted) ?? allSeries[0];
+    data = data.filter(d => String(d.series) === String(shown));
+    if (!data.length) return;
+  }
 
   const xVals = [...new Set(data.map(d => d.x))];
   const yVals = [...new Set(data.map(d => d.y))];
@@ -50,18 +64,21 @@ function draw(svg, g, data, W, H, color, p) {
   // ---- Géométrie des cases ----------------------------------------------
   // p.cellRatio fige le rapport largeur/hauteur d'une case (1 = carré) ;
   // sans lui les cases remplissent toute la surface disponible.
+  const captionH = shown === null ? 0 : (p.fontSize ?? 12) + 10;
+  const plotH = Math.max(10, H - captionH);
+
   const ratio = Number.isFinite(+p.cellRatio) && +p.cellRatio > 0 ? +p.cellRatio : null;
   let stepX = W / m;
-  let stepY = H / n;
+  let stepY = plotH / n;
   if (ratio) {
-    const side = Math.min(W / m, (H / n) * ratio);
+    const side = Math.min(W / m, (plotH / n) * ratio);
     stepX = side;
     stepY = side / ratio;
   }
   const gridW = stepX * m;
   const gridH = stepY * n;
   const offX = (W - gridW) / 2; // la grille contrainte est centrée
-  const offY = (H - gridH) / 2;
+  const offY = captionH + (plotH - gridH) / 2;
 
   // p.cellGap est un écart en px, converti en padding relatif que d3 attend
   const gap = Math.max(0, p.cellGap ?? 2);
@@ -90,6 +107,17 @@ function draw(svg, g, data, W, H, color, p) {
 
   g.selectAll('.domain').attr('stroke', '#e4e4ed');
   g.selectAll('.tick line').attr('stroke', 'none');
+
+  // Nom de la série affichée : sans lui on lit une grille sans savoir laquelle
+  if (shown !== null) {
+    g.append('text')
+      .attr('x', 0).attr('y', (p.fontSize ?? 12))
+      .attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-size', p.fontSize ?? 12)
+      .attr('font-weight', '500')
+      .attr('fill', '#0f0f1a')
+      .text(`${shown}  (${allSeries.length} séries)`);
+  }
 
   // ---- Cellules ----------------------------------------------------------
   g.selectAll('.cell')

@@ -1,6 +1,7 @@
 /**
  * @name Barres verticales
  * @description Comparaison de valeurs entre catégories
+ * @icon <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1" opacity=".5"/><rect x="9.75" y="7" width="4.5" height="14" rx="1" opacity=".78"/><rect x="16.5" y="3" width="4.5" height="18" rx="1"/></svg>
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"2019","value":42},{"label":"2020","value":58},{"label":"2021","value":51},{"label":"2022","value":67},{"label":"2023","value":73},{"label":"2024","value":69}]

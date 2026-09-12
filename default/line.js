@@ -1,6 +1,7 @@
 /**
  * @name Courbe temporelle
  * @description Évolution d'une valeur dans le temps
+ * @icon <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 9-9"/><circle cx="8" cy="11" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1.7" fill="currentColor" stroke="none"/><circle cx="21" cy="5" r="1.7" fill="currentColor" stroke="none"/></svg>
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"2019","value":42},{"label":"2020","value":58},{"label":"2021","value":51},{"label":"2022","value":67},{"label":"2023","value":73},{"label":"2024","value":69}]

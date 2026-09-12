@@ -1,6 +1,7 @@
 /**
  * @name Barres horizontales
  * @description Classement de valeurs (ranking)
+ * @icon <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="12.5" height="4" rx="1" opacity=".75"/><rect x="3" y="16" width="7" height="4" rx="1" opacity=".5"/></svg>
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"Paris","value":92},{"label":"Lyon","value":74},{"label":"Marseille","value":68},{"label":"Toulouse","value":61},{"label":"Bordeaux","value":55},{"label":"Nantes","value":49}]
