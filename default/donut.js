@@ -14,9 +14,11 @@ function draw(svg, g, data, W, H, color, p) {
   const valueMax = d3.max(data, d => d.value);
   const fmtVal = v => formatAxisValue(v, p.unitMode, p.decimals, valueMax);
 
-  // Palette basée sur la couleur principale
+  // Palette dérivée de la couleur principale. La clarté cycle dans une bande
+  // bornée au lieu de croître : en 0.4 + i * 0.08 elle dépassait 1 dès la 8e
+  // part, qui devenait blanc pur — dessinée, mais invisible sur fond blanc.
   const palette = data.map((_, i) =>
-    d3.hsl(d3.hsl(color).h + i * 30, 0.7, 0.4 + i * 0.08).toString()
+    d3.hsl((d3.hsl(color).h + i * 30) % 360, 0.7, 0.4 + (i % 4) * 0.09).toString()
   );
 
   // Épaisseur de l'anneau : 48 % du rayon par défaut, bornée pour que le trou
@@ -60,7 +62,9 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('text-anchor', 'middle')
       .attr('font-family', 'DM Mono, monospace')
       .attr('font-size', (p.fontSize ?? 12) - 1)
-      .attr('fill', 'white')
+      // Contraste sur la clarté perceptuelle : du blanc sur une part claire
+      // est illisible, et c'est justement ce qui masquait les dernières parts.
+      .attr('fill', (d, i) => (d3.lab(palette[i]).l > 62 ? '#0f0f1a' : '#ffffff'))
       .attr('font-weight', '500')
       .text(d => {
         const parts = [];

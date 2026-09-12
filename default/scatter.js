@@ -16,8 +16,11 @@ function draw(svg, g, data, W, H, color, p) {
   const seriesNames = [...new Set(data.map(d => d.series))]
     .filter(s => s !== undefined && s !== null && s !== '');
   const grouped = seriesNames.length > 1;
+  // Palette dérivée de la couleur principale. La clarté cycle dans une bande
+  // bornée au lieu de croître : en 0.4 + i * 0.08 elle dépassait 1 dès la 8e
+  // part, qui devenait blanc pur — dessinée, mais invisible sur fond blanc.
   const palette = seriesNames.map((_, i) =>
-    d3.hsl(d3.hsl(color).h + i * 30, 0.7, 0.4 + i * 0.08).toString()
+    d3.hsl((d3.hsl(color).h + i * 30) % 360, 0.7, 0.4 + (i % 4) * 0.09).toString()
   );
   const colorOf = d => {
     if (!grouped) return color;

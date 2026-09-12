@@ -57,8 +57,11 @@ function draw(svg, g, data, W, H, color, p) {
   const yLine = d3.scaleLinear().domain([0, lineMax]).range([plotH, 0]);
   const fmtLine = v => formatAxisValue(v, p.unitMode, p.decimals, lineMax);
 
+  // Palette dérivée de la couleur principale. La clarté cycle dans une bande
+  // bornée au lieu de croître : en 0.4 + i * 0.08 elle dépassait 1 dès la 8e
+  // part, qui devenait blanc pur — dessinée, mais invisible sur fond blanc.
   const palette = keys.map((_, i) => (grouped
-    ? d3.hsl(d3.hsl(color).h + i * 30, 0.7, 0.4 + i * 0.08).toString()
+    ? d3.hsl((d3.hsl(color).h + i * 30) % 360, 0.7, 0.4 + (i % 4) * 0.09).toString()
     : color));
   const lineColor = p.lineColor || d3.hsl(d3.hsl(color).h + 180, 0.65, 0.45).toString();
 
@@ -126,7 +129,7 @@ function draw(svg, g, data, W, H, color, p) {
         .attr('text-anchor', 'middle')
         .attr('font-family', 'DM Mono, monospace')
         .attr('font-size', fontSize - 2)
-        .attr('fill', '#ffffff')
+        .attr('fill', d3.lab(palette[i]).l > 62 ? '#0f0f1a' : '#ffffff')
         .attr('font-weight', '500')
         .text(d => (d[1] - d[0] > 0 ? fmtBar(d[1] - d[0]) : ''));
     });

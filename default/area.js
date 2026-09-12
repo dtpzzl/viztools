@@ -45,9 +45,11 @@ function draw(svg, g, data, W, H, color, p) {
   const y = d3.scaleLinear().domain([0, yMax]).range([plotH, 0]);
   const fmtY = v => formatAxisValue(v, p.unitMode, p.decimals, yMax);
 
-  // Palette dérivée de la couleur principale, comme le Donut
+  // Palette dérivée de la couleur principale. La clarté cycle dans une bande
+  // bornée au lieu de croître : en 0.4 + i * 0.08 elle dépassait 1 dès la 8e
+  // part, qui devenait blanc pur — dessinée, mais invisible sur fond blanc.
   const palette = keys.map((_, i) => (grouped
-    ? d3.hsl(d3.hsl(color).h + i * 30, 0.7, 0.4 + i * 0.08).toString()
+    ? d3.hsl((d3.hsl(color).h + i * 30) % 360, 0.7, 0.4 + (i % 4) * 0.09).toString()
     : color));
 
   const pg = g.append('g').attr('transform', `translate(0,${legendH})`);
@@ -149,7 +151,9 @@ function draw(svg, g, data, W, H, color, p) {
         .attr('text-anchor', d => edgeAnchor(d.data.label))
         .attr('font-family', 'DM Mono, monospace')
         .attr('font-size', fontSize - 1)
-        .attr('fill', grouped ? '#ffffff' : '#7a7a90')
+        .attr('fill', grouped
+          ? (d3.lab(palette[i]).l > 62 ? '#0f0f1a' : '#ffffff')
+          : '#7a7a90')
         .attr('font-weight', grouped ? '500' : null)
         .text(d => {
           const value = d[1] - d[0];
