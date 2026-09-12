@@ -5,24 +5,41 @@
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"Lun-0h","theta":"0h","r":"Lun","value":12},{"label":"Lun-3h","theta":"3h","r":"Lun","value":8},{"label":"Lun-6h","theta":"6h","r":"Lun","value":34},{"label":"Lun-9h","theta":"9h","r":"Lun","value":96},{"label":"Lun-12h","theta":"12h","r":"Lun","value":71},{"label":"Lun-15h","theta":"15h","r":"Lun","value":63},{"label":"Lun-18h","theta":"18h","r":"Lun","value":88},{"label":"Lun-21h","theta":"21h","r":"Lun","value":41},{"label":"Mar-0h","theta":"0h","r":"Mar","value":9},{"label":"Mar-3h","theta":"3h","r":"Mar","value":6},{"label":"Mar-6h","theta":"6h","r":"Mar","value":38},{"label":"Mar-9h","theta":"9h","r":"Mar","value":92},{"label":"Mar-12h","theta":"12h","r":"Mar","value":68},{"label":"Mar-15h","theta":"15h","r":"Mar","value":59},{"label":"Mar-18h","theta":"18h","r":"Mar","value":84},{"label":"Mar-21h","theta":"21h","r":"Mar","value":37},{"label":"Mer-0h","theta":"0h","r":"Mer","value":14},{"label":"Mer-3h","theta":"3h","r":"Mer","value":7},{"label":"Mer-6h","theta":"6h","r":"Mer","value":29},{"label":"Mer-9h","theta":"9h","r":"Mer","value":78},{"label":"Mer-12h","theta":"12h","r":"Mer","value":74},{"label":"Mer-15h","theta":"15h","r":"Mer","value":52},{"label":"Mer-18h","theta":"18h","r":"Mer","value":91},{"label":"Mer-21h","theta":"21h","r":"Mer","value":45}]
- * @dataFields {"theta":{"type":"category","required":true,"label":"Secteur","description":"Dimension angulaire, déployée autour du cercle"},"r":{"type":"category","required":true,"label":"Anneau","description":"Dimension radiale, du centre vers l'extérieur"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"series":{"type":"category","required":false,"label":"Série","description":"Filtre : le visuel n'affiche qu'une série à la fois"}}
- * @params {"seriesValue":{"group":"visuel","type":"text","label":"Série affichée","default":null,"placeholder":"première série"},"thickness":{"group":"visuel","type":"number","label":"Épaisseur des anneaux","default":null,"placeholder":"auto","unit":"px"},"radialGap":{"group":"visuel","type":"range","label":"Espacement radial","min":0,"max":30,"step":1,"default":2,"unit":"px"},"angularGap":{"group":"visuel","type":"range","label":"Espacement circulaire","min":0,"max":15,"step":0.5,"default":1,"unit":"°"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"opacity":{"group":"general","type":"range","label":"Opacité des cellules","min":0,"max":1,"step":0.05,"default":1},"stroke":{"group":"general","type":"range","label":"Bordure des cellules","min":0,"max":8,"step":0.5,"default":0,"unit":"px"},"radius":{"group":"general","type":"range","label":"Arrondi des cellules","min":0,"max":12,"step":1,"default":2,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @dataFields {"theta":{"type":"category","required":true,"label":"Secteur","description":"Dimension angulaire, déployée autour du cercle"},"r":{"type":"category","required":true,"label":"Anneau","description":"Dimension radiale, du centre vers l'extérieur"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"series":{"type":"category","required":false,"label":"Série","description":"Filtre optionnel ; sans filtre les séries sont cumulées"}}
+ * @params {"seriesValue":{"group":"visuel","type":"text","label":"Série affichée","default":null,"placeholder":"toutes séries cumulées"},"thickness":{"group":"visuel","type":"number","label":"Épaisseur des anneaux","default":null,"placeholder":"auto","unit":"px"},"radialGap":{"group":"visuel","type":"range","label":"Espacement radial","min":0,"max":30,"step":1,"default":2,"unit":"px"},"angularGap":{"group":"visuel","type":"range","label":"Espacement circulaire","min":0,"max":15,"step":0.5,"default":1,"unit":"°"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"opacity":{"group":"general","type":"range","label":"Opacité des cellules","min":0,"max":1,"step":0.05,"default":1},"stroke":{"group":"general","type":"range","label":"Bordure des cellules","min":0,"max":8,"step":0.5,"default":0,"unit":"px"},"radius":{"group":"general","type":"range","label":"Arrondi des cellules","min":0,"max":12,"step":1,"default":2,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
 
   // Filtre optionnel par série : plusieurs disques peuvent cohabiter dans le
-  // même jeu (la pluie par heure ET par ville). Le visuel n'en montre qu'un,
-  // celui nommé par p.seriesValue, sinon le premier rencontré.
+  // même jeu (la pluie par mois ET par ville). p.seriesValue en isole une ;
+  // laissé vide, aucun filtre n'est appliqué et les séries sont cumulées.
   const allSeries = [...new Set(data.map(d => d.series))]
     .filter(v => v !== undefined && v !== null && v !== '');
-  let shown = null;
+  let shown = null; // null = toutes séries confondues
   if (allSeries.length > 1) {
     const wanted = String(p.seriesValue ?? '').trim();
-    shown = allSeries.find(v => String(v) === wanted) ?? allSeries[0];
-    data = data.filter(d => String(d.series) === String(shown));
-    if (!data.length) return;
+    const match = wanted ? allSeries.find(v => String(v) === wanted) : undefined;
+    if (match !== undefined) {
+      shown = match;
+      data = data.filter(d => String(d.series) === String(match));
+      if (!data.length) return;
+    }
   }
+
+  // Agrège les doublons d'une même case. Sans filtre, plusieurs séries
+  // tombent sur la même case : elles se superposeraient silencieusement,
+  // la dernière dessinée masquant les autres, au lieu de se cumuler.
+  const cases = new Map();
+  data.forEach(d => {
+    if (!Number.isFinite(d.value)) return;
+    const cle = String(d.theta) + '\u0000' + String(d.r);
+    const existante = cases.get(cle);
+    if (existante) existante.value += d.value;
+    else cases.set(cle, { theta: d.theta, r: d.r, value: d.value });
+  });
+  data = [...cases.values()];
+  if (!data.length) return;
 
   // theta = dimension angulaire (tour du cercle), r = dimension radiale
   // (anneaux, du centre vers l'extérieur). Les variables internes restent
@@ -66,7 +83,7 @@ function draw(svg, g, data, W, H, color, p) {
 
   // ---- Géométrie ---------------------------------------------------------
   const legendH = H > 170 ? 42 : 0;
-  const captionH = shown === null ? 0 : (p.fontSize ?? 12) + 10;
+  const captionH = allSeries.length > 1 ? (p.fontSize ?? 12) + 10 : 0;
   const labelPad = 26; // place réservée aux labels de catégories à l'extérieur
   const usableH = H - legendH - captionH;
   const cx = W / 2;
@@ -104,14 +121,16 @@ function draw(svg, g, data, W, H, color, p) {
   const cg = g.append('g').attr('transform', `translate(${cx},${cy})`);
 
   // Nom de la série affichée : sans lui on lit un disque sans savoir lequel
-  if (shown !== null) {
+  if (allSeries.length > 1) {
     g.append('text')
       .attr('x', 0).attr('y', (p.fontSize ?? 12))
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-size', p.fontSize ?? 12)
       .attr('font-weight', '500')
       .attr('fill', '#0f0f1a')
-      .text(`${shown}  (${allSeries.length} séries)`);
+      .text(shown === null
+        ? `Somme de ${allSeries.length} séries`
+        : `${shown}  (sur ${allSeries.length} séries)`);
   }
 
   // ---- Cellules ----------------------------------------------------------
