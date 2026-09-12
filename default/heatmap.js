@@ -5,29 +5,29 @@
  * @author datapuzzle
  * @version 1.1
  * @sampleData [{"label":"Lun-6h","x":"Lun","y":"6h","value":0.2},{"label":"Lun-9h","x":"Lun","y":"9h","value":0.8},{"label":"Lun-12h","x":"Lun","y":"12h","value":0.6},{"label":"Mar-6h","x":"Mar","y":"6h","value":0.1},{"label":"Mar-9h","x":"Mar","y":"9h","value":0.9},{"label":"Mar-12h","x":"Mar","y":"12h","value":0.5},{"label":"Mer-6h","x":"Mer","y":"6h","value":0.4},{"label":"Mer-9h","x":"Mer","y":"9h","value":0.7},{"label":"Mer-12h","x":"Mer","y":"12h","value":0.3}]
- * @dataFields {"x":{"type":"category","required":true,"label":"Colonne","description":"Dimension horizontale de la grille"},"y":{"type":"category","required":true,"label":"Ligne","description":"Dimension verticale de la grille"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"series":{"type":"category","required":false,"label":"Série","description":"Filtre optionnel ; sans filtre les séries sont cumulées"}}
- * @params {"seriesValue":{"group":"visuel","type":"text","label":"Série affichée","default":null,"placeholder":"toutes séries cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @dataFields {"x":{"type":"category","required":true,"label":"Colonne","description":"Dimension horizontale de la grille"},"y":{"type":"category","required":true,"label":"Ligne","description":"Dimension verticale de la grille"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
 
   // Filtre optionnel par série : plusieurs grilles peuvent cohabiter dans le
-  // même jeu (la pluie par mois ET par ville). p.seriesValue en isole une ;
-  // laissé vide, aucun filtre n'est appliqué et les séries sont cumulées.
-  const allSeries = [...new Set(data.map(d => d.series))]
+  // même jeu (la pluie par mois ET par ville). p.filterValue en isole une ;
+  // laissé vide, aucun filtre n'est appliqué et les valeurs sont cumulées.
+  const allFilters = [...new Set(data.map(d => d.filter))]
     .filter(v => v !== undefined && v !== null && v !== '');
-  let shown = null; // null = toutes séries confondues
-  if (allSeries.length > 1) {
-    const wanted = String(p.seriesValue ?? '').trim();
-    const match = wanted ? allSeries.find(v => String(v) === wanted) : undefined;
+  let shown = null; // null = toutes valeurs confondues
+  if (allFilters.length > 1) {
+    const wanted = String(p.filterValue ?? '').trim();
+    const match = wanted ? allFilters.find(v => String(v) === wanted) : undefined;
     if (match !== undefined) {
       shown = match;
-      data = data.filter(d => String(d.series) === String(match));
+      data = data.filter(d => String(d.filter) === String(match));
       if (!data.length) return;
     }
   }
 
-  // Agrège les doublons d'une même case. Sans filtre, plusieurs séries
+  // Agrège les doublons d'une même case. Sans filtre, plusieurs valeurs
   // tombent sur la même case : elles se superposeraient silencieusement,
   // la dernière dessinée masquant les autres, au lieu de se cumuler.
   const cases = new Map();
@@ -81,7 +81,7 @@ function draw(svg, g, data, W, H, color, p) {
   // ---- Géométrie des cases ----------------------------------------------
   // p.cellRatio fige le rapport largeur/hauteur d'une case (1 = carré) ;
   // sans lui les cases remplissent toute la surface disponible.
-  const captionH = allSeries.length > 1 ? (p.fontSize ?? 12) + 10 : 0;
+  const captionH = allFilters.length > 1 ? (p.fontSize ?? 12) + 10 : 0;
   const plotH = Math.max(10, H - captionH);
 
   const ratio = Number.isFinite(+p.cellRatio) && +p.cellRatio > 0 ? +p.cellRatio : null;
@@ -126,7 +126,7 @@ function draw(svg, g, data, W, H, color, p) {
   g.selectAll('.tick line').attr('stroke', 'none');
 
   // Nom de la série affichée : sans lui on lit une grille sans savoir laquelle
-  if (allSeries.length > 1) {
+  if (allFilters.length > 1) {
     g.append('text')
       .attr('x', 0).attr('y', (p.fontSize ?? 12))
       .attr('font-family', 'DM Sans, sans-serif')
@@ -134,8 +134,8 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-weight', '500')
       .attr('fill', '#0f0f1a')
       .text(shown === null
-        ? `Somme de ${allSeries.length} séries`
-        : `${shown}  (sur ${allSeries.length} séries)`);
+        ? `Toutes les valeurs (${allFilters.length})`
+        : `${shown}  (sur ${allFilters.length})`);
   }
 
   // ---- Cellules ----------------------------------------------------------
