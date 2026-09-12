@@ -1,0 +1,217 @@
+/**
+ * @name Barres empilées + courbe
+ * @description Volumes empilés et un indicateur suivi sur un axe séparé
+ * @icon <svg viewBox="0 0 24 24"><g fill="currentColor"><rect x="3" y="14" width="4" height="7" rx="1" opacity=".38"/><rect x="3" y="10" width="4" height="4" rx="1" opacity=".8"/><rect x="10" y="12" width="4" height="9" rx="1" opacity=".38"/><rect x="10" y="7" width="4" height="5" rx="1" opacity=".8"/><rect x="17" y="9" width="4" height="12" rx="1" opacity=".38"/><rect x="17" y="4" width="4" height="5" rx="1" opacity=".8"/></g><path d="M5 7.5l7-3 7-2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+ * @author datapuzzle
+ * @version 1.0
+ * @sampleData [{"label":"Jan","value":42,"series":"Nord","line":78},{"label":"Jan","value":31,"series":"Sud","line":78},{"label":"Fév","value":58,"series":"Nord","line":84},{"label":"Fév","value":35,"series":"Sud","line":84},{"label":"Mar","value":51,"series":"Nord","line":72},{"label":"Mar","value":44,"series":"Sud","line":72},{"label":"Avr","value":67,"series":"Nord","line":91},{"label":"Avr","value":39,"series":"Sud","line":91},{"label":"Mai","value":73,"series":"Nord","line":88},{"label":"Mai","value":52,"series":"Sud","line":88},{"label":"Juin","value":69,"series":"Nord","line":95},{"label":"Juin","value":61,"series":"Sud","line":95}]
+ * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses, un groupe de barres par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Hauteur des barres, empilée par série"},"series":{"type":"category","required":false,"label":"Série","description":"Empile une couleur par valeur distincte. Absent ou unique : barres simples"},"line":{"type":"number","required":false,"label":"Courbe","description":"Indicateur tracé en courbe sur un axe de droite dédié"}}
+ * @params {"curve":{"group":"visuel","type":"select","label":"Lissage","default":"monotone","options":[{"value":"monotone","label":"Lissé sans dépassement"},{"value":"catmullRom","label":"Lissé"},{"value":"linear","label":"Linéaire"},{"value":"step","label":"En marches"}]},"lineColor":{"group":"visuel","type":"color","label":"Couleur de la courbe","default":null,"placeholder":"complémentaire"},"opacity":{"group":"general","type":"range","label":"Opacité des barres","min":0,"max":1,"step":0.05,"default":0.9},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":3,"unit":"px"},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ */
+function draw(svg, g, data, W, H, color, p) {
+  if (!data || !data.length) return;
+
+  const seriesNames = [...new Set(data.map(d => d.series))]
+    .filter(v => v !== undefined && v !== null && v !== '');
+  const grouped = seriesNames.length > 1;
+  const keys = grouped ? seriesNames : ['value'];
+  const labels = [...new Set(data.map(d => d.label))];
+
+  // Table label × série pour les barres ; les doublons sont sommés
+  const rows = labels.map(label => {
+    const row = { label: label };
+    keys.forEach(k => { row[k] = 0; });
+    return row;
+  });
+  const rowOf = new Map(rows.map(r => [r.label, r]));
+  data.forEach(d => {
+    const row = rowOf.get(d.label);
+    const key = grouped ? d.series : 'value';
+    if (row && key in row) row[key] += d.value;
+  });
+
+  // La courbe est portée par un champ distinct, une valeur par abscisse.
+  // Les lignes d'une même abscisse répètent la même valeur : on prend la
+  // première définie plutôt que de les sommer.
+  const lineOf = new Map();
+  data.forEach(d => {
+    if (Number.isFinite(d.line) && !lineOf.has(d.label)) lineOf.set(d.label, d.line);
+  });
+  const hasLine = lineOf.size > 0;
+
+  const stacked = d3.stack().keys(keys)(rows);
+
+  const fontSize = p.fontSize ?? 12;
+  const legendH = (grouped || hasLine) ? fontSize + 14 : 0;
+  const plotH = Math.max(10, H - legendH);
+
+  const x = d3.scaleBand().domain(labels).range([0, W]).padding(0.28);
+
+  const barMax = d3.max(stacked[stacked.length - 1], s => s[1]) * 1.1;
+  const yBar = d3.scaleLinear().domain([0, barMax]).range([plotH, 0]);
+  const fmtBar = v => formatAxisValue(v, p.unitMode, p.decimals, barMax);
+
+  // Axe de droite propre à la courbe : sans lui un indicateur d'échelle
+  // différente serait écrasé au ras de l'axe ou sortirait du cadre.
+  const lineMax = hasLine ? d3.max([...lineOf.values()]) * 1.15 : 1;
+  const yLine = d3.scaleLinear().domain([0, lineMax]).range([plotH, 0]);
+  const fmtLine = v => formatAxisValue(v, p.unitMode, p.decimals, lineMax);
+
+  const palette = keys.map((_, i) => (grouped
+    ? d3.hsl(d3.hsl(color).h + i * 30, 0.7, 0.4 + i * 0.08).toString()
+    : color));
+  const lineColor = p.lineColor || d3.hsl(d3.hsl(color).h + 180, 0.65, 0.45).toString();
+
+  const pg = g.append('g').attr('transform', `translate(0,${legendH})`);
+
+  // Grille, calée sur l'axe des barres
+  if (p.showGrid ?? true) {
+    pg.append('g').attr('class', 'grid')
+      .call(d3.axisLeft(yBar).ticks(p.ticks ?? 5).tickSize(-W).tickFormat(''))
+      .selectAll('line').attr('stroke', '#e4e4ed').attr('stroke-dasharray', '3,3');
+    pg.select('.grid .domain').remove();
+  }
+
+  // Axes
+  pg.append('g').attr('transform', `translate(0,${plotH})`)
+    .call(d3.axisBottom(x))
+    .selectAll('text')
+    .attr('font-family', 'DM Sans, sans-serif')
+    .attr('font-size', fontSize)
+    .attr('fill', '#7a7a90');
+
+  pg.append('g')
+    .call(d3.axisLeft(yBar).ticks(p.ticks ?? 5).tickFormat(fmtBar))
+    .selectAll('text')
+    .attr('font-family', 'DM Sans, sans-serif')
+    .attr('font-size', fontSize)
+    .attr('fill', '#7a7a90');
+
+  if (hasLine) {
+    pg.append('g').attr('transform', `translate(${W},0)`)
+      .call(d3.axisRight(yLine).ticks(p.ticks ?? 5).tickFormat(fmtLine))
+      .selectAll('text')
+      .attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-size', fontSize)
+      .attr('fill', lineColor);
+  }
+
+  pg.selectAll('.domain').attr('stroke', '#e4e4ed');
+  pg.selectAll('.tick line').attr('stroke', 'none');
+
+  // Barres empilées
+  stacked.forEach((layer, i) => {
+    pg.selectAll('.bar-' + i)
+      .data(layer)
+      .enter()
+      .append('rect')
+      .attr('x', d => x(d.data.label))
+      .attr('y', d => yBar(d[1]))
+      .attr('width', x.bandwidth())
+      .attr('height', d => Math.max(0, yBar(d[0]) - yBar(d[1])))
+      .attr('fill', palette[i])
+      .attr('opacity', p.opacity ?? 0.9)
+      .attr('rx', p.radius ?? 3);
+  });
+
+  // Valeurs dans les segments
+  if (p.showLabels) {
+    stacked.forEach((layer, i) => {
+      pg.selectAll('.bar-label-' + i)
+        .data(layer)
+        .enter()
+        .append('text')
+        .attr('x', d => x(d.data.label) + x.bandwidth() / 2)
+        .attr('y', d => (yBar(d[0]) + yBar(d[1])) / 2 + 4)
+        .attr('text-anchor', 'middle')
+        .attr('font-family', 'DM Mono, monospace')
+        .attr('font-size', fontSize - 2)
+        .attr('fill', '#ffffff')
+        .attr('font-weight', '500')
+        .text(d => (d[1] - d[0] > 0 ? fmtBar(d[1] - d[0]) : ''));
+    });
+  }
+
+  // Courbe
+  if (hasLine) {
+    const points = labels
+      .filter(l => lineOf.has(l))
+      .map(l => ({ label: l, value: lineOf.get(l) }));
+
+    const line = d3.line()
+      .x(d => x(d.label) + x.bandwidth() / 2)
+      .y(d => yLine(d.value))
+      .curve(resolveCurve(p.curve));
+
+    pg.append('path')
+      .datum(points)
+      .attr('d', line)
+      .attr('fill', 'none')
+      .attr('stroke', lineColor)
+      .attr('stroke-width', p.stroke ?? 2.5);
+
+    pg.selectAll('.line-dot')
+      .data(points)
+      .enter()
+      .append('circle')
+      .attr('cx', d => x(d.label) + x.bandwidth() / 2)
+      .attr('cy', d => yLine(d.value))
+      .attr('r', 4)
+      .attr('fill', lineColor)
+      .attr('stroke', 'white')
+      .attr('stroke-width', 2);
+  }
+
+  // Légende
+  if (legendH) {
+    const legend = g.append('g');
+    let cursor = 0;
+    const entries = keys.map((k, i) => ({ nom: grouped ? k : 'Valeur', couleur: palette[i], trait: false }));
+    if (hasLine) entries.push({ nom: 'Courbe', couleur: lineColor, trait: true });
+
+    entries.forEach(e => {
+      const item = legend.append('g').attr('transform', `translate(${cursor},0)`);
+      if (e.trait) {
+        item.append('line')
+          .attr('x1', 0).attr('y1', 5).attr('x2', 12).attr('y2', 5)
+          .attr('stroke', e.couleur).attr('stroke-width', 2.5);
+      } else {
+        item.append('rect')
+          .attr('x', 0).attr('y', 0).attr('width', 10).attr('height', 10)
+          .attr('rx', 2).attr('fill', e.couleur);
+      }
+      item.append('text')
+        .attr('x', 16).attr('y', 9)
+        .attr('font-family', 'DM Sans, sans-serif')
+        .attr('font-size', fontSize)
+        .attr('fill', '#7a7a90')
+        .text(e.nom);
+      cursor += 16 + String(e.nom).length * fontSize * 0.58 + 18;
+    });
+  }
+}
+
+// Type de lissage de la courbe superposée aux barres
+function resolveCurve(mode) {
+  if (mode === 'linear') return d3.curveLinear;
+  if (mode === 'catmullRom') return d3.curveCatmullRom;
+  if (mode === 'step') return d3.curveStep;
+  return d3.curveMonotoneX;
+}
+
+// Formatage unité/décimales des valeurs d'axe (cohérent avec le Studio DataViz)
+function formatAxisValue(value, unitMode, decimals, domainMax) {
+  const divisors = { unit: 1, k: 1e3, M: 1e6, Md: 1e9 };
+  const suffixes = { unit: '', k: 'k', M: 'M', Md: 'Md' };
+  let unit = unitMode || 'auto';
+  if (unit === 'auto') {
+    const abs = Math.abs(domainMax || 0);
+    unit = abs >= 1e9 ? 'Md' : abs >= 1e6 ? 'M' : abs >= 1e3 ? 'k' : 'unit';
+  }
+  const div = divisors[unit] ?? 1;
+  const suf = suffixes[unit] ?? '';
+  return (value / div).toLocaleString('fr-FR', {
+    minimumFractionDigits: decimals ?? 0,
+    maximumFractionDigits: decimals ?? 0,
+  }) + suf;
+}

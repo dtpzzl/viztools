@@ -1,10 +1,11 @@
 /**
  * @name Nuage de points
  * @description Corrélation entre deux variables, colorée par série
+ * @icon <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="16.5" r="2"/><circle cx="11" cy="9" r="3.3" opacity=".75"/><circle cx="17" cy="14" r="2.6" opacity=".85"/><circle cx="19.5" cy="6" r="1.6" opacity=".6"/><circle cx="8" cy="5.5" r="1.3" opacity=".5"/></svg>
  * @author datapuzzle
  * @version 1.1
- * @sampleData [{"label":"A","x":12,"y":34,"series":"Nord"},{"label":"B","x":45,"y":67,"series":"Nord"},{"label":"C","x":23,"y":12,"series":"Nord"},{"label":"D","x":78,"y":89,"series":"Nord"},{"label":"E","x":56,"y":45,"series":"Sud"},{"label":"F","x":34,"y":78,"series":"Sud"},{"label":"G","x":89,"y":23,"series":"Sud"},{"label":"H","x":67,"y":56,"series":"Sud"}]
- * @dataFields {"x":{"type":"number","required":true,"label":"Abscisse","description":"Première variable, axe horizontal"},"y":{"type":"number","required":true,"label":"Ordonnée","description":"Seconde variable, axe vertical"},"label":{"type":"category","required":false,"label":"Étiquette","description":"Annotation affichée à côté du point, pas un axe"},"series":{"type":"category","required":false,"label":"Série","description":"Une couleur et une entrée de légende par valeur distincte"}}
+ * @sampleData [{"label":"A","x":12,"y":34,"series":"Nord","weight":120},{"label":"B","x":45,"y":67,"series":"Nord","weight":340},{"label":"C","x":23,"y":12,"series":"Nord","weight":90},{"label":"D","x":78,"y":89,"series":"Nord","weight":610},{"label":"E","x":56,"y":45,"series":"Sud","weight":250},{"label":"F","x":34,"y":78,"series":"Sud","weight":180},{"label":"G","x":89,"y":23,"series":"Sud","weight":430},{"label":"H","x":67,"y":56,"series":"Sud","weight":70}]
+ * @dataFields {"x":{"type":"number","required":true,"label":"Abscisse","description":"Première variable, axe horizontal"},"y":{"type":"number","required":true,"label":"Ordonnée","description":"Seconde variable, axe vertical"},"label":{"type":"category","required":false,"label":"Étiquette","description":"Annotation affichée à côté du point, pas un axe"},"series":{"type":"category","required":false,"label":"Série","description":"Une couleur et une entrée de légende par valeur distincte"},"weight":{"type":"number","required":false,"label":"Poids","description":"Fait varier le diamètre du point ; l'aire est proportionnelle au poids"}}
  * @params {"pointShape":{"group":"visuel","type":"select","label":"Forme","default":"circle","options":[{"value":"circle","label":"Cercle"},{"value":"square","label":"Carré"},{"value":"triangle","label":"Triangle"},{"value":"diamond","label":"Losange"},{"value":"cross","label":"Croix"},{"value":"star","label":"Étoile"},{"value":"wye","label":"Y"}]},"opacity":{"group":"general","type":"range","label":"Opacité des points","min":0,"max":1,"step":0.05,"default":0.75},"radius":{"group":"general","type":"range","label":"Rayon des points","min":1,"max":20,"step":1,"default":7,"unit":"px"},"stroke":{"group":"general","type":"range","label":"Contour des points","min":0,"max":8,"step":0.5,"default":1.5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les étiquettes","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
@@ -70,7 +71,20 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Points — d3.symbol prend une aire : πr² redonne exactement le cercle de rayon r
   const r = p.radius ?? 7;
-  const symbol = d3.symbol().type(resolveSymbol(p.pointShape)).size(Math.PI * r * r);
+  const shape = resolveSymbol(p.pointShape);
+
+  // Poids optionnel : le rayon suit la racine carrée du poids, pour que l'aire
+  // du point soit proportionnelle à l'effectif et non son rayon, sinon les gros
+  // échantillons écrasent visuellement les autres. Un plancher garde les
+  // points les plus légers visibles.
+  const weights = data.map(d => d.weight).filter(v => Number.isFinite(v) && v > 0);
+  const weighted = weights.length > 0;
+  const sizeOf = weighted
+    ? d3.scaleSqrt().domain([0, d3.max(weights)]).range([r * 0.45, r * 1.9]).clamp(true)
+    : null;
+  const radiusOf = d => (weighted ? sizeOf(Number.isFinite(d.weight) ? d.weight : 0) : r);
+  const symbol = d => d3.symbol().type(shape)
+    .size(Math.PI * radiusOf(d) * radiusOf(d))();
 
   pg.selectAll('.dot')
     .data(data)
@@ -89,7 +103,7 @@ function draw(svg, g, data, W, H, color, p) {
       .data(data)
       .enter()
       .append('text')
-      .attr('x', d => x(d.x) + r + 3)
+      .attr('x', d => x(d.x) + radiusOf(d) + 3)
       .attr('y', d => y(d.y) + 4)
       .attr('font-family', 'DM Mono, monospace')
       .attr('font-size', fontSize - 1)

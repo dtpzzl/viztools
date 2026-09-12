@@ -1,6 +1,7 @@
 /**
  * @name Aire empilée
  * @description Volume d'une valeur dans le temps, empilé par série
+ * @icon <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 21V13l5-5 4 4 9-8v17z" opacity=".32"/><path d="M3 21v-4l5-3 4 3 9-6v10z" opacity=".72"/></svg>
  * @author datapuzzle
  * @version 1.1
  * @sampleData [{"label":"2019","value":42,"series":"Nord"},{"label":"2020","value":58,"series":"Nord"},{"label":"2021","value":51,"series":"Nord"},{"label":"2022","value":67,"series":"Nord"},{"label":"2023","value":73,"series":"Nord"},{"label":"2024","value":69,"series":"Nord"},{"label":"2019","value":28,"series":"Sud"},{"label":"2020","value":31,"series":"Sud"},{"label":"2021","value":44,"series":"Sud"},{"label":"2022","value":39,"series":"Sud"},{"label":"2023","value":52,"series":"Sud"},{"label":"2024","value":61,"series":"Sud"}]

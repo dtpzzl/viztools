@@ -1,11 +1,12 @@
 /**
  * @name Donut
  * @description Répartition en parts d'un total
+ * @icon <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5"><circle cx="12" cy="12" r="7" opacity=".3"/><path d="M12 5a7 7 0 0 1 6.06 10.5" stroke-linecap="round"/></svg>
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"A","value":35},{"label":"B","value":25},{"label":"C","value":20},{"label":"D","value":12},{"label":"E","value":8}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Une part du total par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée, sommée pour obtenir le total"}}
- * @params {"donutMode":{"group":"visuel","type":"select","label":"Étiquettes","default":"percent","options":[{"value":"percent","label":"Pourcentage du total"},{"value":"value","label":"Valeur brute"}]},"thickness":{"group":"visuel","type":"number","label":"Épaisseur de l'anneau","default":null,"placeholder":"48 % du rayon","unit":"px"},"stroke":{"group":"general","type":"range","label":"Liseré entre les parts","min":0,"max":8,"step":0.5,"default":2,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les étiquettes","default":true},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"showName":{"group":"visuel","type":"toggle","label":"Étiquette","default":false},"showValue":{"group":"visuel","type":"toggle","label":"Valeur","default":false},"showPercent":{"group":"visuel","type":"toggle","label":"Pourcentage","default":true},"thickness":{"group":"visuel","type":"number","label":"Épaisseur de l'anneau","default":null,"placeholder":"48 % du rayon","unit":"px"},"stroke":{"group":"general","type":"range","label":"Liseré entre les parts","min":0,"max":8,"step":0.5,"default":2,"unit":"px"},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   const radius = Math.min(W, H) / 2 - 20;
@@ -43,8 +44,14 @@ function draw(svg, g, data, W, H, color, p) {
     .attr('stroke', 'white')
     .attr('stroke-width', p.stroke ?? 2);
 
-  // Labels pourcentage (calculés à partir du total, pas de la valeur brute)
-  if (p.showLabels ?? true) {
+  // Étiquettes sur les parts : trois cases indépendantes plutôt qu'une liste
+  // fermée, pour couvrir « nom seul », « nom + valeur », « % seul » et le reste
+  // sans maintenir la liste des combinaisons.
+  const showName = p.showName ?? false;
+  const showValue = p.showValue ?? false;
+  const showPercent = p.showPercent ?? true;
+
+  if (showName || showValue || showPercent) {
     pg.selectAll('.pct')
       .data(pie(data))
       .enter()
@@ -55,7 +62,14 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-size', (p.fontSize ?? 12) - 1)
       .attr('fill', 'white')
       .attr('font-weight', '500')
-      .text(d => p.donutMode === 'value' ? fmtVal(d.data.value) : `${Math.round(d.data.value / total * 100)}%`);
+      .text(d => {
+        const parts = [];
+        if (showName) parts.push(d.data.label);
+        if (showValue) parts.push(fmtVal(d.data.value));
+        // Le pourcentage se calcule sur le total, jamais sur la valeur brute
+        if (showPercent) parts.push(`${Math.round(d.data.value / total * 100)}%`);
+        return parts.join(' ');
+      });
   }
 
   // Légende à droite
