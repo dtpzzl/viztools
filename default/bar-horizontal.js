@@ -5,10 +5,53 @@
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"Paris","value":92},{"label":"Lyon","value":74},{"label":"Marseille","value":68},{"label":"Toulouse","value":61},{"label":"Bordeaux","value":55},{"label":"Nantes","value":49}]
- * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Un rang du classement par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée"}}
- * @params {"opacity":{"group":"general","type":"range","label":"Opacité de la première barre","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Un rang du classement par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité de la première barre","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
+  if (!data || !data.length) return;
+
+  // Filtre optionnel : p.filterValue isole un sous-ensemble ; laissé vide,
+  // aucun filtre n'est appliqué et les valeurs sont cumulées.
+  const allFilters = [...new Set(data.map(d => d.filter))]
+    .filter(v => v !== undefined && v !== null && v !== '');
+  let shown = null;
+  if (allFilters.length > 1) {
+    const wanted = String(p.filterValue ?? '').trim();
+    const match = wanted ? allFilters.find(v => String(v) === wanted) : undefined;
+    if (match !== undefined) {
+      shown = match;
+      data = data.filter(d => String(d.filter) === String(match));
+      if (!data.length) return;
+    }
+  }
+
+  // Cumule les entrées de même label : sans filtre, chaque valeur de filtre en
+  // crée une, et le visuel afficherait plusieurs entrées portant le même nom.
+  const cumul = new Map();
+  data.forEach(d => {
+    if (!Number.isFinite(d.value)) return;
+    const cle = String(d.label);
+    if (cumul.has(cle)) cumul.get(cle).value += d.value;
+    else cumul.set(cle, Object.assign({}, d, { label: d.label, value: d.value }));
+  });
+  data = [...cumul.values()];
+  if (!data.length) return;
+
+  // Valeur du filtre, affichée seulement quand un filtre est réellement actif.
+  // Le dessin est alors décalé dans un sous-groupe pour lui laisser la place.
+  if (shown !== null) {
+    const capH = (p.fontSize ?? 12) + 10;
+    g.append('text')
+      .attr('x', 0).attr('y', (p.fontSize ?? 12))
+      .attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-size', p.fontSize ?? 12)
+      .attr('font-weight', '500')
+      .attr('fill', '#0f0f1a')
+      .text(shown);
+    g = g.append('g').attr('transform', `translate(0,${capH})`);
+    H = Math.max(10, H - capH);
+  }
   // Trier par valeur décroissante
   const sorted = [...data].sort((a, b) => b.value - a.value);
 

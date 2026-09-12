@@ -68,7 +68,7 @@ function draw(svg, g, data, W, H, color, p) {
   const fmtVal = v => formatAxisValue(v, p.unitMode, p.decimals, sMax);
   const fontSize = p.fontSize ?? 12;
   const labelH = p.showLabels ? fontSize + 8 : 0;
-  const captionH = allFilters.length > 1 ? fontSize + 10 : 0;
+  const captionH = shown === null ? 0 : fontSize + 10;
   const bandH = Math.max(10, H - labelH - captionH);
 
   // ---- Géométrie des bandes ---------------------------------------------
@@ -83,16 +83,14 @@ function draw(svg, g, data, W, H, color, p) {
   const offY = captionH + (bandH - stripeH) / 2; // bande contrainte : centrée
 
   // Nom du filtre appliqué : sans lui on lit un sous-ensemble sans le savoir
-  if (allFilters.length > 1) {
+  if (shown !== null) {
     g.append('text')
       .attr('x', 0).attr('y', fontSize)
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-size', fontSize)
       .attr('font-weight', '500')
       .attr('fill', '#0f0f1a')
-      .text(shown === null
-        ? `Toutes les valeurs (${allFilters.length})`
-        : `${shown}  (sur ${allFilters.length})`);
+      .text(shown);
   }
 
   g.selectAll('.stripe')

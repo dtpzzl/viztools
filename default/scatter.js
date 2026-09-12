@@ -5,11 +5,42 @@
  * @author datapuzzle
  * @version 1.1
  * @sampleData [{"label":"A","x":12,"y":34,"series":"Nord","weight":120},{"label":"B","x":45,"y":67,"series":"Nord","weight":340},{"label":"C","x":23,"y":12,"series":"Nord","weight":90},{"label":"D","x":78,"y":89,"series":"Nord","weight":610},{"label":"E","x":56,"y":45,"series":"Sud","weight":250},{"label":"F","x":34,"y":78,"series":"Sud","weight":180},{"label":"G","x":89,"y":23,"series":"Sud","weight":430},{"label":"H","x":67,"y":56,"series":"Sud","weight":70}]
- * @dataFields {"x":{"type":"number","required":true,"label":"Abscisse","description":"Première variable, axe horizontal"},"y":{"type":"number","required":true,"label":"Ordonnée","description":"Seconde variable, axe vertical"},"label":{"type":"category","required":false,"label":"Étiquette","description":"Annotation affichée à côté du point, pas un axe"},"series":{"type":"category","required":false,"label":"Série","description":"Une couleur et une entrée de légende par valeur distincte"},"weight":{"type":"number","required":false,"label":"Poids","description":"Fait varier le diamètre du point ; l'aire est proportionnelle au poids"}}
- * @params {"pointShape":{"group":"visuel","type":"select","label":"Forme","default":"circle","options":[{"value":"circle","label":"Cercle"},{"value":"square","label":"Carré"},{"value":"triangle","label":"Triangle"},{"value":"diamond","label":"Losange"},{"value":"cross","label":"Croix"},{"value":"star","label":"Étoile"},{"value":"wye","label":"Y"}]},"opacity":{"group":"general","type":"range","label":"Opacité des points","min":0,"max":1,"step":0.05,"default":0.75},"radius":{"group":"general","type":"range","label":"Rayon des points","min":1,"max":20,"step":1,"default":7,"unit":"px"},"stroke":{"group":"general","type":"range","label":"Contour des points","min":0,"max":8,"step":0.5,"default":1.5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les étiquettes","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @dataFields {"x":{"type":"number","required":true,"label":"Abscisse","description":"Première variable, axe horizontal"},"y":{"type":"number","required":true,"label":"Ordonnée","description":"Seconde variable, axe vertical"},"label":{"type":"category","required":false,"label":"Étiquette","description":"Annotation affichée à côté du point, pas un axe"},"series":{"type":"category","required":false,"label":"Série","description":"Une couleur et une entrée de légende par valeur distincte"},"weight":{"type":"number","required":false,"label":"Poids","description":"Fait varier le diamètre du point ; l'aire est proportionnelle au poids"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"pointShape":{"group":"visuel","type":"select","label":"Forme","default":"circle","options":[{"value":"circle","label":"Cercle"},{"value":"square","label":"Carré"},{"value":"triangle","label":"Triangle"},{"value":"diamond","label":"Losange"},{"value":"cross","label":"Croix"},{"value":"star","label":"Étoile"},{"value":"wye","label":"Y"}]},"opacity":{"group":"general","type":"range","label":"Opacité des points","min":0,"max":1,"step":0.05,"default":0.75},"radius":{"group":"general","type":"range","label":"Rayon des points","min":1,"max":20,"step":1,"default":7,"unit":"px"},"stroke":{"group":"general","type":"range","label":"Contour des points","min":0,"max":8,"step":0.5,"default":1.5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les étiquettes","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
+  if (!data || !data.length) return;
+
+  // Filtre optionnel : p.filterValue isole un sous-ensemble ; laissé vide,
+  // aucun filtre n'est appliqué et les valeurs sont cumulées.
+  const allFilters = [...new Set(data.map(d => d.filter))]
+    .filter(v => v !== undefined && v !== null && v !== '');
+  let shown = null;
+  if (allFilters.length > 1) {
+    const wanted = String(p.filterValue ?? '').trim();
+    const match = wanted ? allFilters.find(v => String(v) === wanted) : undefined;
+    if (match !== undefined) {
+      shown = match;
+      data = data.filter(d => String(d.filter) === String(match));
+      if (!data.length) return;
+    }
+  }
+
+  // Valeur du filtre, affichée seulement quand un filtre est réellement actif.
+  // Le dessin est alors décalé dans un sous-groupe pour lui laisser la place.
+  if (shown !== null) {
+    const capH = (p.fontSize ?? 12) + 10;
+    g.append('text')
+      .attr('x', 0).attr('y', (p.fontSize ?? 12))
+      .attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-size', p.fontSize ?? 12)
+      .attr('font-weight', '500')
+      .attr('fill', '#0f0f1a')
+      .text(shown);
+    g = g.append('g').attr('transform', `translate(0,${capH})`);
+    H = Math.max(10, H - capH);
+  }
 
   // Une série par valeur distincte du champ `series`. Champ absent ou valeur
   // unique : tous les points prennent la couleur principale, pas de légende.

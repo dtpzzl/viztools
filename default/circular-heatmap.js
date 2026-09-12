@@ -83,7 +83,7 @@ function draw(svg, g, data, W, H, color, p) {
 
   // ---- Géométrie ---------------------------------------------------------
   const legendH = H > 170 ? 42 : 0;
-  const captionH = allFilters.length > 1 ? (p.fontSize ?? 12) + 10 : 0;
+  const captionH = shown === null ? 0 : (p.fontSize ?? 12) + 10;
   const labelPad = 26; // place réservée aux labels de catégories à l'extérieur
   const usableH = H - legendH - captionH;
   const cx = W / 2;
@@ -121,16 +121,14 @@ function draw(svg, g, data, W, H, color, p) {
   const cg = g.append('g').attr('transform', `translate(${cx},${cy})`);
 
   // Nom de la série affichée : sans lui on lit un disque sans savoir lequel
-  if (allFilters.length > 1) {
+  if (shown !== null) {
     g.append('text')
       .attr('x', 0).attr('y', (p.fontSize ?? 12))
       .attr('font-family', 'DM Sans, sans-serif')
       .attr('font-size', p.fontSize ?? 12)
       .attr('font-weight', '500')
       .attr('fill', '#0f0f1a')
-      .text(shown === null
-        ? `Toutes les valeurs (${allFilters.length})`
-        : `${shown}  (sur ${allFilters.length})`);
+      .text(shown);
   }
 
   // ---- Cellules ----------------------------------------------------------

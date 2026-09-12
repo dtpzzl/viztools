@@ -5,11 +5,42 @@
  * @author datapuzzle
  * @version 1.0
  * @sampleData [{"label":"Jan","value":42,"series":"Nord","line":78},{"label":"Jan","value":31,"series":"Sud","line":78},{"label":"Fév","value":58,"series":"Nord","line":84},{"label":"Fév","value":35,"series":"Sud","line":84},{"label":"Mar","value":51,"series":"Nord","line":72},{"label":"Mar","value":44,"series":"Sud","line":72},{"label":"Avr","value":67,"series":"Nord","line":91},{"label":"Avr","value":39,"series":"Sud","line":91},{"label":"Mai","value":73,"series":"Nord","line":88},{"label":"Mai","value":52,"series":"Sud","line":88},{"label":"Juin","value":69,"series":"Nord","line":95},{"label":"Juin","value":61,"series":"Sud","line":95}]
- * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses, un groupe de barres par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Hauteur des barres, empilée par série"},"series":{"type":"category","required":false,"label":"Série","description":"Empile une couleur par valeur distincte. Absent ou unique : barres simples"},"line":{"type":"number","required":false,"label":"Courbe","description":"Indicateur tracé en courbe sur un axe de droite dédié"}}
- * @params {"curve":{"group":"visuel","type":"select","label":"Lissage","default":"monotone","options":[{"value":"monotone","label":"Lissé sans dépassement"},{"value":"catmullRom","label":"Lissé"},{"value":"linear","label":"Linéaire"},{"value":"step","label":"En marches"}]},"lineColor":{"group":"visuel","type":"color","label":"Couleur de la courbe","default":null,"placeholder":"complémentaire"},"opacity":{"group":"general","type":"range","label":"Opacité des barres","min":0,"max":1,"step":0.05,"default":0.9},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":3,"unit":"px"},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses, un groupe de barres par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Hauteur des barres, empilée par série"},"series":{"type":"category","required":false,"label":"Série","description":"Empile une couleur par valeur distincte. Absent ou unique : barres simples"},"line":{"type":"number","required":false,"label":"Courbe","description":"Indicateur tracé en courbe sur un axe de droite dédié"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"curve":{"group":"visuel","type":"select","label":"Lissage","default":"monotone","options":[{"value":"monotone","label":"Lissé sans dépassement"},{"value":"catmullRom","label":"Lissé"},{"value":"linear","label":"Linéaire"},{"value":"step","label":"En marches"}]},"lineColor":{"group":"visuel","type":"color","label":"Couleur de la courbe","default":null,"placeholder":"complémentaire"},"opacity":{"group":"general","type":"range","label":"Opacité des barres","min":0,"max":1,"step":0.05,"default":0.9},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":3,"unit":"px"},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
+  if (!data || !data.length) return;
+
+  // Filtre optionnel : p.filterValue isole un sous-ensemble ; laissé vide,
+  // aucun filtre n'est appliqué et les valeurs sont cumulées.
+  const allFilters = [...new Set(data.map(d => d.filter))]
+    .filter(v => v !== undefined && v !== null && v !== '');
+  let shown = null;
+  if (allFilters.length > 1) {
+    const wanted = String(p.filterValue ?? '').trim();
+    const match = wanted ? allFilters.find(v => String(v) === wanted) : undefined;
+    if (match !== undefined) {
+      shown = match;
+      data = data.filter(d => String(d.filter) === String(match));
+      if (!data.length) return;
+    }
+  }
+
+  // Valeur du filtre, affichée seulement quand un filtre est réellement actif.
+  // Le dessin est alors décalé dans un sous-groupe pour lui laisser la place.
+  if (shown !== null) {
+    const capH = (p.fontSize ?? 12) + 10;
+    g.append('text')
+      .attr('x', 0).attr('y', (p.fontSize ?? 12))
+      .attr('font-family', 'DM Sans, sans-serif')
+      .attr('font-size', p.fontSize ?? 12)
+      .attr('font-weight', '500')
+      .attr('fill', '#0f0f1a')
+      .text(shown);
+    g = g.append('g').attr('transform', `translate(0,${capH})`);
+    H = Math.max(10, H - capH);
+  }
 
   const seriesNames = [...new Set(data.map(d => d.series))]
     .filter(v => v !== undefined && v !== null && v !== '');
