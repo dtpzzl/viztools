@@ -11,21 +11,13 @@
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
 
-  // Filtre optionnel : plusieurs séries peuvent cohabiter dans le même jeu
-  // (l'écart de température par année ET par station). p.filterValue en isole
-  // une ; laissé vide, aucun filtre n'est appliqué et les valeurs sont cumulées.
-  const allFilters = [...new Set(data.map(d => d.filter))]
-    .filter(v => v !== undefined && v !== null && v !== '');
-  let shown = null; // null = toutes valeurs confondues
-  if (allFilters.length > 1) {
-    const wanted = String(p.filterValue ?? '').trim();
-    const match = wanted ? allFilters.find(v => String(v) === wanted) : undefined;
-    if (match !== undefined) {
-      shown = match;
-      data = data.filter(d => String(d.filter) === String(match));
-      if (!data.length) return;
-    }
-  }
+  // Le Studio filtre ET agrège en amont : il restreint les lignes avant de les
+  // grouper, pour que le mode choisi (somme, moyenne, min, max, comptage)
+  // s'applique une seule fois, sur la population réellement concernée. Le
+  // visuel n'a donc plus rien à filtrer ni à cumuler — il rappelle seulement
+  // quelle valeur a été retenue, sans quoi on lirait un sous-ensemble sans le
+  // savoir. Voir CLAUDE.md, « Champ filtre ».
+  const shown = String(p.filterValue ?? '').trim() || null;
 
   // Une bande par label, dans l'ordre reçu ; les doublons sont sommés, ce qui
   // cumule aussi les valeurs des différents filtres quand aucun n'est choisi

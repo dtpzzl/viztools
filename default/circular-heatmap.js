@@ -11,35 +11,13 @@
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
 
-  // Filtre optionnel par série : plusieurs disques peuvent cohabiter dans le
-  // même jeu (la pluie par mois ET par ville). p.filterValue en isole une ;
-  // laissé vide, aucun filtre n'est appliqué et les valeurs sont cumulées.
-  const allFilters = [...new Set(data.map(d => d.filter))]
-    .filter(v => v !== undefined && v !== null && v !== '');
-  let shown = null; // null = toutes valeurs confondues
-  if (allFilters.length > 1) {
-    const wanted = String(p.filterValue ?? '').trim();
-    const match = wanted ? allFilters.find(v => String(v) === wanted) : undefined;
-    if (match !== undefined) {
-      shown = match;
-      data = data.filter(d => String(d.filter) === String(match));
-      if (!data.length) return;
-    }
-  }
-
-  // Agrège les doublons d'une même case. Sans filtre, plusieurs valeurs
-  // tombent sur la même case : elles se superposeraient silencieusement,
-  // la dernière dessinée masquant les autres, au lieu de se cumuler.
-  const cases = new Map();
-  data.forEach(d => {
-    if (!Number.isFinite(d.value)) return;
-    const cle = String(d.theta) + '\u0000' + String(d.r);
-    const existante = cases.get(cle);
-    if (existante) existante.value += d.value;
-    else cases.set(cle, { theta: d.theta, r: d.r, value: d.value });
-  });
-  data = [...cases.values()];
-  if (!data.length) return;
+  // Le Studio filtre ET agrège en amont : il restreint les lignes avant de les
+  // grouper, pour que le mode choisi (somme, moyenne, min, max, comptage)
+  // s'applique une seule fois, sur la population réellement concernée. Le
+  // visuel n'a donc plus rien à filtrer ni à cumuler — il rappelle seulement
+  // quelle valeur a été retenue, sans quoi on lirait un sous-ensemble sans le
+  // savoir. Voir CLAUDE.md, « Champ filtre ».
+  const shown = String(p.filterValue ?? '').trim() || null;
 
   // theta = dimension angulaire (tour du cercle), r = dimension radiale
   // (anneaux, du centre vers l'extérieur). Les variables internes restent
