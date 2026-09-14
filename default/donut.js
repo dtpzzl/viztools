@@ -11,31 +11,13 @@
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
 
-  // Filtre optionnel : p.filterValue isole un sous-ensemble ; laissé vide,
-  // aucun filtre n'est appliqué et les parts homonymes sont cumulées.
-  const allFilters = [...new Set(data.map(d => d.filter))]
-    .filter(v => v !== undefined && v !== null && v !== '');
-  let shown = null;
-  if (allFilters.length > 1) {
-    const wanted = String(p.filterValue ?? '').trim();
-    const match = wanted ? allFilters.find(v => String(v) === wanted) : undefined;
-    if (match !== undefined) {
-      shown = match;
-      data = data.filter(d => String(d.filter) === String(match));
-    }
-  }
-
-  // Cumule les parts de même nom : sans filtre, chaque valeur de filtre en
-  // crée une, et le donut afficherait plusieurs parts portant le même label.
-  const parts = new Map();
-  data.forEach(d => {
-    if (!Number.isFinite(d.value)) return;
-    const cle = String(d.label);
-    if (parts.has(cle)) parts.get(cle).value += d.value;
-    else parts.set(cle, { label: d.label, value: d.value });
-  });
-  data = [...parts.values()];
-  if (!data.length) return;
+  // Le Studio filtre ET agrège en amont : il restreint les lignes avant de les
+  // grouper, pour que le mode choisi (somme, moyenne, min, max, comptage)
+  // s'applique une seule fois, sur la population réellement concernée. Le
+  // visuel n'a donc plus rien à filtrer ni à cumuler — il rappelle seulement
+  // quelle valeur a été retenue, sans quoi on lirait un sous-ensemble sans le
+  // savoir. Voir CLAUDE.md, « Champ filtre ».
+  const shown = String(p.filterValue ?? '').trim() || null;
 
   const fontSize = p.fontSize ?? 12;
   const captionH = shown === null ? 0 : fontSize + 10;

@@ -21,7 +21,9 @@ viztools/
     ├── heatmap.js
     ├── circular-heatmap.js
     ├── donut.js
-    └── scatter.js
+    ├── scatter.js
+    ├── stacked-bar-line.js
+    └── warming-stripes.js
 ```
 
 ---
@@ -130,10 +132,12 @@ p.showGrid      // boolean
 p.ticks         // nombre de ticks sur l'axe Y
 p.unitMode      // 'auto' | 'unit' | 'k' | 'M' | 'Md' — échelle des valeurs affichées
 p.decimals      // nombre de décimales (0–3) appliquées après mise à l'échelle
-p.donutMode     // 'percent' | 'value' — spécifique au visuel Donut (% du total ou valeur brute)
+p.filterValue   // valeur du filtre retenue — fournie par le Studio, voir plus bas
 
 // Spécifiques à un seul visuel
-p.donutMode     // Donut — 'percent' | 'value'
+p.showName      // Donut — afficher le nom de la part
+p.showValue     // Donut — afficher sa valeur
+p.showPercent   // Donut — afficher son pourcentage du total
 p.thickness     // Donut — épaisseur de l'anneau en px (défaut : 48 % du rayon)
                 // Heatmap circulaire — épaisseur d'un anneau en px (défaut : auto)
 p.curve         // Courbe — 'catmullRom' | 'monotone' | 'linear' | 'step'
@@ -142,11 +146,17 @@ p.pointShape    // Nuage de points — 'circle' | 'square' | 'triangle' |
                 // 'diamond' | 'cross' | 'star' | 'wye'
 p.radialGap     // Heatmap circulaire — espacement entre anneaux en px
 p.angularGap    // Heatmap circulaire — espacement entre secteurs en degrés
-p.scaleMin      // Heatmap circulaire — bornes de l'échelle de couleur en dur,
+p.cellGap       // Heatmap — écart entre les cases en px
+p.cellRatio     // Heatmap — rapport largeur/hauteur d'une case
+p.stripeGap     // Bandes — écart entre les bandes en px
+p.stripeRatio   // Bandes — rapport largeur/hauteur d'une bande
+p.showValues    // Bandes — afficher les valeurs extrêmes
+p.lineColor     // Barres empilées + courbe — couleur de la courbe
+p.scaleMin      // Heatmaps et Bandes — bornes de l'échelle de couleur en dur,
 p.scaleMid      // par défaut min / moyenne / max des données
 p.scaleMax
-p.colorMin      // Heatmap circulaire — couleurs des trois bornes, par défaut
-p.colorMid      // #f0f0f5, milieu interpolé, puis la couleur principale
+p.colorMin      // Heatmaps et Bandes — couleurs des trois bornes
+p.colorMid
 p.colorMax
 ```
 
@@ -174,11 +184,12 @@ pour signaler qu'un visuel est inapplicable à un jeu de données.
 
 | Visuel | Requis | Optionnels |
 |---|---|---|
-| Barres, barres horizontales, courbe, donut | `label`, `value` | — |
-| Aire empilée | `label`, `value` | `series` |
-| Heatmap | `x`, `y`, `value` | — |
-| Heatmap circulaire | `theta`, `r`, `value` | — |
-| Nuage de points | `x`, `y` | `label`, `series` |
+| Barres, barres horizontales, courbe, donut, Bandes | `label`, `value` | `filter` |
+| Aire empilée | `label`, `value` | `series`, `filter` |
+| Barres empilées + courbe | `label`, `value` | `series`, `line`, `filter` |
+| Heatmap | `x`, `y`, `value` | `filter` |
+| Heatmap circulaire | `theta`, `r`, `value` | `filter` |
+| Nuage de points | `x`, `y` | `label`, `series`, `weight`, `filter` |
 
 **Deux pièges :**
 
@@ -194,7 +205,45 @@ pour signaler qu'un visuel est inapplicable à un jeu de données.
 
 La règle de cohérence est la même que pour `@params` : la liste déclarée doit
 correspondre aux champs réellement lus par `draw`, et le `type` déclaré doit
-correspondre à ce que porte `@sampleData`.
+correspondre à ce que porte `@sampleData`. Seule exception, le champ `filter` :
+il est consommé par le Studio et jamais lu par `draw` — voir la section
+suivante.
+
+### Champ filtre — consommé par le Studio, pas par `draw`
+
+Un champ `filter` optionnel permet à plusieurs jeux de cohabiter dans la même
+source : la pluie par mois **et** par ville. Il se distingue d'un champ de
+regroupement comme `series` par un point essentiel.
+
+**`series` groupe** : l'aire empile une couche par série, le nuage de points en
+colore une par série, tout reste visible en même temps. Le DataTool s'en charge.
+
+**`filter` tranche** : le visuel ne montre qu'un sous-ensemble, ou tout cumulé.
+C'est le **Studio** qui s'en charge, et il doit le faire *avant* d'agréger.
+
+La raison est arithmétique. Si le filtre entrait dans la clé de regroupement,
+janvier se scinderait en « janvier à Quimper » et « janvier à Bordeaux », et le
+mode choisi s'appliquerait deux fois, sur deux moitiés. Un DataTool ne pourrait
+pas recomposer le résultat : une moyenne de moyennes n'est la vraie moyenne que
+si les groupes ont le même effectif, et ces effectifs ne sont transmis nulle
+part. Le Studio restreint donc les lignes d'abord, puis agrège une seule fois
+sur la population retenue.
+
+**Conséquences pour un DataTool :**
+
+- Il déclare `filter` dans `@dataFields` (le Studio a besoin de savoir sur
+  quelle colonne brancher le sélecteur) et `filterValue` dans `@params`, de
+  type `text`. C'est cette convention de nommage, `<champ>Value`, qui fait
+  afficher le sélecteur de valeur dans le panneau « Données & Axes », sous le
+  champ, plutôt que dans le panneau des réglages.
+- Sa fonction `draw` **ne lit jamais `d.filter`** et ne filtre rien. Les données
+  reçues sont déjà restreintes et agrégées.
+- Elle lit `p.filterValue` uniquement pour **afficher** la valeur retenue, sans
+  quoi on lirait un sous-ensemble sans le savoir. Rien n'est affiché si le
+  champ est vide.
+
+`filter` est donc l'exception symétrique de `p.margin` : déclaré mais jamais lu
+par `draw`, là où `p.margin` est lu sans être déclaré.
 
 ### Déclarer les paramètres applicables — `@params`
 
