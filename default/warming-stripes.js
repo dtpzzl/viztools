@@ -6,7 +6,7 @@
  * @version 1.0
  * @sampleData [{"label":"1995","value":-0.42},{"label":"1996","value":-0.31},{"label":"1997","value":-0.18},{"label":"1998","value":0.12},{"label":"1999","value":-0.22},{"label":"2000","value":-0.05},{"label":"2001","value":0.08},{"label":"2002","value":0.21},{"label":"2003","value":0.44},{"label":"2004","value":0.17},{"label":"2005","value":0.35},{"label":"2006","value":0.29},{"label":"2007","value":0.41},{"label":"2008","value":0.19},{"label":"2009","value":0.38},{"label":"2010","value":0.52},{"label":"2011","value":0.33},{"label":"2012","value":0.47},{"label":"2013","value":0.55},{"label":"2014","value":0.68},{"label":"2015","value":0.81},{"label":"2016","value":0.94},{"label":"2017","value":0.79},{"label":"2018","value":0.72},{"label":"2019","value":0.88},{"label":"2020","value":0.97},{"label":"2021","value":0.76},{"label":"2022","value":0.91},{"label":"2023","value":1.12},{"label":"2024","value":1.25}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Période","description":"Une bande par valeur distincte, dans l'ordre reçu"},"value":{"type":"number","required":true,"label":"Écart","description":"Détermine la couleur de la bande"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#2166ac"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"#f7f7f7"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"#b2182b"},"stripeGap":{"group":"visuel","type":"range","label":"Espacement entre bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"stripeRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"pleine hauteur"},"showValues":{"group":"visuel","type":"toggle","label":"Afficher les extrêmes","default":false},"opacity":{"group":"general","type":"range","label":"Opacité des bandes","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les périodes","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#2166ac"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"#f7f7f7"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"#b2182b"},"stripeGap":{"group":"visuel","type":"range","label":"Espacement entre bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"stripeRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"pleine hauteur"},"showValues":{"group":"visuel","type":"toggle","label":"Afficher les extrêmes","default":false},"opacity":{"group":"general","type":"range","label":"Opacité des bandes","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les périodes","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -85,17 +85,36 @@ function draw(svg, g, data, W, H, color, p) {
       .text(shown);
   }
 
-  g.selectAll('.stripe')
+
+  // ---- Animation d'apparition -------------------------------------------
+  // L'ordre suit l'axe, tel que le Studio l'a trié : aucun réglage d'ordre
+  // ici. Pour animer autrement, on change le tri du champ dans le panneau
+  // Données & Axes, et l'animation suit.
+  const anim = !!p.animate;
+  const dureeBase = p.animateDuration ?? 450;
+  const decalage = p.animateStagger ?? 70;
+  const easing = revealEase(p.animateEase);
+  const retard = (d, i) => i * decalage;
+
+  // Toutes les bandes ont la même hauteur : elles s'ouvrent depuis leur
+  // milieu, ce qui donne un balayage lisible sans notion de vitesse.
+  const bandes = g.selectAll('.stripe')
     .data(labels)
     .enter()
     .append('rect')
     .attr('x', (d, i) => i * stepX + gap / 2)
-    .attr('y', offY)
     .attr('width', stripeW)
-    .attr('height', stripeH)
     .attr('rx', p.radius ?? 0)
     .attr('fill', d => colorScale(totals.get(d)))
     .attr('opacity', p.opacity ?? 1);
+
+  if (anim) {
+    bandes.attr('y', offY + stripeH / 2).attr('height', 0)
+      .transition().duration(dureeBase).delay(retard).ease(easing)
+      .attr('y', offY).attr('height', stripeH);
+  } else {
+    bandes.attr('y', offY).attr('height', stripeH);
+  }
 
   // ---- Labels sous les bandes -------------------------------------------
   // Ils ne sont écrits que tous les n pour éviter le pâté illisible quand la
@@ -104,7 +123,7 @@ function draw(svg, g, data, W, H, color, p) {
     const widest = labels.reduce((max, l) => Math.max(max, String(l).length), 0) * fontSize * 0.58;
     const every = Math.max(1, Math.ceil((widest + 8) / stepX));
 
-    g.selectAll('.stripe-label')
+    const etiquettes = g.selectAll('.stripe-label')
       .data(labels.filter((d, i) => i % every === 0))
       .enter()
       .append('text')
@@ -115,6 +134,13 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-size', fontSize)
       .attr('fill', '#7a7a90')
       .text(d => d);
+
+    if (anim) {
+      etiquettes.attr('opacity', 0)
+        .transition().duration(dureeBase * 0.6)
+        .delay(d => labels.indexOf(d) * decalage + dureeBase * 0.55)
+        .attr('opacity', 1);
+    }
   }
 
   // ---- Valeurs extrêmes --------------------------------------------------
@@ -152,4 +178,13 @@ function formatAxisValue(value, unitMode, decimals, domainMax) {
     minimumFractionDigits: decimals ?? 0,
     maximumFractionDigits: decimals ?? 0,
   }) + suf;
+}
+
+// Accélération de l'animation d'apparition. Linéaire par défaut : une marque
+// progresse à vitesse constante du début à la fin.
+function revealEase(mode) {
+  if (mode === 'cubic')   return d3.easeCubicOut;
+  if (mode === 'back')    return d3.easeBackOut.overshoot(1.4);
+  if (mode === 'elastic') return d3.easeElasticOut.amplitude(1).period(0.4);
+  return d3.easeLinear;
 }

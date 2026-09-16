@@ -6,7 +6,7 @@
  * @version 1.0
  * @sampleData [{"label":"A","value":35},{"label":"B","value":25},{"label":"C","value":20},{"label":"D","value":12},{"label":"E","value":8}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Une part du total par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée, sommée pour obtenir le total"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"showName":{"group":"visuel","type":"toggle","label":"Étiquette","default":false},"showValue":{"group":"visuel","type":"toggle","label":"Valeur","default":false},"showPercent":{"group":"visuel","type":"toggle","label":"Pourcentage","default":true},"thickness":{"group":"visuel","type":"number","label":"Épaisseur de l'anneau","default":null,"placeholder":"48 % du rayon","unit":"px"},"stroke":{"group":"general","type":"range","label":"Liseré entre les parts","min":0,"max":8,"step":0.5,"default":2,"unit":"px"},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"showName":{"group":"visuel","type":"toggle","label":"Étiquette","default":false},"showValue":{"group":"visuel","type":"toggle","label":"Valeur","default":false},"showPercent":{"group":"visuel","type":"toggle","label":"Pourcentage","default":true},"thickness":{"group":"visuel","type":"number","label":"Épaisseur de l'anneau","default":null,"placeholder":"48 % du rayon","unit":"px"},"stroke":{"group":"general","type":"range","label":"Liseré entre les parts","min":0,"max":8,"step":0.5,"default":2,"unit":"px"},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animatePace":{"group":"visuel","type":"select","label":"Rythme","default":"duration","options":[{"value":"duration","label":"Même durée pour toutes"},{"value":"speed","label":"Même vitesse pour toutes"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -70,15 +70,47 @@ function draw(svg, g, data, W, H, color, p) {
       .text(shown);
   }
 
+
+  // ---- Animation d'apparition -------------------------------------------
+  // L'ordre suit l'axe, tel que le Studio l'a trié : aucun réglage d'ordre
+  // ici. Pour animer autrement, on change le tri du champ dans le panneau
+  // Données & Axes, et l'animation suit.
+  const anim = !!p.animate;
+  const dureeBase = p.animateDuration ?? 450;
+  const decalage = p.animateStagger ?? 70;
+  const easing = revealEase(p.animateEase);
+  const retard = (d, i) => i * decalage;
+
+  // « Même vitesse » rend la durée proportionnelle à l'angle balayé : sinon
+  // une part large et une part fine mettent le même temps, donc la large
+  // balaye plus vite.
+  const angleMax = d3.max(pie(data), a => a.endAngle - a.startAngle);
+  const dureeArc = a => (p.animatePace === 'speed' && angleMax > 0
+    ? Math.max(60, dureeBase * (a.endAngle - a.startAngle) / angleMax)
+    : dureeBase);
+
   // Arcs
-  pg.selectAll('.arc')
+  const arcs = pg.selectAll('.arc')
     .data(pie(data))
     .enter()
     .append('path')
-    .attr('d', arc)
     .attr('fill', (d, i) => palette[i])
     .attr('stroke', 'white')
     .attr('stroke-width', p.stroke ?? 2);
+
+  if (anim) {
+    // Chaque part s'ouvre depuis son propre angle de départ : elle balaye
+    // jusqu'à son angle de fin au lieu d'apparaître d'un bloc.
+    arcs
+      .attr('d', a => arc({ ...a, endAngle: a.startAngle }))
+      .transition().duration(dureeArc).delay(retard).ease(easing)
+      .attrTween('d', a => {
+        const interp = d3.interpolate(a.startAngle, a.endAngle);
+        return t => arc({ ...a, endAngle: interp(t) });
+      });
+  } else {
+    arcs.attr('d', arc);
+  }
 
   // Étiquettes sur les parts : trois cases indépendantes plutôt qu'une liste
   // fermée, pour couvrir « nom seul », « nom + valeur », « % seul » et le reste
@@ -88,7 +120,7 @@ function draw(svg, g, data, W, H, color, p) {
   const showPercent = p.showPercent ?? true;
 
   if (showName || showValue || showPercent) {
-    pg.selectAll('.pct')
+    const etiquettes = pg.selectAll('.pct')
       .data(pie(data))
       .enter()
       .append('text')
@@ -108,6 +140,13 @@ function draw(svg, g, data, W, H, color, p) {
         if (showPercent) parts.push(`${Math.round(d.data.value / total * 100)}%`);
         return parts.join(' ');
       });
+
+    if (anim) {
+      etiquettes.attr('opacity', 0)
+        .transition().duration(a => dureeArc(a) * 0.6)
+        .delay((a, i) => retard(a, i) + dureeArc(a) * 0.55)
+        .attr('opacity', 1);
+    }
   }
 
   // Légende à droite, dans la bande qui lui a été réservée. L'interligne se
@@ -147,4 +186,13 @@ function formatAxisValue(value, unitMode, decimals, domainMax) {
     minimumFractionDigits: decimals ?? 0,
     maximumFractionDigits: decimals ?? 0,
   }) + suf;
+}
+
+// Accélération de l'animation d'apparition. Linéaire par défaut : une marque
+// progresse à vitesse constante du début à la fin.
+function revealEase(mode) {
+  if (mode === 'cubic')   return d3.easeCubicOut;
+  if (mode === 'back')    return d3.easeBackOut.overshoot(1.4);
+  if (mode === 'elastic') return d3.easeElasticOut.amplitude(1).period(0.4);
+  return d3.easeLinear;
 }

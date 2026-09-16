@@ -6,7 +6,7 @@
  * @version 1.1
  * @sampleData [{"label":"Lun-6h","x":"Lun","y":"6h","value":0.2},{"label":"Lun-9h","x":"Lun","y":"9h","value":0.8},{"label":"Lun-12h","x":"Lun","y":"12h","value":0.6},{"label":"Mar-6h","x":"Mar","y":"6h","value":0.1},{"label":"Mar-9h","x":"Mar","y":"9h","value":0.9},{"label":"Mar-12h","x":"Mar","y":"12h","value":0.5},{"label":"Mer-6h","x":"Mer","y":"6h","value":0.4},{"label":"Mer-9h","x":"Mer","y":"9h","value":0.7},{"label":"Mer-12h","x":"Mer","y":"12h","value":0.3}]
  * @dataFields {"x":{"type":"category","required":true,"label":"Colonne","description":"Dimension horizontale de la grille"},"y":{"type":"category","required":true,"label":"Ligne","description":"Dimension verticale de la grille"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -114,8 +114,23 @@ function draw(svg, g, data, W, H, color, p) {
       .text(shown);
   }
 
+
+  // ---- Animation d'apparition -------------------------------------------
+  // L'ordre suit l'axe, tel que le Studio l'a trié : aucun réglage d'ordre
+  // ici. Pour animer autrement, on change le tri du champ dans le panneau
+  // Données & Axes, et l'animation suit.
+  const anim = !!p.animate;
+  const dureeBase = p.animateDuration ?? 450;
+  const decalage = p.animateStagger ?? 70;
+  const easing = revealEase(p.animateEase);
+  const retard = (d, i) => i * decalage;
+
   // ---- Cellules ----------------------------------------------------------
-  g.selectAll('.cell')
+  // Les cases arrivent dans l'ordre du couple (colonne, ligne) fixé par le
+  // tri des deux champs : la grille se remplit ligne par ligne ou colonne par
+  // colonne selon le tri choisi, sans réglage supplémentaire ici. Toutes ont
+  // la même taille, donc pas de notion de vitesse : elles apparaissent en fondu.
+  const cellules = g.selectAll('.cell')
     .data(data)
     .enter()
     .append('rect')
@@ -124,12 +139,19 @@ function draw(svg, g, data, W, H, color, p) {
     .attr('width', x.bandwidth())
     .attr('height', y.bandwidth())
     .attr('fill', d => colorScale(d.value))
-    .attr('opacity', p.opacity ?? 1)
     .attr('rx', p.radius ?? 4);
+
+  if (anim) {
+    cellules.attr('opacity', 0)
+      .transition().duration(dureeBase).delay(retard).ease(easing)
+      .attr('opacity', p.opacity ?? 1);
+  } else {
+    cellules.attr('opacity', p.opacity ?? 1);
+  }
 
   // ---- Valeurs dans les cellules ----------------------------------------
   if (p.showLabels) {
-    g.selectAll('.cell-label')
+    const etiquettes = g.selectAll('.cell-label')
       .data(data)
       .enter()
       .append('text')
@@ -143,8 +165,25 @@ function draw(svg, g, data, W, H, color, p) {
       // alors qu'un texte sombre y est peu lisible.
       .attr('fill', d => (d3.lab(colorScale(d.value)).l > 62 ? '#0f0f1a' : '#ffffff'))
       .text(d => fmtVal(d.value));
+
+    if (anim) {
+      etiquettes.attr('opacity', 0)
+        .transition().duration(dureeBase * 0.6)
+        .delay((d, i) => retard(d, i) + dureeBase * 0.55)
+        .attr('opacity', 1);
+    }
   }
 }
+
+// Accélération de l'animation d'apparition. Linéaire par défaut : une marque
+// progresse à vitesse constante du début à la fin.
+function revealEase(mode) {
+  if (mode === 'cubic')   return d3.easeCubicOut;
+  if (mode === 'back')    return d3.easeBackOut.overshoot(1.4);
+  if (mode === 'elastic') return d3.easeElasticOut.amplitude(1).period(0.4);
+  return d3.easeLinear;
+}
+
 
 // Formatage unité/décimales des valeurs d'axe (cohérent avec le Studio DataViz)
 function formatAxisValue(value, unitMode, decimals, domainMax) {

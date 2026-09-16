@@ -6,7 +6,7 @@
  * @version 1.0
  * @sampleData [{"label":"Paris","value":92},{"label":"Lyon","value":74},{"label":"Marseille","value":68},{"label":"Toulouse","value":61},{"label":"Bordeaux","value":55},{"label":"Nantes","value":49}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Un rang du classement par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité de la première barre","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité de la première barre","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animatePace":{"group":"visuel","type":"select","label":"Rythme","default":"duration","options":[{"value":"duration","label":"Même durée pour toutes"},{"value":"speed","label":"Même vitesse pour toutes"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -76,22 +76,45 @@ function draw(svg, g, data, W, H, color, p) {
     g.select('.grid .domain').remove();
   }
 
+
+  // ---- Animation d'apparition -------------------------------------------
+  // L'ordre suit l'axe, tel que le Studio l'a trié : aucun réglage d'ordre
+  // ici. Pour animer autrement, on change le tri du champ dans le panneau
+  // Données & Axes, et l'animation suit.
+  const anim = !!p.animate;
+  const dureeBase = p.animateDuration ?? 450;
+  const decalage = p.animateStagger ?? 70;
+  const easing = revealEase(p.animateEase);
+  const retard = (d, i) => i * decalage;
+
+  const largeMax = x(d3.max(sorted, d => d.value));
+  const dureeDe = d => (p.animatePace === 'speed' && largeMax > 0
+    ? Math.max(60, dureeBase * x(d.value) / largeMax)
+    : dureeBase);
+
   // Barres
-  g.selectAll('.bar')
+  const barres = g.selectAll('.bar')
     .data(sorted)
     .enter()
     .append('rect')
     .attr('x', 0)
     .attr('y', d => y(d.label))
-    .attr('width', d => x(d.value))
     .attr('height', y.bandwidth())
     .attr('fill', color)
     .attr('rx', p.radius ?? 5)
     .attr('opacity', (d, i) => Math.max(0.15, (p.opacity ?? 1) - i * 0.08));
 
+  if (anim) {
+    barres.attr('width', 0)
+      .transition().duration(dureeDe).delay(retard).ease(easing)
+      .attr('width', d => x(d.value));
+  } else {
+    barres.attr('width', d => x(d.value));
+  }
+
   // Valeurs en bout de barre
   if (p.showLabels ?? true) {
-    g.selectAll('.label')
+    const etiquettes = g.selectAll('.label')
       .data(sorted)
       .enter()
       .append('text')
@@ -101,8 +124,27 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-size', p.fontSize ?? 12)
       .attr('fill', '#7a7a90')
       .text(d => fmtX(d.value));
+
+    if (anim) {
+      etiquettes.attr('opacity', 0)
+        .transition().duration(d => dureeDe(d) * 0.6)
+        .delay((d, i) => retard(d, i) + dureeDe(d) * 0.55)
+        .attr('opacity', 1);
+    }
   }
 }
+
+// Accélération de l'animation d'apparition. Linéaire par défaut : une marque
+// progresse à vitesse constante du début à la fin. cubicOut couvrait
+// l'essentiel de la distance dans les premiers 40 % puis s'attardait, ce qui
+// se lit comme une saccade plutôt que comme une montée régulière.
+function revealEase(mode) {
+  if (mode === 'cubic')   return d3.easeCubicOut;
+  if (mode === 'back')    return d3.easeBackOut.overshoot(1.4);
+  if (mode === 'elastic') return d3.easeElasticOut.amplitude(1).period(0.4);
+  return d3.easeLinear;
+}
+
 
 // Formatage unité/décimales des valeurs d'axe (cohérent avec le Studio DataViz)
 function formatAxisValue(value, unitMode, decimals, domainMax) {

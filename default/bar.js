@@ -6,7 +6,7 @@
  * @version 1.0
  * @sampleData [{"label":"2019","value":42},{"label":"2020","value":58},{"label":"2021","value":51},{"label":"2022","value":67},{"label":"2023","value":73},{"label":"2024","value":69}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses, une barre ou un point par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité des barres","min":0,"max":1,"step":0.05,"default":0.9},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité des barres","min":0,"max":1,"step":0.05,"default":0.9},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animatePace":{"group":"visuel","type":"select","label":"Rythme","default":"duration","options":[{"value":"duration","label":"Même durée pour toutes"},{"value":"speed","label":"Même vitesse pour toutes"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -74,22 +74,48 @@ function draw(svg, g, data, W, H, color, p) {
   g.selectAll('.domain').attr('stroke', '#e4e4ed');
   g.selectAll('.tick line').attr('stroke', 'none');
 
+
+  // ---- Animation d'apparition -------------------------------------------
+  // L'ordre suit l'axe, tel que le Studio l'a trié : aucun réglage d'ordre
+  // ici. Pour animer autrement, on change le tri du champ dans le panneau
+  // Données & Axes, et l'animation suit.
+  const anim = !!p.animate;
+  const dureeBase = p.animateDuration ?? 450;
+  const decalage = p.animateStagger ?? 70;
+  const easing = revealEase(p.animateEase);
+  const retard = (d, i) => i * decalage;
+
+  // « Même vitesse » rend la durée proportionnelle à la hauteur : sinon une
+  // barre haute et une barre basse mettent le même temps, donc la haute monte
+  // plus vite, ce qui se lit comme une accélération.
+  const hautMax = H - y(d3.max(data, d => d.value));
+  const dureeDe = d => (p.animatePace === 'speed' && hautMax > 0
+    ? Math.max(60, dureeBase * (H - y(d.value)) / hautMax)
+    : dureeBase);
+
   // Barres
-  g.selectAll('.bar')
+  const barres = g.selectAll('.bar')
     .data(data)
     .enter()
     .append('rect')
     .attr('x', d => x(d.label))
-    .attr('y', d => y(d.value))
     .attr('width', x.bandwidth())
-    .attr('height', d => H - y(d.value))
     .attr('fill', color)
     .attr('rx', p.radius ?? 5)
     .attr('opacity', p.opacity ?? 0.9);
 
+  if (anim) {
+    barres.attr('y', H).attr('height', 0)
+      .transition().duration(dureeDe).delay(retard).ease(easing)
+      .attr('y', d => y(d.value))
+      .attr('height', d => H - y(d.value));
+  } else {
+    barres.attr('y', d => y(d.value)).attr('height', d => H - y(d.value));
+  }
+
   // Valeurs au-dessus des barres
   if (p.showLabels ?? true) {
-    g.selectAll('.label')
+    const etiquettes = g.selectAll('.label')
       .data(data)
       .enter()
       .append('text')
@@ -100,8 +126,27 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-size', (p.fontSize ?? 12) - 1)
       .attr('fill', '#7a7a90')
       .text(d => fmtY(d.value));
+
+    if (anim) {
+      etiquettes.attr('opacity', 0)
+        .transition().duration(d => dureeDe(d) * 0.6)
+        .delay((d, i) => retard(d, i) + dureeDe(d) * 0.55)
+        .attr('opacity', 1);
+    }
   }
 }
+
+// Accélération de l'animation d'apparition. Linéaire par défaut : une marque
+// progresse à vitesse constante du début à la fin. cubicOut couvrait
+// l'essentiel de la distance dans les premiers 40 % puis s'attardait, ce qui
+// se lit comme une saccade plutôt que comme une montée régulière.
+function revealEase(mode) {
+  if (mode === 'cubic')   return d3.easeCubicOut;
+  if (mode === 'back')    return d3.easeBackOut.overshoot(1.4);
+  if (mode === 'elastic') return d3.easeElasticOut.amplitude(1).period(0.4);
+  return d3.easeLinear;
+}
+
 
 // Bascule les labels de l'axe des catégories en biais quand ils se chevauchent
 // (noms de séries, dates…), avec retour à la ligne automatique. La largeur est
