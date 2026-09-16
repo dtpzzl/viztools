@@ -6,7 +6,7 @@
  * @version 1.1
  * @sampleData [{"label":"2019","value":42,"series":"Nord"},{"label":"2020","value":58,"series":"Nord"},{"label":"2021","value":51,"series":"Nord"},{"label":"2022","value":67,"series":"Nord"},{"label":"2023","value":73,"series":"Nord"},{"label":"2024","value":69,"series":"Nord"},{"label":"2019","value":28,"series":"Sud"},{"label":"2020","value":31,"series":"Sud"},{"label":"2021","value":44,"series":"Sud"},{"label":"2022","value":39,"series":"Sud"},{"label":"2023","value":52,"series":"Sud"},{"label":"2024","value":61,"series":"Sud"}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses, ordonné tel que reçu"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée, sommée en cas de doublon label/série"},"series":{"type":"category","required":false,"label":"Série","description":"Empile une aire par valeur distincte. Absent ou unique : aire simple"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"areaMode":{"group":"visuel","type":"select","label":"Étiquettes","default":"value","options":[{"value":"value","label":"Valeur"},{"value":"percent","label":"Pourcentage"}]},"opacity":{"group":"general","type":"range","label":"Opacité de l'aire","min":0,"max":1,"step":0.05,"default":1},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"radius":{"group":"general","type":"range","label":"Rayon des points","min":0,"max":12,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"areaMode":{"group":"visuel","type":"select","label":"Étiquettes","default":"value","options":[{"value":"value","label":"Valeur"},{"value":"percent","label":"Pourcentage"}]},"opacity":{"group":"general","type":"range","label":"Opacité de l'aire","min":0,"max":1,"step":0.05,"default":1},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"radius":{"group":"general","type":"range","label":"Rayon des points","min":0,"max":12,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -76,7 +76,21 @@ function draw(svg, g, data, W, H, color, p) {
     ? d3.hsl((d3.hsl(color).h + i * 30) % 360, 0.7, 0.4 + (i % 4) * 0.09).toString()
     : color));
 
+  // ---- Animation d'apparition -------------------------------------------
+  // L'ordre suit l'axe, tel que le Studio l'a trié. L'aire étant un tracé
+  // continu, elle se révèle par un volet qui balaye l'axe des abscisses : les
+  // couches empilées apparaissent ensemble à mesure qu'il avance, et chaque
+  // point sort quand le volet le dépasse.
+  const anim = !!p.animate;
+  const dureeBase = p.animateDuration ?? 450;
+  const decalage = p.animateStagger ?? 70;
+  const easing = revealEase(p.animateEase);
+  const dureeTotale = Math.max(1, (labels.length - 1) * decalage + dureeBase);
+
   const pg = g.append('g').attr('transform', `translate(0,${legendH})`);
+  // Les couches vivent dans leur propre groupe : le volet ne doit rogner ni
+  // les axes ni la grille.
+  const couches = pg.append('g');
   const fill = p.opacity ?? 1;
 
   // Grille
@@ -131,19 +145,19 @@ function draw(svg, g, data, W, H, color, p) {
     .curve(d3.curveCatmullRom);
 
   stacked.forEach((layer, i) => {
-    pg.append('path')
+    couches.append('path')
       .datum(layer)
       .attr('d', area)
       .attr('fill', `url(#area-grad-${suffix}-${i})`);
 
-    pg.append('path')
+    couches.append('path')
       .datum(layer)
       .attr('d', line)
       .attr('fill', 'none')
       .attr('stroke', palette[i])
       .attr('stroke-width', p.stroke ?? 2.5);
 
-    pg.selectAll('.dot-' + i)
+    couches.selectAll('.dot-' + i)
       .data(layer)
       .enter()
       .append('circle')
@@ -155,6 +169,17 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('stroke-width', 2);
   });
 
+  if (anim) {
+    const voletId = 'area-volet-' + suffix;
+    defs.append('clipPath').attr('id', voletId)
+      .append('rect')
+      .attr('x', -4).attr('y', -8)
+      .attr('width', 0).attr('height', plotH + 16)
+      .transition().duration(dureeTotale).ease(easing)
+      .attr('width', W + 8);
+    couches.attr('clip-path', `url(#${voletId})`);
+  }
+
   const firstLabel = labels[0];
   const lastLabel = labels[labels.length - 1];
   const edgeAnchor = l => (l === firstLabel ? 'start' : l === lastLabel ? 'end' : 'middle');
@@ -163,7 +188,7 @@ function draw(svg, g, data, W, H, color, p) {
   // Valeurs ou pourcentages
   if (p.showLabels) {
     stacked.forEach((layer, i) => {
-      pg.selectAll('.label-' + i)
+      couches.selectAll('.label-' + i)
         .data(layer)
         .enter()
         .append('text')
@@ -226,4 +251,13 @@ function formatAxisValue(value, unitMode, decimals, domainMax) {
     minimumFractionDigits: decimals ?? 0,
     maximumFractionDigits: decimals ?? 0,
   }) + suf;
+}
+
+// Accélération de l'animation d'apparition. Linéaire par défaut : une marque
+// progresse à vitesse constante du début à la fin.
+function revealEase(mode) {
+  if (mode === 'cubic')   return d3.easeCubicOut;
+  if (mode === 'back')    return d3.easeBackOut.overshoot(1.4);
+  if (mode === 'elastic') return d3.easeElasticOut.amplitude(1).period(0.4);
+  return d3.easeLinear;
 }

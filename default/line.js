@@ -6,7 +6,7 @@
  * @version 1.0
  * @sampleData [{"label":"2019","value":42},{"label":"2020","value":58},{"label":"2021","value":51},{"label":"2022","value":67},{"label":"2023","value":73},{"label":"2024","value":69}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses, ordonné tel que reçu"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"curve":{"group":"visuel","type":"select","label":"Lissage","default":"catmullRom","options":[{"value":"catmullRom","label":"Lissé"},{"value":"monotone","label":"Lissé sans dépassement"},{"value":"linear","label":"Linéaire"},{"value":"step","label":"En marches"}]},"opacity":{"group":"general","type":"range","label":"Opacité du remplissage","min":0,"max":1,"step":0.02,"default":0.08},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"radius":{"group":"general","type":"range","label":"Rayon des points","min":0,"max":12,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"curve":{"group":"visuel","type":"select","label":"Lissage","default":"catmullRom","options":[{"value":"catmullRom","label":"Lissé"},{"value":"monotone","label":"Lissé sans dépassement"},{"value":"linear","label":"Linéaire"},{"value":"step","label":"En marches"}]},"opacity":{"group":"general","type":"range","label":"Opacité du remplissage","min":0,"max":1,"step":0.02,"default":0.08},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"radius":{"group":"general","type":"range","label":"Rayon des points","min":0,"max":12,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -77,11 +77,32 @@ function draw(svg, g, data, W, H, color, p) {
     .y1(d => y(d.value))
     .curve(curve);
 
-  g.append('path')
+
+  // ---- Animation d'apparition -------------------------------------------
+  // L'ordre suit l'axe, tel que le Studio l'a trié : aucun réglage d'ordre
+  // ici. Pour animer autrement, on change le tri du champ dans le panneau
+  // Données & Axes, et l'animation suit.
+  const anim = !!p.animate;
+  const dureeBase = p.animateDuration ?? 450;
+  const decalage = p.animateStagger ?? 70;
+  const easing = revealEase(p.animateEase);
+  const retard = (d, i) => i * decalage;
+  // La courbe est un tracé unique : elle se dessine sur la durée totale de la
+  // séquence, pendant que les points apparaissent chacun à son rang.
+  const dureeTotale = Math.max(1, (data.length - 1) * decalage + dureeBase);
+
+  const remplissage = g.append('path')
     .datum(data)
     .attr('d', area)
-    .attr('fill', color)
-    .attr('opacity', p.opacity ?? 0.08);
+    .attr('fill', color);
+
+  if (anim) {
+    remplissage.attr('opacity', 0)
+      .transition().duration(dureeTotale).ease(d3.easeLinear)
+      .attr('opacity', p.opacity ?? 0.08);
+  } else {
+    remplissage.attr('opacity', p.opacity ?? 0.08);
+  }
 
   // Ligne
   const line = d3.line()
@@ -89,28 +110,49 @@ function draw(svg, g, data, W, H, color, p) {
     .y(d => y(d.value))
     .curve(curve);
 
-  g.append('path')
+  const trace = g.append('path')
     .datum(data)
     .attr('d', line)
     .attr('fill', 'none')
     .attr('stroke', color)
     .attr('stroke-width', p.stroke ?? 2.5);
 
+  if (anim) {
+    // Le tracé se révèle en déroulant son propre pointillé : la longueur du
+    // chemin sert de motif, et on résorbe le décalage de 100 % à 0.
+    trace
+      .attr('stroke-dasharray', function () {
+        const L = this.getTotalLength();
+        return L + ' ' + L;
+      })
+      .attr('stroke-dashoffset', function () { return this.getTotalLength(); })
+      .transition().duration(dureeTotale).ease(easing)
+      .attr('stroke-dashoffset', 0)
+      .on('end', function () { d3.select(this).attr('stroke-dasharray', null); });
+  }
+
   // Points
-  g.selectAll('.dot')
+  const points = g.selectAll('.dot')
     .data(data)
     .enter()
     .append('circle')
     .attr('cx', d => x(d.label))
     .attr('cy', d => y(d.value))
-    .attr('r', p.radius ?? 5)
     .attr('fill', color)
     .attr('stroke', 'white')
     .attr('stroke-width', 2);
 
+  if (anim) {
+    points.attr('r', 0)
+      .transition().duration(dureeBase).delay(retard).ease(easing)
+      .attr('r', p.radius ?? 5);
+  } else {
+    points.attr('r', p.radius ?? 5);
+  }
+
   // Valeurs
   if (p.showLabels ?? true) {
-    g.selectAll('.label')
+    const etiquettes = g.selectAll('.label')
       .data(data)
       .enter()
       .append('text')
@@ -121,8 +163,25 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-size', (p.fontSize ?? 12) - 1)
       .attr('fill', '#7a7a90')
       .text(d => fmtY(d.value));
+
+    if (anim) {
+      etiquettes.attr('opacity', 0)
+        .transition().duration(dureeBase * 0.6)
+        .delay((d, i) => retard(d, i) + dureeBase * 0.55)
+        .attr('opacity', 1);
+    }
   }
 }
+
+// Accélération de l'animation d'apparition. Linéaire par défaut : une marque
+// progresse à vitesse constante du début à la fin.
+function revealEase(mode) {
+  if (mode === 'cubic')   return d3.easeCubicOut;
+  if (mode === 'back')    return d3.easeBackOut.overshoot(1.4);
+  if (mode === 'elastic') return d3.easeElasticOut.amplitude(1).period(0.4);
+  return d3.easeLinear;
+}
+
 
 // Type de lissage appliqué à la courbe et à sa zone de remplissage.
 // curveCatmullRom reste le défaut historique ; curveMonotoneX évite les

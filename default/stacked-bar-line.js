@@ -6,7 +6,7 @@
  * @version 1.0
  * @sampleData [{"label":"Jan","value":42,"series":"Nord","line":78},{"label":"Jan","value":31,"series":"Sud","line":78},{"label":"Fév","value":58,"series":"Nord","line":84},{"label":"Fév","value":35,"series":"Sud","line":84},{"label":"Mar","value":51,"series":"Nord","line":72},{"label":"Mar","value":44,"series":"Sud","line":72},{"label":"Avr","value":67,"series":"Nord","line":91},{"label":"Avr","value":39,"series":"Sud","line":91},{"label":"Mai","value":73,"series":"Nord","line":88},{"label":"Mai","value":52,"series":"Sud","line":88},{"label":"Juin","value":69,"series":"Nord","line":95},{"label":"Juin","value":61,"series":"Sud","line":95}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses, un groupe de barres par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Hauteur des barres, empilée par série"},"series":{"type":"category","required":false,"label":"Série","description":"Empile une couleur par valeur distincte. Absent ou unique : barres simples"},"line":{"type":"number","required":false,"label":"Courbe","description":"Indicateur tracé en courbe sur un axe de droite dédié"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"curve":{"group":"visuel","type":"select","label":"Lissage","default":"monotone","options":[{"value":"monotone","label":"Lissé sans dépassement"},{"value":"catmullRom","label":"Lissé"},{"value":"linear","label":"Linéaire"},{"value":"step","label":"En marches"}]},"lineColor":{"group":"visuel","type":"color","label":"Couleur de la courbe","default":null,"placeholder":"complémentaire"},"opacity":{"group":"general","type":"range","label":"Opacité des barres","min":0,"max":1,"step":0.05,"default":0.9},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":3,"unit":"px"},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"curve":{"group":"visuel","type":"select","label":"Lissage","default":"monotone","options":[{"value":"monotone","label":"Lissé sans dépassement"},{"value":"catmullRom","label":"Lissé"},{"value":"linear","label":"Linéaire"},{"value":"step","label":"En marches"}]},"lineColor":{"group":"visuel","type":"color","label":"Couleur de la courbe","default":null,"placeholder":"complémentaire"},"opacity":{"group":"general","type":"range","label":"Opacité des barres","min":0,"max":1,"step":0.05,"default":0.9},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":3,"unit":"px"},"stroke":{"group":"general","type":"range","label":"Épaisseur de la courbe","min":0.5,"max":8,"step":0.5,"default":2.5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animatePace":{"group":"visuel","type":"select","label":"Rythme","default":"duration","options":[{"value":"duration","label":"Même durée pour toutes"},{"value":"speed","label":"Même vitesse pour toutes"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -89,6 +89,22 @@ function draw(svg, g, data, W, H, color, p) {
     : color));
   const lineColor = p.lineColor || d3.hsl(d3.hsl(color).h + 180, 0.65, 0.45).toString();
 
+  // ---- Animation d'apparition -------------------------------------------
+  // L'ordre suit l'axe, tel que le Studio l'a trié. Les piles montent une à
+  // une, puis la courbe se déroule sur toute la séquence : elle se lit comme
+  // un commentaire des barres plutôt que comme un élément concurrent.
+  const anim = !!p.animate;
+  const dureeBase = p.animateDuration ?? 450;
+  const decalage = p.animateStagger ?? 70;
+  const easing = revealEase(p.animateEase);
+  const retard = (d, i) => i * decalage;
+  const dureeTotale = Math.max(1, (labels.length - 1) * decalage + dureeBase);
+
+  const pileMax = d3.max(stacked[stacked.length - 1], seg => yBar(seg[0]) - yBar(seg[1]));
+  const dureeSeg = seg => (p.animatePace === 'speed' && pileMax > 0
+    ? Math.max(60, dureeBase * (yBar(seg[0]) - yBar(seg[1])) / pileMax)
+    : dureeBase);
+
   const pg = g.append('g').attr('transform', `translate(0,${legendH})`);
 
   // Grille, calée sur l'axe des barres
@@ -128,23 +144,31 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Barres empilées
   stacked.forEach((layer, i) => {
-    pg.selectAll('.bar-' + i)
+    const segments = pg.selectAll('.bar-' + i)
       .data(layer)
       .enter()
       .append('rect')
       .attr('x', d => x(d.data.label))
-      .attr('y', d => yBar(d[1]))
       .attr('width', x.bandwidth())
-      .attr('height', d => Math.max(0, yBar(d[0]) - yBar(d[1])))
       .attr('fill', palette[i])
       .attr('opacity', p.opacity ?? 0.9)
       .attr('rx', p.radius ?? 3);
+
+    if (anim) {
+      segments.attr('y', d => yBar(d[0])).attr('height', 0)
+        .transition().duration(dureeSeg).delay(retard).ease(easing)
+        .attr('y', d => yBar(d[1]))
+        .attr('height', d => Math.max(0, yBar(d[0]) - yBar(d[1])));
+    } else {
+      segments.attr('y', d => yBar(d[1]))
+        .attr('height', d => Math.max(0, yBar(d[0]) - yBar(d[1])));
+    }
   });
 
   // Valeurs dans les segments
   if (p.showLabels) {
     stacked.forEach((layer, i) => {
-      pg.selectAll('.bar-label-' + i)
+      const etiquettes = pg.selectAll('.bar-label-' + i)
         .data(layer)
         .enter()
         .append('text')
@@ -156,6 +180,13 @@ function draw(svg, g, data, W, H, color, p) {
         .attr('fill', d3.lab(palette[i]).l > 62 ? '#0f0f1a' : '#ffffff')
         .attr('font-weight', '500')
         .text(d => (d[1] - d[0] > 0 ? fmtBar(d[1] - d[0]) : ''));
+
+      if (anim) {
+        etiquettes.attr('opacity', 0)
+          .transition().duration(d => dureeSeg(d) * 0.6)
+          .delay((d, i) => retard(d, i) + dureeSeg(d) * 0.55)
+          .attr('opacity', 1);
+      }
     });
   }
 
@@ -170,23 +201,42 @@ function draw(svg, g, data, W, H, color, p) {
       .y(d => yLine(d.value))
       .curve(resolveCurve(p.curve));
 
-    pg.append('path')
+    const trace = pg.append('path')
       .datum(points)
       .attr('d', line)
       .attr('fill', 'none')
       .attr('stroke', lineColor)
       .attr('stroke-width', p.stroke ?? 2.5);
 
-    pg.selectAll('.line-dot')
+    if (anim) {
+      trace
+        .attr('stroke-dasharray', function () {
+          const L = this.getTotalLength();
+          return L + ' ' + L;
+        })
+        .attr('stroke-dashoffset', function () { return this.getTotalLength(); })
+        .transition().duration(dureeTotale).ease(easing)
+        .attr('stroke-dashoffset', 0)
+        .on('end', function () { d3.select(this).attr('stroke-dasharray', null); });
+    }
+
+    const reperes = pg.selectAll('.line-dot')
       .data(points)
       .enter()
       .append('circle')
       .attr('cx', d => x(d.label) + x.bandwidth() / 2)
       .attr('cy', d => yLine(d.value))
-      .attr('r', 4)
       .attr('fill', lineColor)
       .attr('stroke', 'white')
       .attr('stroke-width', 2);
+
+    if (anim) {
+      reperes.attr('r', 0)
+        .transition().duration(dureeBase).delay(retard).ease(easing)
+        .attr('r', 4);
+    } else {
+      reperes.attr('r', 4);
+    }
   }
 
   // Légende
@@ -241,4 +291,13 @@ function formatAxisValue(value, unitMode, decimals, domainMax) {
     minimumFractionDigits: decimals ?? 0,
     maximumFractionDigits: decimals ?? 0,
   }) + suf;
+}
+
+// Accélération de l'animation d'apparition. Linéaire par défaut : une marque
+// progresse à vitesse constante du début à la fin.
+function revealEase(mode) {
+  if (mode === 'cubic')   return d3.easeCubicOut;
+  if (mode === 'back')    return d3.easeBackOut.overshoot(1.4);
+  if (mode === 'elastic') return d3.easeElasticOut.amplitude(1).period(0.4);
+  return d3.easeLinear;
 }

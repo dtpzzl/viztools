@@ -6,7 +6,7 @@
  * @version 1.1
  * @sampleData [{"label":"A","x":12,"y":34,"series":"Nord","weight":120},{"label":"B","x":45,"y":67,"series":"Nord","weight":340},{"label":"C","x":23,"y":12,"series":"Nord","weight":90},{"label":"D","x":78,"y":89,"series":"Nord","weight":610},{"label":"E","x":56,"y":45,"series":"Sud","weight":250},{"label":"F","x":34,"y":78,"series":"Sud","weight":180},{"label":"G","x":89,"y":23,"series":"Sud","weight":430},{"label":"H","x":67,"y":56,"series":"Sud","weight":70}]
  * @dataFields {"x":{"type":"number","required":true,"label":"Abscisse","description":"Première variable, axe horizontal"},"y":{"type":"number","required":true,"label":"Ordonnée","description":"Seconde variable, axe vertical"},"label":{"type":"category","required":false,"label":"Étiquette","description":"Annotation affichée à côté du point, pas un axe"},"series":{"type":"category","required":false,"label":"Série","description":"Une couleur et une entrée de légende par valeur distincte"},"weight":{"type":"number","required":false,"label":"Poids","description":"Fait varier le diamètre du point ; l'aire est proportionnelle au poids"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"pointShape":{"group":"visuel","type":"select","label":"Forme","default":"circle","options":[{"value":"circle","label":"Cercle"},{"value":"square","label":"Carré"},{"value":"triangle","label":"Triangle"},{"value":"diamond","label":"Losange"},{"value":"cross","label":"Croix"},{"value":"star","label":"Étoile"},{"value":"wye","label":"Y"}]},"opacity":{"group":"general","type":"range","label":"Opacité des points","min":0,"max":1,"step":0.05,"default":0.75},"radius":{"group":"general","type":"range","label":"Rayon des points","min":1,"max":20,"step":1,"default":7,"unit":"px"},"stroke":{"group":"general","type":"range","label":"Contour des points","min":0,"max":8,"step":0.5,"default":1.5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les étiquettes","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"pointShape":{"group":"visuel","type":"select","label":"Forme","default":"circle","options":[{"value":"circle","label":"Cercle"},{"value":"square","label":"Carré"},{"value":"triangle","label":"Triangle"},{"value":"diamond","label":"Losange"},{"value":"cross","label":"Croix"},{"value":"star","label":"Étoile"},{"value":"wye","label":"Y"}]},"opacity":{"group":"general","type":"range","label":"Opacité des points","min":0,"max":1,"step":0.05,"default":0.75},"radius":{"group":"general","type":"range","label":"Rayon des points","min":1,"max":20,"step":1,"default":7,"unit":"px"},"stroke":{"group":"general","type":"range","label":"Contour des points","min":0,"max":8,"step":0.5,"default":1.5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les étiquettes","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -113,20 +113,45 @@ function draw(svg, g, data, W, H, color, p) {
   const symbol = d => d3.symbol().type(shape)
     .size(Math.PI * radiusOf(d) * radiusOf(d))();
 
-  pg.selectAll('.dot')
+
+  // ---- Animation d'apparition -------------------------------------------
+  // L'ordre suit l'axe, tel que le Studio l'a trié : aucun réglage d'ordre
+  // ici. Pour animer autrement, on change le tri du champ dans le panneau
+  // Données & Axes, et l'animation suit.
+  const anim = !!p.animate;
+  const dureeBase = p.animateDuration ?? 450;
+  const decalage = p.animateStagger ?? 70;
+  const easing = revealEase(p.animateEase);
+  const retard = (d, i) => i * decalage;
+
+  // Les points grossissent depuis leur centre. Ils gardent leur position :
+  // c'est l'échelle qui est animée, via le transform, pour ne pas recalculer
+  // le tracé du symbole à chaque image.
+  const points = pg.selectAll('.dot')
     .data(data)
     .enter()
     .append('path')
     .attr('d', symbol)
-    .attr('transform', d => `translate(${x(d.x)},${y(d.y)})`)
     .attr('fill', colorOf)
-    .attr('opacity', p.opacity ?? 0.75)
     .attr('stroke', 'white')
     .attr('stroke-width', p.stroke ?? 1.5);
 
+  if (anim) {
+    points
+      .attr('transform', d => `translate(${x(d.x)},${y(d.y)}) scale(0)`)
+      .attr('opacity', 0)
+      .transition().duration(dureeBase).delay(retard).ease(easing)
+      .attr('transform', d => `translate(${x(d.x)},${y(d.y)}) scale(1)`)
+      .attr('opacity', p.opacity ?? 0.75);
+  } else {
+    points
+      .attr('transform', d => `translate(${x(d.x)},${y(d.y)})`)
+      .attr('opacity', p.opacity ?? 0.75);
+  }
+
   // Étiquettes
   if (p.showLabels ?? true) {
-    pg.selectAll('.label')
+    const etiquettes = pg.selectAll('.label')
       .data(data)
       .enter()
       .append('text')
@@ -136,6 +161,13 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-size', fontSize - 1)
       .attr('fill', '#7a7a90')
       .text(d => d.label);
+
+    if (anim) {
+      etiquettes.attr('opacity', 0)
+        .transition().duration(dureeBase * 0.6)
+        .delay((d, i) => retard(d, i) + dureeBase * 0.55)
+        .attr('opacity', 1);
+    }
   }
 
   // Légende en haut
@@ -185,4 +217,13 @@ function formatAxisValue(value, unitMode, decimals, domainMax) {
     minimumFractionDigits: decimals ?? 0,
     maximumFractionDigits: decimals ?? 0,
   }) + suf;
+}
+
+// Accélération de l'animation d'apparition. Linéaire par défaut : une marque
+// progresse à vitesse constante du début à la fin.
+function revealEase(mode) {
+  if (mode === 'cubic')   return d3.easeCubicOut;
+  if (mode === 'back')    return d3.easeBackOut.overshoot(1.4);
+  if (mode === 'elastic') return d3.easeElasticOut.amplitude(1).period(0.4);
+  return d3.easeLinear;
 }
