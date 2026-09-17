@@ -6,7 +6,7 @@
  * @version 1.1
  * @sampleData [{"label":"Lun-6h","x":"Lun","y":"6h","value":0.2},{"label":"Lun-9h","x":"Lun","y":"9h","value":0.8},{"label":"Lun-12h","x":"Lun","y":"12h","value":0.6},{"label":"Mar-6h","x":"Mar","y":"6h","value":0.1},{"label":"Mar-9h","x":"Mar","y":"9h","value":0.9},{"label":"Mar-12h","x":"Mar","y":"12h","value":0.5},{"label":"Mer-6h","x":"Mer","y":"6h","value":0.4},{"label":"Mer-9h","x":"Mer","y":"9h","value":0.7},{"label":"Mer-12h","x":"Mer","y":"12h","value":0.3}]
  * @dataFields {"x":{"type":"category","required":true,"label":"Colonne","description":"Dimension horizontale de la grille"},"y":{"type":"category","required":true,"label":"Ligne","description":"Dimension verticale de la grille"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateAxis":{"group":"visuel","type":"select","label":"Sens de l'animation","default":"x","options":[{"value":"x","label":"Parcourt l'axe X"},{"value":"y","label":"Parcourt l'axe Y"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -86,18 +86,26 @@ function draw(svg, g, data, W, H, color, p) {
     .paddingInner(padY).paddingOuter(padY / 2);
 
   // ---- Axes --------------------------------------------------------------
+  // Les étiquettes sont éclaircies quand la grille est dense : en abscisse
+  // selon la largeur du plus long libellé, en ordonnée selon la hauteur d'une
+  // ligne de texte.
+  const fs = p.fontSize ?? 12;
+  const largeurX = xVals.reduce((m, v) => Math.max(m, String(v).length), 0) * fs * 0.58 + 6;
+  const ticksX = thinTicks(xVals, stepX, largeurX);
+  const ticksY = thinTicks(yVals, stepY, fs * 1.25);
+
   g.append('g').attr('transform', `translate(0,${offY + gridH})`)
-    .call(d3.axisBottom(x))
+    .call(d3.axisBottom(x).tickValues(ticksX))
     .selectAll('text')
     .attr('font-family', 'DM Sans, sans-serif')
-    .attr('font-size', p.fontSize ?? 12)
+    .attr('font-size', fs)
     .attr('fill', '#7a7a90');
 
   g.append('g').attr('transform', `translate(${offX},0)`)
-    .call(d3.axisLeft(y))
+    .call(d3.axisLeft(y).tickValues(ticksY))
     .selectAll('text')
     .attr('font-family', 'DM Sans, sans-serif')
-    .attr('font-size', p.fontSize ?? 12)
+    .attr('font-size', fs)
     .attr('fill', '#7a7a90');
 
   g.selectAll('.domain').attr('stroke', '#e4e4ed');
@@ -123,7 +131,16 @@ function draw(svg, g, data, W, H, color, p) {
   const dureeBase = p.animateDuration ?? 450;
   const decalage = p.animateStagger ?? 70;
   const easing = revealEase(p.animateEase);
-  const retard = (d, i) => i * decalage;
+  // Sens de l'animation : quelle dimension défile en premier. Sans ce réglage
+  // l'ordre serait celui des lignes reçues, où le premier champ trié commande —
+  // avec les mois en abscisse et les années en ordonnée, on verrait tous les
+  // janviers de 1950 à 2026 avant de passer à février.
+  const iX = new Map(xVals.map((v, i) => [String(v), i]));
+  const iY = new Map(yVals.map((v, i) => [String(v), i]));
+  const rangDe = d => (p.animateAxis === 'y'
+    ? iX.get(String(d.x)) * n + iY.get(String(d.y))
+    : iY.get(String(d.y)) * m + iX.get(String(d.x)));
+  const retard = d => rangDe(d) * decalage;
 
   // ---- Cellules ----------------------------------------------------------
   // Les cases arrivent dans l'ordre du couple (colonne, ligne) fixé par le
@@ -169,7 +186,7 @@ function draw(svg, g, data, W, H, color, p) {
     if (anim) {
       etiquettes.attr('opacity', 0)
         .transition().duration(dureeBase * 0.6)
-        .delay((d, i) => retard(d, i) + dureeBase * 0.55)
+        .delay(d => retard(d) + dureeBase * 0.55)
         .attr('opacity', 1);
     }
   }
@@ -200,4 +217,13 @@ function formatAxisValue(value, unitMode, decimals, domainMax) {
     minimumFractionDigits: decimals ?? 0,
     maximumFractionDigits: decimals ?? 0,
   }) + suf;
+}
+
+// N'écrit qu'une étiquette sur n quand elles ne tiennent pas côte à côte. Le
+// pas se déduit de la place réellement disponible et non d'un seuil arbitraire :
+// 77 années sur un axe vertical en gardent une sur 5 ou sur 10 selon la
+// hauteur, sans qu'aucun réglage soit nécessaire.
+function thinTicks(valeurs, pas, encombrement) {
+  const tous = Math.max(1, Math.ceil(encombrement / Math.max(1, pas)));
+  return tous === 1 ? valeurs : valeurs.filter((v, i) => i % tous === 0);
 }

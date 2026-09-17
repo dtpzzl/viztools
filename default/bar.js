@@ -53,8 +53,18 @@ function draw(svg, g, data, W, H, color, p) {
   }
 
   // Axes
+  // Éclaircissement. On garde assez d'espace pour que l'inclinaison reste sous
+  // 45° : au-delà les étiquettes deviennent quasi verticales, et la troncature
+  // qui les fait tenir dans la marge basse les réduit à deux ou trois
+  // caractères — « 19… » au lieu de « 1950 ». Mieux vaut en afficher moins,
+  // mais lisibles. Sous ce seuil, layoutAxisLabels incline et tout tient.
+  const labelsX = data.map(d => d.label);
+  const espaceMini = (p.fontSize ?? 12) * 1.15 * 1.45; // hauteur de ligne / sin(45°)
+  const tousLesN = Math.max(1, Math.ceil(espaceMini / Math.max(1, x.step())));
+  const ticksX = tousLesN === 1 ? labelsX : labelsX.filter((l, i) => i % tousLesN === 0);
+
   const xAxis = g.append('g').attr('transform', `translate(0,${H})`)
-    .call(d3.axisBottom(x));
+    .call(d3.axisBottom(x).tickValues(ticksX));
 
   xAxis.selectAll('text')
     .attr('font-family', 'DM Sans, sans-serif')
@@ -62,7 +72,7 @@ function draw(svg, g, data, W, H, color, p) {
     .attr('fill', '#7a7a90');
 
   // Bascule les labels en biais s'ils ne tiennent pas côte à côte
-  layoutAxisLabels(xAxis, data.map(d => d.label), x.step(), p.fontSize ?? 12, p.margin);
+  layoutAxisLabels(xAxis, ticksX, x.step() * tousLesN, p.fontSize ?? 12, p.margin);
 
   g.append('g')
     .call(d3.axisLeft(y).ticks(p.ticks ?? 5).tickFormat(fmtY))

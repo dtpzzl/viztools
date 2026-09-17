@@ -55,9 +55,12 @@ function draw(svg, g, data, W, H, color, p) {
     .attr('font-size', p.fontSize ?? 12)
     .attr('fill', '#7a7a90');
 
-  // Axe Y (labels)
+  // Axe Y (labels) — éclairci quand les rangs deviennent plus serrés qu'une
+  // ligne de texte
+  const ticksY = thinTicks(sorted.map(d => d.label), y.step(), (p.fontSize ?? 12) * 1.25);
+
   g.append('g')
-    .call(d3.axisLeft(y))
+    .call(d3.axisLeft(y).tickValues(ticksY))
     .selectAll('text')
     .attr('font-family', 'DM Sans, sans-serif')
     .attr('font-size', (p.fontSize ?? 12) + 1)
@@ -161,4 +164,11 @@ function formatAxisValue(value, unitMode, decimals, domainMax) {
     minimumFractionDigits: decimals ?? 0,
     maximumFractionDigits: decimals ?? 0,
   }) + suf;
+}
+
+// N'écrit qu'une étiquette sur n quand elles ne tiennent pas côte à côte. Le
+// pas se déduit de la place réellement disponible et non d'un seuil arbitraire.
+function thinTicks(valeurs, pas, encombrement) {
+  const tous = Math.max(1, Math.ceil(encombrement / Math.max(1, pas)));
+  return tous === 1 ? valeurs : valeurs.filter((v, i) => i % tous === 0);
 }
