@@ -52,8 +52,13 @@ function draw(svg, g, data, W, H, color, p) {
   }
 
   // Axes
+  // Éclaircit les étiquettes d'abscisse quand elles ne tiennent plus côte à côte
+  const sourceX = data.map(d => d.label);
+  const ticksX = thinTicks(sourceX, (x.step ? x.step() : W / Math.max(1, data.length)),
+    sourceX.reduce((mx, v) => Math.max(mx, String(v).length), 0) * (p.fontSize ?? 12) * 0.58 + 6);
+
   g.append('g').attr('transform', `translate(0,${H})`)
-    .call(d3.axisBottom(x))
+    .call(d3.axisBottom(x).tickValues(ticksX))
     .selectAll('text')
     .attr('font-family', 'DM Sans, sans-serif')
     .attr('font-size', p.fontSize ?? 12)
@@ -208,4 +213,11 @@ function formatAxisValue(value, unitMode, decimals, domainMax) {
     minimumFractionDigits: decimals ?? 0,
     maximumFractionDigits: decimals ?? 0,
   }) + suf;
+}
+
+// N'écrit qu'une étiquette sur n quand elles ne tiennent pas côte à côte. Le
+// pas se déduit de la place réellement disponible et non d'un seuil arbitraire.
+function thinTicks(valeurs, pas, encombrement) {
+  const tous = Math.max(1, Math.ceil(encombrement / Math.max(1, pas)));
+  return tous === 1 ? valeurs : valeurs.filter((v, i) => i % tous === 0);
 }

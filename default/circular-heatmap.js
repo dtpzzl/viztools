@@ -6,7 +6,7 @@
  * @version 1.0
  * @sampleData [{"label":"Lun-0h","theta":"0h","r":"Lun","value":12},{"label":"Lun-3h","theta":"3h","r":"Lun","value":8},{"label":"Lun-6h","theta":"6h","r":"Lun","value":34},{"label":"Lun-9h","theta":"9h","r":"Lun","value":96},{"label":"Lun-12h","theta":"12h","r":"Lun","value":71},{"label":"Lun-15h","theta":"15h","r":"Lun","value":63},{"label":"Lun-18h","theta":"18h","r":"Lun","value":88},{"label":"Lun-21h","theta":"21h","r":"Lun","value":41},{"label":"Mar-0h","theta":"0h","r":"Mar","value":9},{"label":"Mar-3h","theta":"3h","r":"Mar","value":6},{"label":"Mar-6h","theta":"6h","r":"Mar","value":38},{"label":"Mar-9h","theta":"9h","r":"Mar","value":92},{"label":"Mar-12h","theta":"12h","r":"Mar","value":68},{"label":"Mar-15h","theta":"15h","r":"Mar","value":59},{"label":"Mar-18h","theta":"18h","r":"Mar","value":84},{"label":"Mar-21h","theta":"21h","r":"Mar","value":37},{"label":"Mer-0h","theta":"0h","r":"Mer","value":14},{"label":"Mer-3h","theta":"3h","r":"Mer","value":7},{"label":"Mer-6h","theta":"6h","r":"Mer","value":29},{"label":"Mer-9h","theta":"9h","r":"Mer","value":78},{"label":"Mer-12h","theta":"12h","r":"Mer","value":74},{"label":"Mer-15h","theta":"15h","r":"Mer","value":52},{"label":"Mer-18h","theta":"18h","r":"Mer","value":91},{"label":"Mer-21h","theta":"21h","r":"Mer","value":45}]
  * @dataFields {"theta":{"type":"category","required":true,"label":"Secteur","description":"Dimension angulaire, déployée autour du cercle"},"r":{"type":"category","required":true,"label":"Anneau","description":"Dimension radiale, du centre vers l'extérieur"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"thickness":{"group":"visuel","type":"number","label":"Épaisseur des anneaux","default":null,"placeholder":"auto","unit":"px"},"radialGap":{"group":"visuel","type":"range","label":"Espacement radial","min":0,"max":30,"step":1,"default":2,"unit":"px"},"angularGap":{"group":"visuel","type":"range","label":"Espacement circulaire","min":0,"max":15,"step":0.5,"default":1,"unit":"°"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"opacity":{"group":"general","type":"range","label":"Opacité des cellules","min":0,"max":1,"step":0.05,"default":1},"stroke":{"group":"general","type":"range","label":"Bordure des cellules","min":0,"max":8,"step":0.5,"default":0,"unit":"px"},"radius":{"group":"general","type":"range","label":"Arrondi des cellules","min":0,"max":12,"step":1,"default":2,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"thickness":{"group":"visuel","type":"number","label":"Épaisseur des anneaux","default":null,"placeholder":"auto","unit":"px"},"radialGap":{"group":"visuel","type":"range","label":"Espacement radial","min":0,"max":30,"step":1,"default":2,"unit":"px"},"angularGap":{"group":"visuel","type":"range","label":"Espacement circulaire","min":0,"max":15,"step":0.5,"default":1,"unit":"°"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"opacity":{"group":"general","type":"range","label":"Opacité des cellules","min":0,"max":1,"step":0.05,"default":1},"stroke":{"group":"general","type":"range","label":"Bordure des cellules","min":0,"max":8,"step":0.5,"default":0,"unit":"px"},"radius":{"group":"general","type":"range","label":"Arrondi des cellules","min":0,"max":12,"step":1,"default":2,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateAxis":{"group":"visuel","type":"select","label":"Sens de l'animation","default":"x","options":[{"value":"x","label":"Parcourt les secteurs"},{"value":"y","label":"Parcourt les anneaux"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -118,7 +118,14 @@ function draw(svg, g, data, W, H, color, p) {
   const dureeBase = p.animateDuration ?? 450;
   const decalage = p.animateStagger ?? 70;
   const easing = revealEase(p.animateEase);
-  const retard = (d, i) => i * decalage;
+  // Sens de l'animation : quelle dimension défile en premier. Sans ce réglage
+  // l'ordre serait celui des lignes reçues, où le premier champ trié commande.
+  const iSecteur = new Map(sectors.map((v, i) => [String(v), i]));
+  const iAnneau = new Map(rings.map((v, i) => [String(v), i]));
+  const rangDe = d => (p.animateAxis === 'y'
+    ? iSecteur.get(String(d.theta)) * n + iAnneau.get(String(d.r))
+    : iAnneau.get(String(d.r)) * m + iSecteur.get(String(d.theta)));
+  const retard = d => rangDe(d) * decalage;
 
   // ---- Cellules ----------------------------------------------------------
   // Les cases arrivent dans l'ordre du couple (secteur, anneau) fixé par le
@@ -170,14 +177,23 @@ function draw(svg, g, data, W, H, color, p) {
     if (anim) {
       etiquettes.attr('opacity', 0)
         .transition().duration(dureeBase * 0.6)
-        .delay((d, i) => retard(d, i) + dureeBase * 0.55)
+        .delay(d => retard(d) + dureeBase * 0.55)
         .attr('opacity', 1);
     }
   }
 
   // ---- Labels de la dimension angulaire (autour du cercle) ---------------
   const lr = maxR + 12;
+  // Éclaircit les libellés quand le disque est dense : en périphérie selon la
+  // corde entre deux secteurs, sur la verticale selon la hauteur d'une ligne.
+  const fs = p.fontSize ?? 12;
+  const largeurSecteur = sectors.reduce((mx, v) => Math.max(mx, String(v).length), 0) * fs * 0.58 + 6;
+  const cordeSecteur = 2 * lr * Math.sin(band / 2);
+  const secteursVisibles = new Set(thinTicks(sectors, cordeSecteur, largeurSecteur).map(String));
+  const anneauxVisibles = new Set(thinTicks(rings, t + radialGap, fs * 1.25).map(String));
+
   sectors.forEach((v, i) => {
+    if (!secteursVisibles.has(String(v))) return;
     const a = (i + 0.5) * band;
     const sx = Math.sin(a);
     cg.append('text')
@@ -193,6 +209,7 @@ function draw(svg, g, data, W, H, color, p) {
 
   // ---- Labels de la dimension radiale (verticale, sur les anneaux) -------
   rings.forEach((v, k) => {
+    if (!anneauxVisibles.has(String(v))) return;
     cg.append('text')
       .attr('x', 0)
       .attr('y', -(r0 + k * (t + radialGap) + t / 2))
@@ -269,4 +286,11 @@ function revealEase(mode) {
   if (mode === 'back')    return d3.easeBackOut.overshoot(1.4);
   if (mode === 'elastic') return d3.easeElasticOut.amplitude(1).period(0.4);
   return d3.easeLinear;
+}
+
+// N'écrit qu'une étiquette sur n quand elles ne tiennent pas côte à côte. Le
+// pas se déduit de la place réellement disponible et non d'un seuil arbitraire.
+function thinTicks(valeurs, pas, encombrement) {
+  const tous = Math.max(1, Math.ceil(encombrement / Math.max(1, pas)));
+  return tous === 1 ? valeurs : valeurs.filter((v, i) => i % tous === 0);
 }
