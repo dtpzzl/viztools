@@ -6,7 +6,7 @@
  * @version 1.0
  * @sampleData [{"label":"2019","value":42},{"label":"2020","value":58},{"label":"2021","value":51},{"label":"2022","value":67},{"label":"2023","value":73},{"label":"2024","value":69}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Axe des abscisses, une barre ou un point par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité des barres","min":0,"max":1,"step":0.05,"default":0.9},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animatePace":{"group":"visuel","type":"select","label":"Rythme","default":"duration","options":[{"value":"duration","label":"Même durée pour toutes"},{"value":"speed","label":"Même vitesse pour toutes"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité des barres","min":0,"max":1,"step":0.05,"default":0.9},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"yOrigin":{"group":"general","type":"number","label":"Ordonnée à l'origine","default":0,"placeholder":"0"},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animatePace":{"group":"visuel","type":"select","label":"Rythme","default":"duration","options":[{"value":"duration","label":"Même durée pour toutes"},{"value":"speed","label":"Même vitesse pour toutes"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -38,10 +38,17 @@ function draw(svg, g, data, W, H, color, p) {
     .range([0, W])
     .padding(0.28);
 
-  const yMax = d3.max(data, d => d.value) * 1.1;
+  // Ordonnée à l'origine : le bas de l'axe des valeurs. À 0 l'échelle part de
+  // zéro et la longueur d'une marque représente la valeur. Réglée ailleurs,
+  // elle tronque le bas et amplifie visuellement les écarts — précieux pour
+  // lire de faibles variations, trompeur sur des barres. L'échelle est bornée :
+  // une valeur sous l'origine se pose sur l'axe au lieu de sortir du cadre.
+  const origine = Number.isFinite(+p.yOrigin) ? +p.yOrigin : 0;
+  const yMax = Math.max(d3.max(data, d => d.value) * 1.1, origine + 1);
   const y = d3.scaleLinear()
-    .domain([0, yMax])
-    .range([H, 0]);
+    .domain([origine, yMax])
+    .range([H, 0])
+    .clamp(true);
   const fmtY = v => formatAxisValue(v, p.unitMode, p.decimals, yMax);
 
   // Grille horizontale
