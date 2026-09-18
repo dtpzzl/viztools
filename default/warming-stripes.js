@@ -6,7 +6,7 @@
  * @version 1.0
  * @sampleData [{"label":"1995","value":-0.42},{"label":"1996","value":-0.31},{"label":"1997","value":-0.18},{"label":"1998","value":0.12},{"label":"1999","value":-0.22},{"label":"2000","value":-0.05},{"label":"2001","value":0.08},{"label":"2002","value":0.21},{"label":"2003","value":0.44},{"label":"2004","value":0.17},{"label":"2005","value":0.35},{"label":"2006","value":0.29},{"label":"2007","value":0.41},{"label":"2008","value":0.19},{"label":"2009","value":0.38},{"label":"2010","value":0.52},{"label":"2011","value":0.33},{"label":"2012","value":0.47},{"label":"2013","value":0.55},{"label":"2014","value":0.68},{"label":"2015","value":0.81},{"label":"2016","value":0.94},{"label":"2017","value":0.79},{"label":"2018","value":0.72},{"label":"2019","value":0.88},{"label":"2020","value":0.97},{"label":"2021","value":0.76},{"label":"2022","value":0.91},{"label":"2023","value":1.12},{"label":"2024","value":1.25}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Période","description":"Une bande par valeur distincte, dans l'ordre reçu"},"value":{"type":"number","required":true,"label":"Écart","description":"Détermine la couleur de la bande"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#2166ac"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"#f7f7f7"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"#b2182b"},"stripeGap":{"group":"visuel","type":"range","label":"Espacement entre bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"stripeRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"pleine hauteur"},"showValues":{"group":"visuel","type":"toggle","label":"Afficher les extrêmes","default":false},"opacity":{"group":"general","type":"range","label":"Opacité des bandes","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les périodes","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#2166ac"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"#f7f7f7"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"#b2182b"},"showScale":{"group":"visuel","type":"toggle","label":"Afficher l'échelle","default":true},"stripeGap":{"group":"visuel","type":"range","label":"Espacement entre bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"stripeRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"pleine hauteur"},"showValues":{"group":"visuel","type":"toggle","label":"Afficher les extrêmes","default":false},"opacity":{"group":"general","type":"range","label":"Opacité des bandes","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des bandes","min":0,"max":20,"step":1,"default":0,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les périodes","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -66,8 +66,14 @@ function draw(svg, g, data, W, H, color, p) {
   const fmtVal = v => formatAxisValue(v, p.unitMode, p.decimals, sMax);
   const fontSize = p.fontSize ?? 12;
   const labelH = p.showLabels ? fontSize + 8 : 0;
+  // La légende d'échelle et le nom du filtre partagent le bandeau du haut :
+  // le nom à gauche, le dégradé à droite. On réserve la hauteur du plus
+  // encombrant des deux, pas leur somme.
+  const legende  = p.showScale !== false;
   const captionH = shown === null ? 0 : fontSize + 10;
-  const bandH = Math.max(10, H - labelH - captionH);
+  const legendeH = legende ? fontSize + 14 : 0;
+  const enTeteH  = Math.max(captionH, legendeH);
+  const bandH = Math.max(10, H - labelH - enTeteH);
 
   // ---- Géométrie des bandes ---------------------------------------------
   // p.stripeRatio fige le rapport largeur/hauteur d'une bande ; sans lui les
@@ -78,7 +84,50 @@ function draw(svg, g, data, W, H, color, p) {
 
   const ratio = Number.isFinite(+p.stripeRatio) && +p.stripeRatio > 0 ? +p.stripeRatio : null;
   const stripeH = ratio ? Math.min(bandH, stripeW / ratio) : bandH;
-  const offY = captionH + (bandH - stripeH) / 2; // bande contrainte : centrée
+  const offY = enTeteH + (bandH - stripeH) / 2; // bande contrainte : centrée
+
+  // ---- Légende de l'échelle de couleur -----------------------------------
+  // Des bandes colorées sans échelle se regardent mais ne se lisent pas : rien
+  // ne dit à quelle valeur correspond une teinte. Le dégradé reprend les trois
+  // bornes RÉELLEMENT utilisées par colorScale, bornes figées à la main
+  // comprises — sans quoi la légende mentirait dès qu'on en fige une.
+  if (legende) {
+    const barreW = Math.max(60, Math.min(160, W * 0.32));
+    const barreH = 8;
+    const texteMin = fmtVal(sMin);
+    const texteMax = fmtVal(sMax);
+    // Largeur approximative des deux étiquettes, pour caler le dégradé à leur
+    // gauche sans jamais sortir du cadre. DM Mono : environ 0,6 em.
+    const largeurTexte = (texteMin.length + texteMax.length) * fontSize * 0.6 + 16;
+    const barreX = Math.max(0, W - barreW - largeurTexte);
+    const barreY = Math.max(0, enTeteH - barreH - 6);
+
+    // Un identifiant unique par rendu : deux visuels dans la même page
+    // partageraient sinon le même dégradé, et le second écraserait le premier.
+    const gradId = 'dp-echelle-' + Math.random().toString(36).slice(2, 9);
+    const grad = svg.append('defs').append('linearGradient')
+      .attr('id', gradId).attr('x1', '0%').attr('x2', '100%');
+    grad.append('stop').attr('offset', '0%').attr('stop-color', cMin);
+    grad.append('stop').attr('offset', '50%').attr('stop-color', cMid);
+    grad.append('stop').attr('offset', '100%').attr('stop-color', cMax);
+
+    const gl = g.append('g');
+    gl.append('text')
+      .attr('x', barreX - 6).attr('y', barreY + barreH)
+      .attr('text-anchor', 'end')
+      .attr('font-family', 'DM Mono, monospace').attr('font-size', fontSize - 1)
+      .attr('fill', '#7a7a90').text(texteMin);
+    gl.append('rect')
+      .attr('x', barreX).attr('y', barreY)
+      .attr('width', barreW).attr('height', barreH)
+      .attr('rx', barreH / 2)
+      .attr('fill', `url(#${gradId})`)
+      .attr('stroke', '#e4e4ed');
+    gl.append('text')
+      .attr('x', barreX + barreW + 6).attr('y', barreY + barreH)
+      .attr('font-family', 'DM Mono, monospace').attr('font-size', fontSize - 1)
+      .attr('fill', '#7a7a90').text(texteMax);
+  }
 
   // Nom du filtre appliqué : sans lui on lit un sous-ensemble sans le savoir
   if (shown !== null) {

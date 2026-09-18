@@ -6,7 +6,7 @@
  * @version 1.1
  * @sampleData [{"label":"Lun-6h","x":"Lun","y":"6h","value":0.2},{"label":"Lun-9h","x":"Lun","y":"9h","value":0.8},{"label":"Lun-12h","x":"Lun","y":"12h","value":0.6},{"label":"Mar-6h","x":"Mar","y":"6h","value":0.1},{"label":"Mar-9h","x":"Mar","y":"9h","value":0.9},{"label":"Mar-12h","x":"Mar","y":"12h","value":0.5},{"label":"Mer-6h","x":"Mer","y":"6h","value":0.4},{"label":"Mer-9h","x":"Mer","y":"9h","value":0.7},{"label":"Mer-12h","x":"Mer","y":"12h","value":0.3}]
  * @dataFields {"x":{"type":"category","required":true,"label":"Colonne","description":"Dimension horizontale de la grille"},"y":{"type":"category","required":true,"label":"Ligne","description":"Dimension verticale de la grille"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateAxis":{"group":"visuel","type":"select","label":"Sens de l'animation","default":"x","options":[{"value":"x","label":"Parcourt l'axe X"},{"value":"y","label":"Parcourt l'axe Y"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"showScale":{"group":"visuel","type":"toggle","label":"Afficher l'échelle","default":true},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateAxis":{"group":"visuel","type":"select","label":"Sens de l'animation","default":"x","options":[{"value":"x","label":"Parcourt l'axe X"},{"value":"y","label":"Parcourt l'axe Y"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -65,8 +65,14 @@ function draw(svg, g, data, W, H, color, p) {
   // ---- Géométrie des cases ----------------------------------------------
   // p.cellRatio fige le rapport largeur/hauteur d'une case (1 = carré) ;
   // sans lui les cases remplissent toute la surface disponible.
+  // La légende d'échelle et le nom de la série partagent le bandeau du haut :
+  // le nom à gauche, le dégradé à droite. On réserve donc la hauteur du plus
+  // encombrant des deux, pas leur somme.
+  const legende  = p.showScale !== false;
   const captionH = shown === null ? 0 : (p.fontSize ?? 12) + 10;
-  const plotH = Math.max(10, H - captionH);
+  const legendeH = legende ? (p.fontSize ?? 12) + 14 : 0;
+  const enTeteH  = Math.max(captionH, legendeH);
+  const plotH = Math.max(10, H - enTeteH);
 
   const ratio = Number.isFinite(+p.cellRatio) && +p.cellRatio > 0 ? +p.cellRatio : null;
   let stepX = W / m;
@@ -79,7 +85,7 @@ function draw(svg, g, data, W, H, color, p) {
   const gridW = stepX * m;
   const gridH = stepY * n;
   const offX = (W - gridW) / 2; // la grille contrainte est centrée
-  const offY = captionH + (plotH - gridH) / 2;
+  const offY = enTeteH + (plotH - gridH) / 2;
 
   // p.cellGap est un écart en px, converti en padding relatif que d3 attend
   const gap = Math.max(0, p.cellGap ?? 2);
@@ -126,6 +132,50 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('font-weight', '500')
       .attr('fill', '#0f0f1a')
       .text(shown);
+  }
+
+  // ---- Légende de l'échelle de couleur -----------------------------------
+  // Une grille colorée sans échelle se regarde mais ne se lit pas : rien ne
+  // dit à quelle valeur correspond une teinte. Le dégradé reprend les trois
+  // bornes RÉELLEMENT utilisées par colorScale, bornes figées à la main
+  // comprises, et non le min/max des données — sans quoi la légende mentirait
+  // dès qu'on fige une borne.
+  if (legende) {
+    const barreW = Math.max(60, Math.min(160, W * 0.32));
+    const barreH = 8;
+    const texteMin = fmtVal(sMin);
+    const texteMax = fmtVal(sMax);
+    // Largeur approximative des deux étiquettes, pour caler le dégradé à leur
+    // gauche sans jamais sortir du cadre. DM Mono : environ 0,6 em.
+    const largeurTexte = (texteMin.length + texteMax.length) * fs * 0.6 + 16;
+    const barreX = Math.max(0, W - barreW - largeurTexte);
+    const barreY = Math.max(0, enTeteH - barreH - 6);
+
+    // Un identifiant unique par rendu : deux visuels dans la même page
+    // partageraient sinon le même dégradé, et le second écraserait le premier.
+    const gradId = 'dp-echelle-' + Math.random().toString(36).slice(2, 9);
+    const grad = svg.append('defs').append('linearGradient')
+      .attr('id', gradId).attr('x1', '0%').attr('x2', '100%');
+    grad.append('stop').attr('offset', '0%').attr('stop-color', cMin);
+    grad.append('stop').attr('offset', '50%').attr('stop-color', cMid);
+    grad.append('stop').attr('offset', '100%').attr('stop-color', cMax);
+
+    const gl = g.append('g');
+    gl.append('text')
+      .attr('x', barreX - 6).attr('y', barreY + barreH)
+      .attr('text-anchor', 'end')
+      .attr('font-family', 'DM Mono, monospace').attr('font-size', fs - 1)
+      .attr('fill', '#7a7a90').text(texteMin);
+    gl.append('rect')
+      .attr('x', barreX).attr('y', barreY)
+      .attr('width', barreW).attr('height', barreH)
+      .attr('rx', barreH / 2)
+      .attr('fill', `url(#${gradId})`)
+      .attr('stroke', '#e4e4ed');
+    gl.append('text')
+      .attr('x', barreX + barreW + 6).attr('y', barreY + barreH)
+      .attr('font-family', 'DM Mono, monospace').attr('font-size', fs - 1)
+      .attr('fill', '#7a7a90').text(texteMax);
   }
 
 
