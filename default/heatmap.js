@@ -6,7 +6,7 @@
  * @version 1.1
  * @sampleData [{"label":"Lun-6h","x":"Lun","y":"6h","value":0.2},{"label":"Lun-9h","x":"Lun","y":"9h","value":0.8},{"label":"Lun-12h","x":"Lun","y":"12h","value":0.6},{"label":"Mar-6h","x":"Mar","y":"6h","value":0.1},{"label":"Mar-9h","x":"Mar","y":"9h","value":0.9},{"label":"Mar-12h","x":"Mar","y":"12h","value":0.5},{"label":"Mer-6h","x":"Mer","y":"6h","value":0.4},{"label":"Mer-9h","x":"Mer","y":"9h","value":0.7},{"label":"Mer-12h","x":"Mer","y":"12h","value":0.3}]
  * @dataFields {"x":{"type":"category","required":true,"label":"Colonne","description":"Dimension horizontale de la grille"},"y":{"type":"category","required":true,"label":"Ligne","description":"Dimension verticale de la grille"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"showScale":{"group":"visuel","type":"toggle","label":"Afficher l'échelle","default":true},"opacityMin":{"group":"visuel","type":"range","label":"Opacité borne basse","min":0,"max":1,"step":0.05,"default":1},"opacityMid":{"group":"visuel","type":"number","label":"Opacité borne neutre","default":null,"placeholder":"entre les deux"},"opacityMax":{"group":"visuel","type":"range","label":"Opacité borne haute","min":0,"max":1,"step":0.05,"default":1},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateAxis":{"group":"visuel","type":"select","label":"Sens de l'animation","default":"x","options":[{"value":"x","label":"Parcourt l'axe X"},{"value":"y","label":"Parcourt l'axe Y"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"showScale":{"group":"visuel","type":"toggle","label":"Afficher l'échelle","default":true},"opacityMin":{"group":"visuel","type":"range","label":"Opacité borne basse","min":0,"max":1,"step":0.05,"default":1},"opacityMid":{"group":"visuel","type":"number","label":"Opacité borne neutre","default":null,"placeholder":"entre les deux"},"opacityMax":{"group":"visuel","type":"range","label":"Opacité borne haute","min":0,"max":1,"step":0.05,"default":1},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"labelDensity":{"group":"general","type":"range","label":"Densité des valeurs","min":0,"max":1,"step":0.05,"default":1},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateAxis":{"group":"visuel","type":"select","label":"Sens de l'animation","default":"x","options":[{"value":"x","label":"Parcourt l'axe X"},{"value":"y","label":"Parcourt l'axe Y"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -257,19 +257,42 @@ function draw(svg, g, data, W, H, color, p) {
   }
 
   // ---- Valeurs dans les cellules ----------------------------------------
-  // Une étiquette plus grande que sa case ne se lit pas, elle se superpose à
-  // ses voisines et noircit la grille. On la supprime plutôt que de la tasser :
-  // la couleur porte déjà l'information, le chiffre n'est qu'un confort. En
-  // DM Mono, un caractère occupe environ 0,6 em — il suffit de comparer à la
-  // largeur de bande la plus longue des valeurs à écrire.
+  // Une étiquette plus grande que sa case se superpose à ses voisines et
+  // noircit la grille. Plutôt que de tout supprimer — ce qui donnait un
+  // interrupteur « afficher les valeurs » sans effet visible dès que la grille
+  // était un peu dense — on n'en écrit qu'une sur n. L'étiquette peut alors
+  // déborder sur la case voisine, qui est vide, et reste lisible.
+  //
+  // `labelDensity` règle cet éclaircissement : 1 laisse le visuel en poser
+  // autant que la place le permet, 0,25 une sur quatre, 0 aucune. Le pas
+  // géométrique reste un plancher — demander la densité maximale n'autorise
+  // pas deux étiquettes à se chevaucher.
   const tailleTexte = (p.fontSize ?? 12) - 1;
   const largeurMax  = d3.max(data, d => String(fmtVal(d.value)).length) || 1;
-  const tientDansLaCase = y.bandwidth() >= tailleTexte + 2 &&
-                          x.bandwidth() >= largeurMax * tailleTexte * 0.6 + 4;
+  const densite = dans01(p.labelDensity, 1);
 
-  if (p.showLabels && tientDansLaCase) {
+  // 0,62 em par caractère en DM Mono, plus une respiration de part et d'autre :
+  // sans elle deux nombres voisins se touchent, ce qui est aussi illisible que
+  // s'ils se chevauchaient. Même logique en hauteur avec l'interligne.
+  const largeurTexte = largeurMax * tailleTexte * 0.62 + 10;
+  const hauteurTexte = tailleTexte * 1.45;
+  const pasLisibleX = Math.max(1, Math.ceil(largeurTexte / Math.max(1, x.step())));
+  const pasLisibleY = Math.max(1, Math.ceil(hauteurTexte / Math.max(1, y.step())));
+  // La densité porte sur une SURFACE : une densité de 1/4 se traduit par une
+  // case sur deux dans chaque direction, pas une sur quatre.
+  const pasDensite = densite > 0 ? Math.max(1, Math.round(1 / Math.sqrt(densite))) : Infinity;
+  const pasX = Math.max(pasLisibleX, pasDensite);
+  const pasY = Math.max(pasLisibleY, pasDensite);
+
+  const rangX = new Map(xVals.map((v, i) => [v, i]));
+  const rangY = new Map(yVals.map((v, i) => [v, i]));
+  const etiquetees = densite > 0
+    ? data.filter(d => rangX.get(d.x) % pasX === 0 && rangY.get(d.y) % pasY === 0)
+    : [];
+
+  if (p.showLabels && etiquetees.length) {
     const etiquettes = g.selectAll('.cell-label')
-      .data(data)
+      .data(etiquetees)
       .enter()
       .append('text')
       .attr('x', d => x(d.x) + x.bandwidth() / 2)

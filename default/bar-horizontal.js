@@ -6,7 +6,7 @@
  * @version 1.0
  * @sampleData [{"label":"Paris","value":92},{"label":"Lyon","value":74},{"label":"Marseille","value":68},{"label":"Toulouse","value":61},{"label":"Bordeaux","value":55},{"label":"Nantes","value":49}]
  * @dataFields {"label":{"type":"category","required":true,"label":"Catégorie","description":"Un rang du classement par valeur distincte"},"value":{"type":"number","required":true,"label":"Valeur","description":"Grandeur mesurée"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité de la première barre","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animatePace":{"group":"visuel","type":"select","label":"Rythme","default":"duration","options":[{"value":"duration","label":"Même durée pour toutes"},{"value":"speed","label":"Même vitesse pour toutes"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité de la première barre","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des barres","min":0,"max":20,"step":1,"default":5,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":true},"labelDensity":{"group":"general","type":"range","label":"Densité des valeurs","min":0,"max":1,"step":0.05,"default":1},"showGrid":{"group":"general","type":"toggle","label":"Afficher la grille","default":true},"ticks":{"group":"general","type":"range","label":"Graduations","min":2,"max":12,"step":1,"default":5},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animatePace":{"group":"visuel","type":"select","label":"Rythme","default":"duration","options":[{"value":"duration","label":"Même durée pour toutes"},{"value":"speed","label":"Même vitesse pour toutes"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -117,8 +117,19 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Valeurs en bout de barre
   if (p.showLabels ?? true) {
+    // Éclaircissement des valeurs. Le pas GÉOMÉTRIQUE est un plancher : deux
+    // étiquettes ne doivent jamais se toucher, même à densité maximale.
+    // `labelDensity` éclaircit au-delà — 1 en pose autant que la place le
+    // permet, 0,25 une sur quatre, 0 aucune.
+    const dens01 = v => { const n = +v; return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 1; };
+    const densiteEtq = dens01(p.labelDensity);
+    const pasLisibleEtq = Math.max(1, Math.ceil(((p.fontSize ?? 12) * 1.45) / Math.max(1, y.step())));
+    const pasDensiteEtq = densiteEtq > 0 ? Math.max(1, Math.round(1 / densiteEtq)) : Infinity;
+    const pasEtq = Math.max(pasLisibleEtq, pasDensiteEtq);
+    const etiquetees = densiteEtq > 0 ? sorted.filter((d, i) => i % pasEtq === 0) : [];
+
     const etiquettes = g.selectAll('.label')
-      .data(sorted)
+      .data(etiquetees)
       .enter()
       .append('text')
       .attr('x', d => x(d.value) + 8)
