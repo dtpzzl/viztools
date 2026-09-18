@@ -37,7 +37,7 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Une série par valeur distincte du champ `series`. Champ absent ou valeur
   // unique : tous les points prennent la couleur principale, pas de légende.
-  const seriesNames = [...new Set(data.map(d => d.series))]
+  const seriesNames = (data.domains?.series || [...new Set(data.map(d => d.series))])
     .filter(s => s !== undefined && s !== null && s !== '');
   const grouped = seriesNames.length > 1;
   // Palette dérivée de la couleur principale. La clarté cycle dans une bande

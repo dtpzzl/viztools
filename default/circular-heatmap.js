@@ -22,8 +22,14 @@ function draw(svg, g, data, W, H, color, p) {
   // theta = dimension angulaire (tour du cercle), r = dimension radiale
   // (anneaux, du centre vers l'extérieur). Les variables internes restent
   // nommées sectors/rings : r0, rIn et rOut sont déjà des rayons en pixels.
-  const sectors = [...new Set(data.map(d => d.theta))];
-  const rings = [...new Set(data.map(d => d.r))];
+  // Le Studio transmet l'ordre des axes qu'il a calculé via `data.domains`
+  // (non énumérable). S'en remettre à l'ordre d'apparition des lignes est
+  // faux sur une grille creuse : les lignes sont triées par la PREMIÈRE
+  // dimension, donc la seconde n'apparaît dans le bon ordre que si le premier
+  // groupe la couvre entièrement. Le repli garde le DataTool autonome quand
+  // il est appelé hors Studio (aperçu, @sampleData).
+  const sectors = data.domains?.theta || [...new Set(data.map(d => d.theta))];
+  const rings = data.domains?.r || [...new Set(data.map(d => d.r))];
   const m = sectors.length;
   const n = rings.length;
 

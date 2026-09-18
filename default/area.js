@@ -37,11 +37,17 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Une série par valeur distincte du champ `series`. Champ absent ou valeur
   // unique : rendu simple, identique à la version sans séries.
-  const seriesNames = [...new Set(data.map(d => d.series))]
+  const seriesNames = (data.domains?.series || [...new Set(data.map(d => d.series))])
     .filter(s => s !== undefined && s !== null && s !== '');
   const grouped = seriesNames.length > 1;
   const keys = grouped ? seriesNames : ['value'];
-  const labels = [...new Set(data.map(d => d.label))];
+  // Le Studio transmet l'ordre des axes qu'il a calculé via `data.domains`
+  // (non énumérable). S'en remettre à l'ordre d'apparition des lignes est
+  // faux sur une grille creuse : les lignes sont triées par la PREMIÈRE
+  // dimension, donc la seconde n'apparaît dans le bon ordre que si le premier
+  // groupe la couvre entièrement. Le repli garde le DataTool autonome quand
+  // il est appelé hors Studio (aperçu, @sampleData).
+  const labels = data.domains?.label || [...new Set(data.map(d => d.label))];
 
   // Table label × série ; les doublons sont sommés
   const rows = labels.map(label => {

@@ -19,8 +19,14 @@ function draw(svg, g, data, W, H, color, p) {
   // savoir. Voir CLAUDE.md, « Champ filtre ».
   const shown = String(p.filterValue ?? '').trim() || null;
 
-  const xVals = [...new Set(data.map(d => d.x))];
-  const yVals = [...new Set(data.map(d => d.y))];
+  // Le Studio transmet l'ordre des axes qu'il a calculé via `data.domains`
+  // (non énumérable). S'en remettre à l'ordre d'apparition des lignes est
+  // faux sur une grille creuse : les lignes sont triées par la PREMIÈRE
+  // dimension, donc la seconde n'apparaît dans le bon ordre que si le premier
+  // groupe la couvre entièrement. Le repli garde le DataTool autonome quand
+  // il est appelé hors Studio (aperçu, @sampleData).
+  const xVals = data.domains?.x || [...new Set(data.map(d => d.x))];
+  const yVals = data.domains?.y || [...new Set(data.map(d => d.y))];
   const m = xVals.length;
   const n = yVals.length;
 

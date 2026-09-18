@@ -21,7 +21,13 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Une bande par label, dans l'ordre reçu ; les doublons sont sommés, ce qui
   // cumule aussi les valeurs des différents filtres quand aucun n'est choisi
-  const labels = [...new Set(data.map(d => d.label))];
+  // Le Studio transmet l'ordre des axes qu'il a calculé via `data.domains`
+  // (non énumérable). S'en remettre à l'ordre d'apparition des lignes est
+  // faux sur une grille creuse : les lignes sont triées par la PREMIÈRE
+  // dimension, donc la seconde n'apparaît dans le bon ordre que si le premier
+  // groupe la couvre entièrement. Le repli garde le DataTool autonome quand
+  // il est appelé hors Studio (aperçu, @sampleData).
+  const labels = data.domains?.label || [...new Set(data.map(d => d.label))];
   const totals = new Map(labels.map(l => [l, 0]));
   data.forEach(d => {
     if (Number.isFinite(d.value)) totals.set(d.label, totals.get(d.label) + d.value);
