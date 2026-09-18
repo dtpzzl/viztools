@@ -6,7 +6,7 @@
  * @version 1.1
  * @sampleData [{"label":"Lun-6h","x":"Lun","y":"6h","value":0.2},{"label":"Lun-9h","x":"Lun","y":"9h","value":0.8},{"label":"Lun-12h","x":"Lun","y":"12h","value":0.6},{"label":"Mar-6h","x":"Mar","y":"6h","value":0.1},{"label":"Mar-9h","x":"Mar","y":"9h","value":0.9},{"label":"Mar-12h","x":"Mar","y":"12h","value":0.5},{"label":"Mer-6h","x":"Mer","y":"6h","value":0.4},{"label":"Mer-9h","x":"Mer","y":"9h","value":0.7},{"label":"Mer-12h","x":"Mer","y":"12h","value":0.3}]
  * @dataFields {"x":{"type":"category","required":true,"label":"Colonne","description":"Dimension horizontale de la grille"},"y":{"type":"category","required":true,"label":"Ligne","description":"Dimension verticale de la grille"},"value":{"type":"number","required":true,"label":"Intensité","description":"Détermine la couleur de la cellule"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Isole un sous-ensemble ; sans valeur choisie, tout est cumulé"}}
- * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"showScale":{"group":"visuel","type":"toggle","label":"Afficher l'échelle","default":true},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateAxis":{"group":"visuel","type":"select","label":"Sens de l'animation","default":"x","options":[{"value":"x","label":"Parcourt l'axe X"},{"value":"y","label":"Parcourt l'axe Y"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
+ * @params {"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"scaleMin":{"group":"visuel","type":"number","label":"Borne basse","default":null,"placeholder":"min des données"},"scaleMid":{"group":"visuel","type":"number","label":"Borne neutre","default":null,"placeholder":"moyenne des données"},"scaleMax":{"group":"visuel","type":"number","label":"Borne haute","default":null,"placeholder":"max des données"},"colorMin":{"group":"visuel","type":"color","label":"Couleur min","default":null,"placeholder":"#f0f0f5"},"colorMid":{"group":"visuel","type":"color","label":"Couleur neutre","default":null,"placeholder":"interpolée"},"colorMax":{"group":"visuel","type":"color","label":"Couleur max","default":null,"placeholder":"couleur principale"},"showScale":{"group":"visuel","type":"toggle","label":"Afficher l'échelle","default":true},"opacityMin":{"group":"visuel","type":"range","label":"Opacité borne basse","min":0,"max":1,"step":0.05,"default":1},"opacityMid":{"group":"visuel","type":"number","label":"Opacité borne neutre","default":null,"placeholder":"entre les deux"},"opacityMax":{"group":"visuel","type":"range","label":"Opacité borne haute","min":0,"max":1,"step":0.05,"default":1},"cellGap":{"group":"visuel","type":"range","label":"Espacement entre les cases","min":0,"max":20,"step":1,"default":2,"unit":"px"},"cellRatio":{"group":"visuel","type":"number","label":"Ratio L/H","default":null,"placeholder":"remplit la surface"},"opacity":{"group":"general","type":"range","label":"Opacité des cases","min":0,"max":1,"step":0.05,"default":1},"radius":{"group":"general","type":"range","label":"Arrondi des cases","min":0,"max":20,"step":1,"default":4,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les valeurs","default":false},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":2},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"animate":{"group":"visuel","type":"toggle","label":"Animer à l'affichage","default":false},"animateAxis":{"group":"visuel","type":"select","label":"Sens de l'animation","default":"x","options":[{"value":"x","label":"Parcourt l'axe X"},{"value":"y","label":"Parcourt l'axe Y"}]},"animateDuration":{"group":"visuel","type":"range","label":"Durée d'une marque","min":100,"max":3000,"step":50,"default":450,"unit":"ms"},"animateStagger":{"group":"visuel","type":"range","label":"Décalage entre marques","min":0,"max":2000,"step":10,"default":70,"unit":"ms"},"animateEase":{"group":"visuel","type":"select","label":"Accélération","default":"linear","options":[{"value":"linear","label":"Linéaire"},{"value":"cubic","label":"Douce"},{"value":"back","label":"Léger dépassement"},{"value":"elastic","label":"Rebond"}]}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -59,6 +59,35 @@ function draw(svg, g, data, W, H, color, p) {
     .domain([sMin, sMid, sMax])
     .range([cMin, cMid, cMax])
     .clamp(true); // les valeurs hors bornes figées restent lisibles
+
+  // ---- Opacité le long de l'échelle -------------------------------------
+  // Une grille où la plupart des cases valent zéro se lit mal quand ces
+  // zéros sont aussi opaques que le reste : ils forment un aplat qui pèse
+  // autant que l'information. Estomper la borne basse les fait reculer sans
+  // les effacer. `p.opacity` reste le réglage d'ensemble et multiplie le
+  // tout : les deux bornes à 1, le rendu est exactement celui d'avant.
+  const dans01 = (v, repli) => {
+    const n = +v;
+    return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : repli;
+  };
+  const oMin = dans01(p.opacityMin, 1);
+  const oMax = dans01(p.opacityMax, 1);
+  // Trois bornes comme pour la couleur, et pour la même raison : sur une
+  // échelle DIVERGENTE — les bandes, typiquement — ce qui encombre n'est pas
+  // une extrémité mais le milieu, l'écart nul. Estomper la borne neutre le
+  // fait reculer en gardant le froid et le chaud lisibles. Laissée vide, elle
+  // se place à mi-chemin : l'opacité varie alors linéairement, comme si les
+  // deux bornes seules existaient.
+  const oMid = dans01(p.opacityMid, (oMin + oMax) / 2);
+  const opacityScale = d3.scaleLinear()
+    .domain([sMin, sMid, sMax]).range([oMin, oMid, oMax]).clamp(true);
+  const opaciteDe = d => (p.opacity ?? 1) * opacityScale(d.value);
+
+  // Couleur PERÇUE une fois la case estompée sur le fond blanc. Sans cette
+  // correction, une étiquette blanche restait posée sur une case devenue
+  // presque blanche : le contraste se calculait sur une couleur qui n'est
+  // plus celle qu'on voit.
+  const couleurPercue = d => d3.interpolateLab('#ffffff', colorScale(d.value))(opaciteDe(d));
 
   const fmtVal = v => formatAxisValue(v, p.unitMode, p.decimals, sMax);
 
@@ -156,9 +185,14 @@ function draw(svg, g, data, W, H, color, p) {
     const gradId = 'dp-echelle-' + Math.random().toString(36).slice(2, 9);
     const grad = svg.append('defs').append('linearGradient')
       .attr('id', gradId).attr('x1', '0%').attr('x2', '100%');
-    grad.append('stop').attr('offset', '0%').attr('stop-color', cMin);
-    grad.append('stop').attr('offset', '50%').attr('stop-color', cMid);
-    grad.append('stop').attr('offset', '100%').attr('stop-color', cMax);
+    // Les bornes d'opacité s'appliquent AUSSI au dégradé : une légende opaque
+    // au-dessus d'une grille estompée décrirait un rendu qui n'existe pas.
+    grad.append('stop').attr('offset', '0%').attr('stop-color', cMin)
+      .attr('stop-opacity', oMin === 1 ? null : oMin);
+    grad.append('stop').attr('offset', '50%').attr('stop-color', cMid)
+      .attr('stop-opacity', oMid === 1 ? null : oMid);
+    grad.append('stop').attr('offset', '100%').attr('stop-color', cMax)
+      .attr('stop-opacity', oMax === 1 ? null : oMax);
 
     const gl = g.append('g');
     gl.append('text')
@@ -217,9 +251,9 @@ function draw(svg, g, data, W, H, color, p) {
   if (anim) {
     cellules.attr('opacity', 0)
       .transition().duration(dureeBase).delay(retard).ease(easing)
-      .attr('opacity', p.opacity ?? 1);
+      .attr('opacity', opaciteDe);
   } else {
-    cellules.attr('opacity', p.opacity ?? 1);
+    cellules.attr('opacity', opaciteDe);
   }
 
   // ---- Valeurs dans les cellules ----------------------------------------
@@ -246,7 +280,7 @@ function draw(svg, g, data, W, H, color, p) {
       // Contraste automatique sur la clarté perceptuelle (Lab) et non la
       // clarté HSL, qui surestime les bleus : #6c63ff passe pour clair en HSL
       // alors qu'un texte sombre y est peu lisible.
-      .attr('fill', d => (d3.lab(colorScale(d.value)).l > 62 ? '#0f0f1a' : '#ffffff'))
+      .attr('fill', d => (d3.lab(couleurPercue(d)).l > 62 ? '#0f0f1a' : '#ffffff'))
       .text(d => fmtVal(d.value));
 
     if (anim) {
