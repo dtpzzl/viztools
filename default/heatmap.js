@@ -173,7 +173,17 @@ function draw(svg, g, data, W, H, color, p) {
   }
 
   // ---- Valeurs dans les cellules ----------------------------------------
-  if (p.showLabels) {
+  // Une étiquette plus grande que sa case ne se lit pas, elle se superpose à
+  // ses voisines et noircit la grille. On la supprime plutôt que de la tasser :
+  // la couleur porte déjà l'information, le chiffre n'est qu'un confort. En
+  // DM Mono, un caractère occupe environ 0,6 em — il suffit de comparer à la
+  // largeur de bande la plus longue des valeurs à écrire.
+  const tailleTexte = (p.fontSize ?? 12) - 1;
+  const largeurMax  = d3.max(data, d => String(fmtVal(d.value)).length) || 1;
+  const tientDansLaCase = y.bandwidth() >= tailleTexte + 2 &&
+                          x.bandwidth() >= largeurMax * tailleTexte * 0.6 + 4;
+
+  if (p.showLabels && tientDansLaCase) {
     const etiquettes = g.selectAll('.cell-label')
       .data(data)
       .enter()
@@ -182,7 +192,7 @@ function draw(svg, g, data, W, H, color, p) {
       .attr('y', d => y(d.y) + y.bandwidth() / 2 + 4)
       .attr('text-anchor', 'middle')
       .attr('font-family', 'DM Mono, monospace')
-      .attr('font-size', (p.fontSize ?? 12) - 1)
+      .attr('font-size', tailleTexte)
       // Contraste automatique sur la clarté perceptuelle (Lab) et non la
       // clarté HSL, qui surestime les bleus : #6c63ff passe pour clair en HSL
       // alors qu'un texte sombre y est peu lisible.
