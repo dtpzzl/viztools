@@ -4,7 +4,7 @@
  * @icon <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="4" cy="17" r="1.6" opacity=".45"/><circle cx="7.2" cy="11.5" r="1.6" opacity=".7"/><circle cx="12" cy="9" r="1.6"/><circle cx="16.8" cy="11.5" r="1.6" opacity=".7"/><circle cx="20" cy="17" r="1.6" opacity=".45"/><circle cx="6.5" cy="21" r="1.4" opacity=".3"/><circle cx="12" cy="14.5" r="1.4" opacity=".85"/><circle cx="17.5" cy="21" r="1.4" opacity=".3"/></svg>
  * @sampleData [{"series":"Groupe A","label":"Pour","value":90},{"series":"Groupe A","label":"Contre","value":12},{"series":"Groupe B","label":"Contre","value":64},{"series":"Groupe B","label":"Abstention","value":9}]
  * @dataFields {"series":{"type":"category","required":true,"label":"Groupe","description":"Groupe politique : chaque groupe occupe des sièges contigus, dans l'ordre du tri choisi"},"label":{"type":"category","required":true,"label":"Sens du vote","description":"Pour, Contre, ou tout autre valeur traitée comme abstention"},"value":{"type":"number","required":false,"label":"Effectif","description":"Nombre de votants que représente la ligne — à laisser vide si une ligne = un votant"},"votant":{"type":"category","required":false,"label":"Votant","description":"Nom ou identifiant du votant : au survol, l'infobulle le nomme. Suppose une ligne par votant"},"effectifGroupe":{"type":"number","required":false,"label":"Effectif du groupe","description":"Nombre total de membres du groupe, répété sur chaque ligne. Les membres sans position enregistrée complètent l'hémicycle"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Restreint l'hémicycle à une valeur, par exemple un scrutin"}}
- * @params {"votePour":{"group":"visuel","type":"text","label":"Valeur « pour »","default":"Pour"},"voteContre":{"group":"visuel","type":"text","label":"Valeur « contre »","default":"Contre"},"rowCount":{"group":"visuel","type":"number","label":"Nombre de rangées","default":null,"placeholder":"auto"},"innerRatio":{"group":"visuel","type":"range","label":"Trou central","min":0.1,"max":0.8,"step":0.05,"default":0.35},"seatGap":{"group":"visuel","type":"range","label":"Écart entre sièges","min":0,"max":6,"step":0.5,"default":1.5,"unit":"px"},"abstentionStroke":{"group":"visuel","type":"range","label":"Épaisseur de l'anneau d'abstention","min":0.1,"max":0.6,"step":0.02,"default":0.28},"showLegend":{"group":"visuel","type":"toggle","label":"Afficher la légende","default":true},"showResume":{"group":"visuel","type":"toggle","label":"Résumé au centre","default":true},"effectifTotal":{"group":"visuel","type":"number","label":"Sièges de l'assemblée","default":null,"placeholder":"nombre de votants"},"colorSerie1":{"group":"visuel","type":"color","label":"Couleur groupe 1","default":null,"placeholder":"palette automatique"},"colorSerie2":{"group":"visuel","type":"color","label":"Couleur groupe 2","default":null,"placeholder":"palette automatique"},"colorSerie3":{"group":"visuel","type":"color","label":"Couleur groupe 3","default":null,"placeholder":"palette automatique"},"colorSerie4":{"group":"visuel","type":"color","label":"Couleur groupe 4","default":null,"placeholder":"palette automatique"},"colorSerie5":{"group":"visuel","type":"color","label":"Couleur groupe 5","default":null,"placeholder":"palette automatique"},"colorSerie6":{"group":"visuel","type":"color","label":"Couleur groupe 6","default":null,"placeholder":"palette automatique"},"colorSerie7":{"group":"visuel","type":"color","label":"Couleur groupe 7","default":null,"placeholder":"palette automatique"},"colorSerie8":{"group":"visuel","type":"color","label":"Couleur groupe 8","default":null,"placeholder":"palette automatique"},"colorSerie9":{"group":"visuel","type":"color","label":"Couleur groupe 9","default":null,"placeholder":"palette automatique"},"colorSerie10":{"group":"visuel","type":"color","label":"Couleur groupe 10","default":null,"placeholder":"palette automatique"},"colorSerie11":{"group":"visuel","type":"color","label":"Couleur groupe 11","default":null,"placeholder":"palette automatique"},"colorSerie12":{"group":"visuel","type":"color","label":"Couleur groupe 12","default":null,"placeholder":"palette automatique"},"colorSerie13":{"group":"visuel","type":"color","label":"Couleur groupe 13","default":null,"placeholder":"palette automatique"},"colorSerie14":{"group":"visuel","type":"color","label":"Couleur groupe 14","default":null,"placeholder":"palette automatique"},"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité","min":0.1,"max":1,"step":0.05,"default":1},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les effectifs","default":true}}
+ * @params {"votePour":{"group":"visuel","type":"text","label":"Valeur « pour »","default":"Pour"},"voteContre":{"group":"visuel","type":"text","label":"Valeur « contre »","default":"Contre"},"rowCount":{"group":"visuel","type":"number","label":"Nombre de rangées","default":null,"placeholder":"auto"},"innerRatio":{"group":"visuel","type":"range","label":"Trou central","min":0.1,"max":0.8,"step":0.05,"default":0.35},"seatGap":{"group":"visuel","type":"range","label":"Écart entre sièges","min":0,"max":6,"step":0.5,"default":1.5,"unit":"px"},"abstentionStroke":{"group":"visuel","type":"range","label":"Épaisseur de l'anneau d'abstention","min":0.1,"max":0.6,"step":0.02,"default":0.28},"showLegend":{"group":"visuel","type":"toggle","label":"Afficher la légende","default":true},"showResume":{"group":"visuel","type":"toggle","label":"Résumé au centre","default":true},"effectifTotal":{"group":"visuel","type":"number","label":"Sièges de l'assemblée","default":null,"placeholder":"somme des effectifs de groupe"},"colorSerie1":{"group":"visuel","type":"color","label":"Couleur groupe 1","default":null,"placeholder":"palette automatique"},"colorSerie2":{"group":"visuel","type":"color","label":"Couleur groupe 2","default":null,"placeholder":"palette automatique"},"colorSerie3":{"group":"visuel","type":"color","label":"Couleur groupe 3","default":null,"placeholder":"palette automatique"},"colorSerie4":{"group":"visuel","type":"color","label":"Couleur groupe 4","default":null,"placeholder":"palette automatique"},"colorSerie5":{"group":"visuel","type":"color","label":"Couleur groupe 5","default":null,"placeholder":"palette automatique"},"colorSerie6":{"group":"visuel","type":"color","label":"Couleur groupe 6","default":null,"placeholder":"palette automatique"},"colorSerie7":{"group":"visuel","type":"color","label":"Couleur groupe 7","default":null,"placeholder":"palette automatique"},"colorSerie8":{"group":"visuel","type":"color","label":"Couleur groupe 8","default":null,"placeholder":"palette automatique"},"colorSerie9":{"group":"visuel","type":"color","label":"Couleur groupe 9","default":null,"placeholder":"palette automatique"},"colorSerie10":{"group":"visuel","type":"color","label":"Couleur groupe 10","default":null,"placeholder":"palette automatique"},"colorSerie11":{"group":"visuel","type":"color","label":"Couleur groupe 11","default":null,"placeholder":"palette automatique"},"colorSerie12":{"group":"visuel","type":"color","label":"Couleur groupe 12","default":null,"placeholder":"palette automatique"},"colorSerie13":{"group":"visuel","type":"color","label":"Couleur groupe 13","default":null,"placeholder":"palette automatique"},"colorSerie14":{"group":"visuel","type":"color","label":"Couleur groupe 14","default":null,"placeholder":"palette automatique"},"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité","min":0.1,"max":1,"step":0.05,"default":1},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les effectifs","default":true}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -87,6 +87,15 @@ function draw(svg, g, data, W, H, color, p) {
     total += e.total;
   }
   if (!total) return;
+
+  // Somme des effectifs déclarés : c'est le nombre de sièges POURVUS, qui
+  // varie d'un scrutin à l'autre au gré des vacances — 573 là où l'Assemblée
+  // en compte 577 sur le papier. La saisir à la main serait donc la figer à
+  // une valeur fausse la plupart du temps. On ne descend jamais sous le
+  // nombre de sièges dessinés, qu'un groupe déclarant moins de membres qu'il
+  // n'a de votants ferait sinon dépasser son propre total.
+  const sommeDeclaree = groupes.reduce((acc, g) => acc + (tailleGroupe.get(g) ?? 0), 0);
+  const siegesPourvus = sommeDeclaree > 0 ? Math.max(sommeDeclaree, total) : null;
 
   // ---- Palette ----------------------------------------------------------
   // Une couleur par groupe, réglable siège par siège dans le panneau. Non
@@ -217,6 +226,7 @@ function draw(svg, g, data, W, H, color, p) {
         // la même forme, sans quoi l'infobulle retomberait sur la marque
         // elle-même et afficherait ses coordonnées.
         if (siege) marques.push({ ...siege, groupe, sens, couleur,
+                                  exprime: !!ligne,
                                   data: ligne || { series: groupe } });
       }
     }
@@ -288,18 +298,20 @@ function draw(svg, g, data, W, H, color, p) {
     const nPour   = marques.filter(m => m.sens === 'pour').length;
     const nContre = marques.filter(m => m.sens === 'contre').length;
     const nAbst   = marques.filter(m => m.sens === 'abstention').length;
-    const votants = nPour + nContre + nAbst;
+    // « Votants » compte ceux qui se sont PRONONCÉS, pas les sièges : les
+    // sièges complétés depuis l'effectif du groupe n'ont exprimé aucune
+    // position. Les compter donnerait mécaniquement le total des sièges, et
+    // la ligne se lirait « 520 / 520 ».
+    const votants = marques.filter(m => m.exprime).length;
     const sieges  = Number.isFinite(+p.effectifTotal) && +p.effectifTotal > 0
-      ? Math.round(+p.effectifTotal) : null;
+      ? Math.round(+p.effectifTotal) : siegesPourvus;
 
     // La taille du texte suit le trou : sur un petit visuel le résumé doit
     // rétrécir plutôt que déborder sur les premiers sièges.
     const tailleResume = Math.max(7, Math.min(fontSize * 1.15, rInt * 0.17));
-    // La ligne compte les sièges dessinés. Attention sur un scrutin où tous
-    // les députés ne votent pas — une motion de censure, par exemple :
-    // l'Assemblée n'y recense comme votants que ses soutiens, 146 en juillet
-    // 2022, quand l'hémicycle en montre 577. Le chiffre affiché ici peut donc
-    // différer du décompte officiel du scrutin.
+    // La ligne rapporte les votants aux sièges pourvus. Sur un scrutin où
+    // tous les députés ne votent pas — une motion de censure — l'écart est
+    // l'essentiel de l'information : 114 sur 573.
     const lignes = [
       ['Votants', sieges ? `${votants} / ${sieges}` : String(votants)],
       ['Pour', String(nPour)],
