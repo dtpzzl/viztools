@@ -78,14 +78,23 @@ function draw(svg, g, data, W, H, color, p) {
 
   // ---- Légende ----------------------------------------------------------
   const legende = p.showLegend !== false;
-  const hautCaption = shown === null ? 0 : fontSize + 8;
-  // Deux lignes : les groupes, puis le rappel des trois symboles.
-  const hautLegende = legende ? fontSize * 2 + 26 : 0;
+  // La clé des trois symboles vit en haut À GAUCHE : c'est ce qu'on lit avant
+  // de regarder l'hémicycle, pas après. Le bandeau existe donc toujours,
+  // qu'un filtre soit appliqué ou non.
+  const hautCaption = legende || shown !== null ? fontSize + 10 : 0;
+  // En bas, deux colonnes : les groupes ayant voté pour, ceux ayant voté
+  // contre. Leur hauteur dépend du plus long des deux.
+  const nbPour   = groupes.filter(gr => effectif.get(gr).pour   > 0).length;
+  const nbContre = groupes.filter(gr => effectif.get(gr).contre > 0).length;
+  const hautLegende = legende
+    ? (fontSize + 4) * (Math.max(nbPour, nbContre) + 1) + 14
+    : 0;
   const hauteurArc = Math.max(40, H - hautCaption - hautLegende);
 
   if (shown !== null) {
+    // Le filtre passe à DROITE, la gauche étant prise par la clé.
     g.append('text')
-      .attr('x', 0).attr('y', fontSize)
+      .attr('x', W).attr('y', fontSize).attr('text-anchor', 'end')
       .attr('font-family', 'DM Sans, sans-serif').attr('font-size', fontSize)
       .attr('font-weight', '500').attr('fill', '#0f0f1a')
       .text(shown);
@@ -124,14 +133,25 @@ function draw(svg, g, data, W, H, color, p) {
     rayons.push(rangees === 1 ? (rInt + rExt) / 2
                               : rInt + (rExt - rInt) * (i / (rangees - 1)));
   }
-  const sommeRayons = d3.sum(rayons);
-  const parRangee = rayons.map(r => Math.max(1, Math.floor(total * r / sommeRayons)));
-  // L'arrondi vers le bas laisse des sièges à placer : on les ajoute aux
-  // rangées les plus longues, qui ont le plus de place.
-  let reste = total - d3.sum(parRangee);
-  const ordreLongueur = rayons.map((r, i) => i).sort((a, b) => rayons[b] - rayons[a]);
-  for (let k = 0; reste > 0; k = (k + 1) % ordreLongueur.length, reste--) {
-    parRangee[ordreLongueur[k]]++;
+  // ---- Grille POLAIRE ----------------------------------------------------
+  // Les sièges étaient répartis proportionnellement au rayon : chaque rangée
+  // avait son propre pas angulaire, et comme des rangées voisines tombaient
+  // souvent sur le même effectif, il s'en dégageait des colonnes verticales —
+  // un quadrillage cartésien accidentel, sur un dessin qui est polaire.
+  //
+  // Toutes les rangées partagent désormais les MÊMES angles : pas radial
+  // constant, pas angulaire constant. Les sièges s'alignent donc à la fois
+  // sur les rayons et sur les arcs, ce qui est la régularité propre à un
+  // système de coordonnées polaires.
+  const parRangeeVoulue = Math.ceil(total / rangees);
+  const parRangee = new Array(rangees).fill(parRangeeVoulue);
+  // La division laisse un excédent de places : on le retire de la rangée la
+  // plus INTÉRIEURE, la plus courte, où il se remarque le moins.
+  let excedent = parRangeeVoulue * rangees - total;
+  for (let i = 0; excedent > 0 && i < rangees; i++) {
+    const retire = Math.min(excedent, parRangee[i] - 1);
+    parRangee[i] -= retire;
+    excedent -= retire;
   }
 
   // Positions, puis tri par ANGLE : un hémicycle se lit de gauche à droite,
@@ -141,19 +161,21 @@ function draw(svg, g, data, W, H, color, p) {
   for (let i = 0; i < rangees; i++) {
     const n = parRangee[i];
     const r = rayons[i];
+    // Les rangées amputées restent CENTRÉES sur le demi-cercle : sans ce
+    // décalage, elles commenceraient toutes à gauche et le vide se
+    // retrouverait entièrement à droite.
+    const decalage = (parRangeeVoulue - n) / 2;
     for (let j = 0; j < n; j++) {
-      // Demi-tour de π à 0 ; le demi-pas évite d'aligner tous les sièges de
-      // toutes les rangées sur le même rayon, ce qui ferait des colonnes.
-      const t = n === 1 ? 0.5 : (j + 0.5) / n;
+      const t = (j + decalage + 0.5) / parRangeeVoulue;
       const angle = Math.PI * (1 - t);
       sieges.push({ angle, r, x: Math.cos(angle) * r, y: -Math.sin(angle) * r });
     }
   }
   sieges.sort((a, b) => b.angle - a.angle || a.r - b.r);
 
-  // Taille d'un point : la moitié de l'écart disponible le long de la rangée
-  // la plus chargée, moins l'espacement demandé.
-  const pasAngulaire = Math.PI / Math.max(...parRangee);
+  // Taille d'un point : la moitié du pas angulaire sur la rangée la plus
+  // intérieure, où les sièges sont les plus serrés.
+  const pasAngulaire = Math.PI / parRangeeVoulue;
   const ecartRangees = rangees > 1 ? (rExt - rInt) / (rangees - 1) : rExt - rInt;
   const place = Math.min(pasAngulaire * rInt, ecartRangees);
   const rayonPoint = Math.max(1.2, place / 2 - (p.seatGap ?? 1.5) / 2);
@@ -270,66 +292,83 @@ function draw(svg, g, data, W, H, color, p) {
     });
   }
 
-  // ---- Légende -----------------------------------------------------------
+  // ---- Légendes ----------------------------------------------------------
   if (legende) {
-    const lg = g.append('g').attr('transform', `translate(0,${cy + 16})`);
     const taille = fontSize - 1;
 
-    // Groupes, sur une ligne qui revient à la ligne quand elle déborde.
-    let x = 0, y = taille;
-    groupes.forEach((groupe, i) => {
-      const e = effectif.get(groupe);
-      const texte = p.showLabels !== false ? `${groupe} (${e.total})` : String(groupe);
-      const largeur = texte.length * taille * 0.55 + 16;
-      if (x + largeur > W && x > 0) { x = 0; y += taille + 6; }
-      lg.append('circle').attr('cx', x + 4).attr('cy', y - taille * 0.32)
-        .attr('r', taille * 0.34).attr('fill', couleurDe(groupe, i));
-      lg.append('text').attr('x', x + 12).attr('y', y)
-        .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
-        .attr('fill', '#4a4a5e').text(texte);
-      x += largeur;
-    });
-
-    // Rappel des trois symboles, sous les groupes.
-    const yS = y + taille + 10;
-    const total3 = marques.length;
-    const parSens = sens => marques.filter(m => m.sens === sens).length;
-    // Les décomptes sont déjà au centre quand le résumé est affiché : la
-    // légende n'est plus alors qu'une clé de lecture des trois symboles.
-    const avec = n => (p.showResume !== false ? '' : ` (${n})`);
-    const items = [
-      ['pour', `Pour${avec(parSens('pour'))}`],
-      ['abstention', `Abstention${avec(parSens('abstention'))}`],
-      ['contre', `Contre${avec(parSens('contre'))}`],
-    ];
-    let xs = 0;
-    items.forEach(([sens, texte]) => {
+    // Clé des trois écritures, en haut à gauche.
+    const cle = g.append('g');
+    const symbole = (x, y, sens) => {
       if (sens === 'contre') {
-        const b = taille * 0.3;
-        lg.append('path')
-          .attr('d', `M${xs},${yS - taille * 0.32 - b}L${xs + 2 * b},${yS - taille * 0.32 + b}` +
-                     `M${xs},${yS - taille * 0.32 + b}L${xs + 2 * b},${yS - taille * 0.32 - b}`)
-          .attr('stroke', '#4a4a5e').attr('stroke-width', 1.4)
+        const b = taille * 0.32;
+        cle.append('path')
+          .attr('d', `M${x - b},${y - b}L${x + b},${y + b}M${x - b},${y + b}L${x + b},${y - b}`)
+          .attr('stroke', '#4a4a5e').attr('stroke-width', 1.5)
           .attr('stroke-linecap', 'round').attr('fill', 'none');
       } else if (sens === 'abstention') {
-        lg.append('circle').attr('cx', xs + taille * 0.3).attr('cy', yS - taille * 0.32)
-          .attr('r', taille * 0.26).attr('fill', '#ffffff').attr('fill-opacity', 0.5)
-          .attr('stroke', '#4a4a5e').attr('stroke-width', taille * 0.16);
+        cle.append('circle').attr('cx', x).attr('cy', y).attr('r', taille * 0.27)
+          .attr('fill', '#ffffff').attr('fill-opacity', 0.5)
+          .attr('stroke', '#4a4a5e').attr('stroke-width', taille * 0.17);
       } else {
-        lg.append('circle').attr('cx', xs + taille * 0.3).attr('cy', yS - taille * 0.32)
-          .attr('r', taille * 0.3).attr('fill', '#4a4a5e');
+        cle.append('circle').attr('cx', x).attr('cy', y).attr('r', taille * 0.32)
+          .attr('fill', '#4a4a5e');
       }
-      lg.append('text').attr('x', xs + taille * 0.9).attr('y', yS)
+    };
+    let xc = 0;
+    const yc = fontSize * 0.75;
+    for (const [sens, texte] of [['pour', 'Pour'], ['abstention', 'Abstention'], ['contre', 'Contre']]) {
+      symbole(xc + taille * 0.35, yc - taille * 0.3, sens);
+      cle.append('text').attr('x', xc + taille).attr('y', yc)
         .attr('font-family', 'DM Mono, monospace').attr('font-size', taille - 1)
         .attr('fill', '#7a7a90').text(texte);
-      xs += texte.length * (taille - 1) * 0.58 + 26;
-    });
+      xc += texte.length * (taille - 1) * 0.58 + 24;
+    }
 
+    // Deux colonnes en bas : qui a voté pour, qui a voté contre. La pastille
+    // et la croix reprennent la couleur du groupe — c'est ce qui permet de
+    // relier une ligne de légende à sa zone dans l'hémicycle.
+    const lg = g.append('g').attr('transform', `translate(0,${cy + 16})`);
+    const hLigne = taille + 4;
+    const largeurCol = W / 2;
+
+    const colonne = (sens, titre, x) => {
+      lg.append('text').attr('x', x).attr('y', taille)
+        .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
+        .attr('font-weight', 700).attr('fill', '#0f0f1a').text(titre);
+      let ligne = 1;
+      groupes.forEach((groupe, i) => {
+        const n = effectif.get(groupe)[sens];
+        if (!n) return;
+        const y = taille + ligne * hLigne;
+        const couleur = couleurDe(groupe, i);
+        if (sens === 'contre') {
+          const b = taille * 0.32;
+          lg.append('path')
+            .attr('d', `M${x - b + 4},${y - taille * 0.3 - b}L${x + b + 4},${y - taille * 0.3 + b}` +
+                       `M${x - b + 4},${y - taille * 0.3 + b}L${x + b + 4},${y - taille * 0.3 - b}`)
+            .attr('stroke', couleur).attr('stroke-width', 1.8)
+            .attr('stroke-linecap', 'round').attr('fill', 'none');
+        } else {
+          lg.append('circle').attr('cx', x + 4).attr('cy', y - taille * 0.3)
+            .attr('r', taille * 0.34).attr('fill', couleur);
+        }
+        lg.append('text').attr('x', x + 13).attr('y', y)
+          .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
+          .attr('fill', '#4a4a5e')
+          .text(p.showLabels !== false ? `${groupe} (${n})` : String(groupe));
+        ligne++;
+      });
+    };
+
+    colonne('pour',   'Pour',   0);
+    colonne('contre', 'Contre', largeurCol);
+
+    const total3 = marques.length;
     if (total3 !== total) {
-      lg.append('text').attr('x', 0).attr('y', yS + taille + 6)
+      lg.append('text').attr('x', 0).attr('y', taille + (Math.max(nbPour, nbContre) + 1) * hLigne)
         .attr('font-family', 'DM Mono, monospace').attr('font-size', taille - 2)
         .attr('fill', '#b0b0c0')
-        .text(`${total - total3} siège(s) non placé(s) — arrondi des rangées`);
+        .text(`${total - total3} siège(s) non placé(s)`);
     }
   }
 }
