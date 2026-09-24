@@ -4,7 +4,7 @@
  * @icon <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="4" cy="17" r="1.6" opacity=".45"/><circle cx="7.2" cy="11.5" r="1.6" opacity=".7"/><circle cx="12" cy="9" r="1.6"/><circle cx="16.8" cy="11.5" r="1.6" opacity=".7"/><circle cx="20" cy="17" r="1.6" opacity=".45"/><circle cx="6.5" cy="21" r="1.4" opacity=".3"/><circle cx="12" cy="14.5" r="1.4" opacity=".85"/><circle cx="17.5" cy="21" r="1.4" opacity=".3"/></svg>
  * @sampleData [{"series":"Groupe A","label":"Pour","value":90},{"series":"Groupe A","label":"Contre","value":12},{"series":"Groupe B","label":"Contre","value":64},{"series":"Groupe B","label":"Abstention","value":9}]
  * @dataFields {"series":{"type":"category","required":true,"label":"Groupe","description":"Groupe politique : chaque groupe occupe des sièges contigus, dans l'ordre du tri choisi"},"label":{"type":"category","required":true,"label":"Sens du vote","description":"Pour, Contre, ou tout autre valeur traitée comme abstention"},"value":{"type":"number","required":true,"label":"Effectif","description":"Nombre de votants — à régler en mode « comptage » pour compter les lignes"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Restreint l'hémicycle à une valeur, par exemple un scrutin"}}
- * @params {"votePour":{"group":"visuel","type":"text","label":"Valeur « pour »","default":"Pour"},"voteContre":{"group":"visuel","type":"text","label":"Valeur « contre »","default":"Contre"},"rowCount":{"group":"visuel","type":"number","label":"Nombre de rangées","default":null,"placeholder":"auto"},"innerRatio":{"group":"visuel","type":"range","label":"Trou central","min":0.1,"max":0.8,"step":0.05,"default":0.35},"seatGap":{"group":"visuel","type":"range","label":"Écart entre sièges","min":0,"max":6,"step":0.5,"default":1.5,"unit":"px"},"showLegend":{"group":"visuel","type":"toggle","label":"Afficher la légende","default":true},"colorSerie1":{"group":"visuel","type":"color","label":"Couleur groupe 1","default":null,"placeholder":"palette automatique"},"colorSerie2":{"group":"visuel","type":"color","label":"Couleur groupe 2","default":null,"placeholder":"palette automatique"},"colorSerie3":{"group":"visuel","type":"color","label":"Couleur groupe 3","default":null,"placeholder":"palette automatique"},"colorSerie4":{"group":"visuel","type":"color","label":"Couleur groupe 4","default":null,"placeholder":"palette automatique"},"colorSerie5":{"group":"visuel","type":"color","label":"Couleur groupe 5","default":null,"placeholder":"palette automatique"},"colorSerie6":{"group":"visuel","type":"color","label":"Couleur groupe 6","default":null,"placeholder":"palette automatique"},"colorSerie7":{"group":"visuel","type":"color","label":"Couleur groupe 7","default":null,"placeholder":"palette automatique"},"colorSerie8":{"group":"visuel","type":"color","label":"Couleur groupe 8","default":null,"placeholder":"palette automatique"},"colorSerie9":{"group":"visuel","type":"color","label":"Couleur groupe 9","default":null,"placeholder":"palette automatique"},"colorSerie10":{"group":"visuel","type":"color","label":"Couleur groupe 10","default":null,"placeholder":"palette automatique"},"colorSerie11":{"group":"visuel","type":"color","label":"Couleur groupe 11","default":null,"placeholder":"palette automatique"},"colorSerie12":{"group":"visuel","type":"color","label":"Couleur groupe 12","default":null,"placeholder":"palette automatique"},"colorSerie13":{"group":"visuel","type":"color","label":"Couleur groupe 13","default":null,"placeholder":"palette automatique"},"colorSerie14":{"group":"visuel","type":"color","label":"Couleur groupe 14","default":null,"placeholder":"palette automatique"},"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité","min":0.1,"max":1,"step":0.05,"default":1},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les effectifs","default":true}}
+ * @params {"votePour":{"group":"visuel","type":"text","label":"Valeur « pour »","default":"Pour"},"voteContre":{"group":"visuel","type":"text","label":"Valeur « contre »","default":"Contre"},"rowCount":{"group":"visuel","type":"number","label":"Nombre de rangées","default":null,"placeholder":"auto"},"innerRatio":{"group":"visuel","type":"range","label":"Trou central","min":0.1,"max":0.8,"step":0.05,"default":0.35},"seatGap":{"group":"visuel","type":"range","label":"Écart entre sièges","min":0,"max":6,"step":0.5,"default":1.5,"unit":"px"},"showLegend":{"group":"visuel","type":"toggle","label":"Afficher la légende","default":true},"showResume":{"group":"visuel","type":"toggle","label":"Résumé au centre","default":true},"effectifTotal":{"group":"visuel","type":"number","label":"Sièges de l'assemblée","default":null,"placeholder":"nombre de votants"},"colorSerie1":{"group":"visuel","type":"color","label":"Couleur groupe 1","default":null,"placeholder":"palette automatique"},"colorSerie2":{"group":"visuel","type":"color","label":"Couleur groupe 2","default":null,"placeholder":"palette automatique"},"colorSerie3":{"group":"visuel","type":"color","label":"Couleur groupe 3","default":null,"placeholder":"palette automatique"},"colorSerie4":{"group":"visuel","type":"color","label":"Couleur groupe 4","default":null,"placeholder":"palette automatique"},"colorSerie5":{"group":"visuel","type":"color","label":"Couleur groupe 5","default":null,"placeholder":"palette automatique"},"colorSerie6":{"group":"visuel","type":"color","label":"Couleur groupe 6","default":null,"placeholder":"palette automatique"},"colorSerie7":{"group":"visuel","type":"color","label":"Couleur groupe 7","default":null,"placeholder":"palette automatique"},"colorSerie8":{"group":"visuel","type":"color","label":"Couleur groupe 8","default":null,"placeholder":"palette automatique"},"colorSerie9":{"group":"visuel","type":"color","label":"Couleur groupe 9","default":null,"placeholder":"palette automatique"},"colorSerie10":{"group":"visuel","type":"color","label":"Couleur groupe 10","default":null,"placeholder":"palette automatique"},"colorSerie11":{"group":"visuel","type":"color","label":"Couleur groupe 11","default":null,"placeholder":"palette automatique"},"colorSerie12":{"group":"visuel","type":"color","label":"Couleur groupe 12","default":null,"placeholder":"palette automatique"},"colorSerie13":{"group":"visuel","type":"color","label":"Couleur groupe 13","default":null,"placeholder":"palette automatique"},"colorSerie14":{"group":"visuel","type":"color","label":"Couleur groupe 14","default":null,"placeholder":"palette automatique"},"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité","min":0.1,"max":1,"step":0.05,"default":1},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les effectifs","default":true}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -170,13 +170,27 @@ function draw(svg, g, data, W, H, color, p) {
   // croix pour « contre », un disque à demi effacé pour l'abstention. La
   // forme porte l'information autant que la couleur : la lecture reste
   // possible en noir et blanc, ou pour un œil qui distingue mal les teintes.
-  const pleins = marques.filter(m => m.sens !== 'contre');
-  arc.selectAll('.siege')
-    .data(pleins).enter().append('circle')
+  arc.selectAll('.pour')
+    .data(marques.filter(m => m.sens === 'pour')).enter().append('circle')
     .attr('cx', d => d.x).attr('cy', d => d.y)
     .attr('r', rayonPoint)
     .attr('fill', d => d.couleur)
-    .attr('opacity', d => (p.opacity ?? 1) * (d.sens === 'abstention' ? 0.5 : 1));
+    .attr('opacity', p.opacity ?? 1);
+
+  // L'abstention est un ANNEAU : contour de la couleur du groupe, intérieur
+  // blanc à demi transparent. Un disque simplement rendu translucide se
+  // confondait avec les teintes claires des groupes voisins — on ne voyait
+  // plus à quel groupe le siège appartenait. Le contour, lui, reste à pleine
+  // opacité et garde le groupe identifiable.
+  arc.selectAll('.abstention')
+    .data(marques.filter(m => m.sens === 'abstention')).enter().append('circle')
+    .attr('cx', d => d.x).attr('cy', d => d.y)
+    .attr('r', Math.max(0.8, rayonPoint - rayonPoint * 0.2))
+    .attr('fill', '#ffffff')
+    .attr('fill-opacity', 0.5)
+    .attr('stroke', d => d.couleur)
+    .attr('stroke-width', Math.max(0.8, rayonPoint * 0.4))
+    .attr('opacity', p.opacity ?? 1);
 
   const croix = marques.filter(m => m.sens === 'contre');
   const bras = rayonPoint * 0.78;
@@ -189,6 +203,45 @@ function draw(svg, g, data, W, H, color, p) {
     .attr('stroke-linecap', 'round')
     .attr('fill', 'none')
     .attr('opacity', p.opacity ?? 1);
+
+  // ---- Résumé au centre ---------------------------------------------------
+  // Le demi-disque central est vide par construction : c'est la place
+  // naturelle du décompte, là où l'œil arrive après avoir parcouru l'arc.
+  if (p.showResume !== false) {
+    const nPour   = marques.filter(m => m.sens === 'pour').length;
+    const nContre = marques.filter(m => m.sens === 'contre').length;
+    const nAbst   = marques.filter(m => m.sens === 'abstention').length;
+    const votants = nPour + nContre + nAbst;
+    const sieges  = Number.isFinite(+p.effectifTotal) && +p.effectifTotal > 0
+      ? Math.round(+p.effectifTotal) : null;
+
+    // La taille du texte suit le trou : sur un petit visuel le résumé doit
+    // rétrécir plutôt que déborder sur les premiers sièges.
+    const tailleResume = Math.max(7, Math.min(fontSize * 1.15, rInt * 0.17));
+    const lignes = [
+      ['Votants', sieges ? `${votants} / ${sieges}` : String(votants)],
+      ['Pour', String(nPour)],
+      ['Contre', String(nContre)],
+      ['Abstention', String(nAbst)],
+    ];
+
+    const res = arc.append('g');
+    const hauteurLigne = tailleResume * 1.5;
+    // Posé au-dessus du centre, pour rester dans le demi-disque.
+    const y0 = -(lignes.length - 1) * hauteurLigne - tailleResume * 0.8;
+    lignes.forEach(([libelle, valeur], i) => {
+      const y = y0 + i * hauteurLigne;
+      res.append('text')
+        .attr('x', -6).attr('y', y).attr('text-anchor', 'end')
+        .attr('font-family', 'DM Mono, monospace').attr('font-size', tailleResume)
+        .attr('fill', '#7a7a90').text(libelle);
+      res.append('text')
+        .attr('x', 6).attr('y', y)
+        .attr('font-family', 'DM Sans, sans-serif').attr('font-size', tailleResume * 1.15)
+        .attr('font-weight', i === 0 ? 700 : 500)
+        .attr('fill', '#0f0f1a').text(valeur);
+    });
+  }
 
   // ---- Légende -----------------------------------------------------------
   if (legende) {
@@ -214,10 +267,13 @@ function draw(svg, g, data, W, H, color, p) {
     const yS = y + taille + 10;
     const total3 = marques.length;
     const parSens = sens => marques.filter(m => m.sens === sens).length;
+    // Les décomptes sont déjà au centre quand le résumé est affiché : la
+    // légende n'est plus alors qu'une clé de lecture des trois symboles.
+    const avec = n => (p.showResume !== false ? '' : ` (${n})`);
     const items = [
-      ['pour', `Pour (${parSens('pour')})`],
-      ['abstention', `Abstention (${parSens('abstention')})`],
-      ['contre', `Contre (${parSens('contre')})`],
+      ['pour', `Pour${avec(parSens('pour'))}`],
+      ['abstention', `Abstention${avec(parSens('abstention'))}`],
+      ['contre', `Contre${avec(parSens('contre'))}`],
     ];
     let xs = 0;
     items.forEach(([sens, texte]) => {
@@ -228,10 +284,13 @@ function draw(svg, g, data, W, H, color, p) {
                      `M${xs},${yS - taille * 0.32 + b}L${xs + 2 * b},${yS - taille * 0.32 - b}`)
           .attr('stroke', '#4a4a5e').attr('stroke-width', 1.4)
           .attr('stroke-linecap', 'round').attr('fill', 'none');
+      } else if (sens === 'abstention') {
+        lg.append('circle').attr('cx', xs + taille * 0.3).attr('cy', yS - taille * 0.32)
+          .attr('r', taille * 0.26).attr('fill', '#ffffff').attr('fill-opacity', 0.5)
+          .attr('stroke', '#4a4a5e').attr('stroke-width', taille * 0.16);
       } else {
         lg.append('circle').attr('cx', xs + taille * 0.3).attr('cy', yS - taille * 0.32)
-          .attr('r', taille * 0.3).attr('fill', '#4a4a5e')
-          .attr('opacity', sens === 'abstention' ? 0.5 : 1);
+          .attr('r', taille * 0.3).attr('fill', '#4a4a5e');
       }
       lg.append('text').attr('x', xs + taille * 0.9).attr('y', yS)
         .attr('font-family', 'DM Mono, monospace').attr('font-size', taille - 1)
