@@ -3,7 +3,7 @@
  * @description Sièges d'une assemblée en demi-cercle, un point par votant, coloré par groupe
  * @icon <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="4" cy="17" r="1.6" opacity=".45"/><circle cx="7.2" cy="11.5" r="1.6" opacity=".7"/><circle cx="12" cy="9" r="1.6"/><circle cx="16.8" cy="11.5" r="1.6" opacity=".7"/><circle cx="20" cy="17" r="1.6" opacity=".45"/><circle cx="6.5" cy="21" r="1.4" opacity=".3"/><circle cx="12" cy="14.5" r="1.4" opacity=".85"/><circle cx="17.5" cy="21" r="1.4" opacity=".3"/></svg>
  * @sampleData [{"series":"Groupe A","label":"Pour","value":90},{"series":"Groupe A","label":"Contre","value":12},{"series":"Groupe B","label":"Contre","value":64},{"series":"Groupe B","label":"Abstention","value":9}]
- * @dataFields {"series":{"type":"category","required":true,"label":"Groupe","description":"Groupe politique : chaque groupe occupe des sièges contigus, dans l'ordre du tri choisi"},"label":{"type":"category","required":true,"label":"Sens du vote","description":"Pour, Contre, ou tout autre valeur traitée comme abstention"},"value":{"type":"number","required":false,"label":"Effectif","description":"Nombre de votants que représente la ligne — à laisser vide si une ligne = un votant"},"votant":{"type":"category","required":false,"label":"Votant","description":"Nom ou identifiant du votant : au survol, l'infobulle le nomme. Suppose une ligne par votant"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Restreint l'hémicycle à une valeur, par exemple un scrutin"}}
+ * @dataFields {"series":{"type":"category","required":true,"label":"Groupe","description":"Groupe politique : chaque groupe occupe des sièges contigus, dans l'ordre du tri choisi"},"label":{"type":"category","required":true,"label":"Sens du vote","description":"Pour, Contre, ou tout autre valeur traitée comme abstention"},"value":{"type":"number","required":false,"label":"Effectif","description":"Nombre de votants que représente la ligne — à laisser vide si une ligne = un votant"},"votant":{"type":"category","required":false,"label":"Votant","description":"Nom ou identifiant du votant : au survol, l'infobulle le nomme. Suppose une ligne par votant"},"effectifGroupe":{"type":"number","required":false,"label":"Effectif du groupe","description":"Nombre total de membres du groupe, répété sur chaque ligne. Les membres sans position enregistrée complètent l'hémicycle"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Restreint l'hémicycle à une valeur, par exemple un scrutin"}}
  * @params {"votePour":{"group":"visuel","type":"text","label":"Valeur « pour »","default":"Pour"},"voteContre":{"group":"visuel","type":"text","label":"Valeur « contre »","default":"Contre"},"rowCount":{"group":"visuel","type":"number","label":"Nombre de rangées","default":null,"placeholder":"auto"},"innerRatio":{"group":"visuel","type":"range","label":"Trou central","min":0.1,"max":0.8,"step":0.05,"default":0.35},"seatGap":{"group":"visuel","type":"range","label":"Écart entre sièges","min":0,"max":6,"step":0.5,"default":1.5,"unit":"px"},"abstentionStroke":{"group":"visuel","type":"range","label":"Épaisseur de l'anneau d'abstention","min":0.1,"max":0.6,"step":0.02,"default":0.28},"showLegend":{"group":"visuel","type":"toggle","label":"Afficher la légende","default":true},"showResume":{"group":"visuel","type":"toggle","label":"Résumé au centre","default":true},"effectifTotal":{"group":"visuel","type":"number","label":"Sièges de l'assemblée","default":null,"placeholder":"nombre de votants"},"colorSerie1":{"group":"visuel","type":"color","label":"Couleur groupe 1","default":null,"placeholder":"palette automatique"},"colorSerie2":{"group":"visuel","type":"color","label":"Couleur groupe 2","default":null,"placeholder":"palette automatique"},"colorSerie3":{"group":"visuel","type":"color","label":"Couleur groupe 3","default":null,"placeholder":"palette automatique"},"colorSerie4":{"group":"visuel","type":"color","label":"Couleur groupe 4","default":null,"placeholder":"palette automatique"},"colorSerie5":{"group":"visuel","type":"color","label":"Couleur groupe 5","default":null,"placeholder":"palette automatique"},"colorSerie6":{"group":"visuel","type":"color","label":"Couleur groupe 6","default":null,"placeholder":"palette automatique"},"colorSerie7":{"group":"visuel","type":"color","label":"Couleur groupe 7","default":null,"placeholder":"palette automatique"},"colorSerie8":{"group":"visuel","type":"color","label":"Couleur groupe 8","default":null,"placeholder":"palette automatique"},"colorSerie9":{"group":"visuel","type":"color","label":"Couleur groupe 9","default":null,"placeholder":"palette automatique"},"colorSerie10":{"group":"visuel","type":"color","label":"Couleur groupe 10","default":null,"placeholder":"palette automatique"},"colorSerie11":{"group":"visuel","type":"color","label":"Couleur groupe 11","default":null,"placeholder":"palette automatique"},"colorSerie12":{"group":"visuel","type":"color","label":"Couleur groupe 12","default":null,"placeholder":"palette automatique"},"colorSerie13":{"group":"visuel","type":"color","label":"Couleur groupe 13","default":null,"placeholder":"palette automatique"},"colorSerie14":{"group":"visuel","type":"color","label":"Couleur groupe 14","default":null,"placeholder":"palette automatique"},"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité","min":0.1,"max":1,"step":0.05,"default":1},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les effectifs","default":true}}
  */
 function draw(svg, g, data, W, H, color, p) {
@@ -55,12 +55,33 @@ function draw(svg, g, data, W, H, color, p) {
     const n = Number.isFinite(+d.value) ? Math.max(0, Math.round(+d.value)) : 1;
     for (let k = 0; k < n; k++) seau[sensDe(d.label)].push(d);
   }
+  // `effectifGroupe` est une CONSTANTE du groupe, répétée à l'identique sur
+  // chacune de ses lignes : la sommer donnerait l'effectif multiplié par le
+  // nombre de votants. On en prend donc le maximum, qui vaut la constante.
+  // Le visuel s'en charge lui-même plutôt que de s'en remettre au mode
+  // d'agrégation choisi dans le Studio — il ne s'applique pas ici, les lignes
+  // arrivant brutes.
+  const tailleGroupe = new Map();
+  for (const d of data) {
+    const n = +d.effectifGroupe;
+    if (!Number.isFinite(n)) continue;
+    tailleGroupe.set(d.series, Math.max(tailleGroupe.get(d.series) ?? 0, Math.round(n)));
+  }
+
   const effectif = new Map();
   let total = 0;
   for (const [groupe, seau] of parGroupe) {
     const e = { pour: seau.pour.length, abstention: seau.abstention.length,
                 contre: seau.contre.length };
-    e.total = e.pour + e.abstention + e.contre;
+    // Les membres dont aucune position n'est enregistrée complètent le
+    // groupe. Sur un scrutin où tous ne votent pas — une motion de censure —
+    // ils forment l'essentiel de l'hémicycle, et sans eux le dessin ne
+    // montrerait qu'une fraction de l'assemblée.
+    const attendu = tailleGroupe.get(groupe) ?? 0;
+    const places = e.pour + e.abstention + e.contre;
+    e.absent = Math.max(0, attendu - places);
+    e.abstention += e.absent;
+    e.total = places + e.absent;
     effectif.set(groupe, e);
     total += e.total;
   }
@@ -180,12 +201,19 @@ function draw(svg, g, data, W, H, color, p) {
   groupes.forEach((groupe, i) => {
     const seau = parGroupe.get(groupe);
     const couleur = couleurDe(groupe, i);
+    const e = effectif.get(groupe);
     for (const sens of ['pour', 'abstention', 'contre']) {
-      for (const ligne of seau[sens]) {
+      // Les sièges complétés viennent après les abstentions déclarées : ils
+      // n'ont aucune ligne source, donc rien à montrer au survol.
+      const lignes = sens === 'abstention'
+        ? seau.abstention.concat(new Array(e.absent).fill(null))
+        : seau[sens];
+      for (const ligne of lignes) {
         const siege = sieges[curseur++];
         // `data` porte la ligne d'origine : c'est elle que l'infobulle de la
         // page de lecture affiche. Avec une ligne par votant, elle le nomme.
-        if (siege) marques.push({ ...siege, groupe, sens, couleur, data: ligne });
+        if (siege) marques.push({ ...siege, groupe, sens, couleur, data: ligne,
+                                  absent: !ligne });
       }
     }
   });
@@ -224,15 +252,24 @@ function draw(svg, g, data, W, H, color, p) {
   // siège plein — sinon les abstentions paraissent plus petites que les
   // autres sièges, ce qui se lit comme une différence d'importance.
   const epaisseurAnneau = Math.max(0.6, rayonPoint * dans01(p.abstentionStroke, 0.28));
-  arc.selectAll('.abstention')
-    .data(marques.filter(m => m.sens === 'abstention')).enter().append('circle')
-    .attr('cx', d => d.x).attr('cy', d => d.y)
-    .attr('r', Math.max(0.5, rayonPoint - epaisseurAnneau / 2))
-    .attr('fill', '#ffffff')
-    .attr('fill-opacity', 0.5)
-    .attr('stroke', d => d.couleur)
-    .attr('stroke-width', epaisseurAnneau)
-    .attr('opacity', p.opacity ?? 1);
+  // Un siège complété depuis l'effectif du groupe n'est pas une abstention :
+  // son occupant n'a rien exprimé du tout. Dessiné à l'identique, il noierait
+  // les abstentions déclarées — six anneaux perdus parmi quatre cents. Même
+  // anneau donc, mais pâli, pour qu'il se lise comme un fond d'hémicycle.
+  for (const [absent, opacite, facteur] of [[false, 1, 1], [true, 0.3, 0.75]]) {
+    const lot = marques.filter(m => m.sens === 'abstention' && !!m.absent === absent);
+    if (!lot.length) continue;
+    const ep = epaisseurAnneau * facteur;
+    arc.selectAll(absent ? '.sans-position' : '.abstention')
+      .data(lot).enter().append('circle')
+      .attr('cx', d => d.x).attr('cy', d => d.y)
+      .attr('r', Math.max(0.5, rayonPoint - ep / 2))
+      .attr('fill', '#ffffff')
+      .attr('fill-opacity', 0.5)
+      .attr('stroke', d => d.couleur)
+      .attr('stroke-width', ep)
+      .attr('opacity', (p.opacity ?? 1) * opacite);
+  }
 
   const croix = marques.filter(m => m.sens === 'contre');
   const bras = rayonPoint * 0.78;
@@ -252,7 +289,8 @@ function draw(svg, g, data, W, H, color, p) {
   if (p.showResume !== false) {
     const nPour   = marques.filter(m => m.sens === 'pour').length;
     const nContre = marques.filter(m => m.sens === 'contre').length;
-    const nAbst   = marques.filter(m => m.sens === 'abstention').length;
+    const nAbst   = marques.filter(m => m.sens === 'abstention' && !m.absent).length;
+    const nAbsent = marques.filter(m => m.absent).length;
     const votants = nPour + nContre + nAbst;
     const sieges  = Number.isFinite(+p.effectifTotal) && +p.effectifTotal > 0
       ? Math.round(+p.effectifTotal) : null;
@@ -271,6 +309,10 @@ function draw(svg, g, data, W, H, color, p) {
       ['Contre', String(nContre)],
       ['Abstention', String(nAbst)],
     ];
+    // Les sièges complétés depuis l'effectif du groupe ne sont pas des
+    // abstentions : personne n'a pris position pour eux. Ils ne se comptent
+    // donc dans aucune des trois lignes, et n'apparaissent que s'il y en a.
+    if (nAbsent) lignes.push(['Sans position', String(nAbsent)]);
 
     const res = arc.append('g');
     const hauteurLigne = tailleResume * 1.5;
@@ -303,10 +345,12 @@ function draw(svg, g, data, W, H, color, p) {
           .attr('d', `M${x - b},${y - b}L${x + b},${y + b}M${x - b},${y + b}L${x + b},${y - b}`)
           .attr('stroke', '#4a4a5e').attr('stroke-width', 1.5)
           .attr('stroke-linecap', 'round').attr('fill', 'none');
-      } else if (sens === 'abstention') {
+      } else if (sens === 'abstention' || sens === 'absent') {
         cle.append('circle').attr('cx', x).attr('cy', y).attr('r', taille * 0.27)
           .attr('fill', '#ffffff').attr('fill-opacity', 0.5)
-          .attr('stroke', '#4a4a5e').attr('stroke-width', taille * 0.17);
+          .attr('stroke', '#4a4a5e')
+          .attr('stroke-width', taille * (sens === 'absent' ? 0.13 : 0.17))
+          .attr('opacity', sens === 'absent' ? 0.3 : 1);
       } else {
         cle.append('circle').attr('cx', x).attr('cy', y).attr('r', taille * 0.32)
           .attr('fill', '#4a4a5e');
@@ -314,7 +358,9 @@ function draw(svg, g, data, W, H, color, p) {
     };
     let xc = 0;
     const yc = fontSize * 0.75;
-    for (const [sens, texte] of [['pour', 'Pour'], ['abstention', 'Abstention'], ['contre', 'Contre']]) {
+    const entrees = [['pour', 'Pour'], ['abstention', 'Abstention'], ['contre', 'Contre']];
+    if (marques.some(m => m.absent)) entrees.push(['absent', 'Sans position']);
+    for (const [sens, texte] of entrees) {
       symbole(xc + taille * 0.35, yc - taille * 0.3, sens);
       cle.append('text').attr('x', xc + taille).attr('y', yc)
         .attr('font-family', 'DM Mono, monospace').attr('font-size', taille - 1)
@@ -329,7 +375,25 @@ function draw(svg, g, data, W, H, color, p) {
     // seul regard.
     const lg = g.append('g').attr('transform', `translate(0,${cy + 16})`);
     const hLigne = taille + 6;
-    const larg = t => String(t).length * taille * 0.55;
+
+    // Les largeurs étaient estimées à `longueur × taille × 0.55`. Sur un nom
+    // de groupe plus large que l'estimation — majuscules, lettres larges —
+    // la parenthèse et la pastille se posaient par-dessus. On mesure donc le
+    // texte réellement rendu, avec un nœud jetable réglé sur la même police.
+    // `getComputedTextLength` renvoie 0 sur un SVG détaché ou avant que la
+    // police ne soit chargée : on retombe alors sur l'estimation.
+    const regle = lg.append('text').attr('opacity', 0);
+    const mesurer = (t, mono, poids) => {
+      const estime = String(t).length * taille * 0.55;
+      try {
+        const n = regle
+          .attr('font-family', mono ? 'DM Mono, monospace' : 'DM Sans, sans-serif')
+          .attr('font-size', taille).attr('font-weight', poids || null)
+          .text(String(t)).node().getComputedTextLength();
+        return n > 0 ? n : estime;
+      } catch (err) { return estime; }
+    };
+    const larg = t => mesurer(t, true);
 
     // « Afficher les effectifs » décroché, la légende redevient une simple
     // liste de groupes : les symboles n'ont plus de chiffre à annoncer.
@@ -342,7 +406,7 @@ function draw(svg, g, data, W, H, color, p) {
       const tPour = String(e.pour), tContre = String(e.contre);
 
       if (!avecEffectifs) {
-        const largeurSimple = larg(groupe) + taille + 18;
+        const largeurSimple = mesurer(groupe) + taille + 18;
         if (x + largeurSimple > W && x > 0) { x = 0; ligne++; }
         const yS = taille + ligne * hLigne;
         lg.append('circle').attr('cx', x + taille * 0.34).attr('cy', yS - taille * 0.3)
@@ -355,14 +419,15 @@ function draw(svg, g, data, W, H, color, p) {
       }
       // Largeur estimée de l'entrée entière, pour décider du retour à la ligne
       // AVANT de commencer à la dessiner.
-      const largeurEntree = larg(groupe) + larg(tPour) + larg(tContre) + taille * 4.2 + 22;
+      const largeurEntree = mesurer(groupe, false, 500)
+                          + larg(tPour) + larg(tContre) + taille * 4.2 + 22;
       if (x + largeurEntree > W && x > 0) { x = 0; ligne++; }
       const y = taille + ligne * hLigne;
 
       lg.append('text').attr('x', x).attr('y', y)
         .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
         .attr('font-weight', 500).attr('fill', '#0f0f1a').text(groupe);
-      let xc = x + larg(groupe) + 5;
+      let xc = x + mesurer(groupe, false, 500) + 5;
 
       lg.append('text').attr('x', xc).attr('y', y)
         .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
@@ -405,6 +470,8 @@ function draw(svg, g, data, W, H, color, p) {
 
       x = xc + taille * 0.35 + 18;
     });
+
+    regle.remove();
 
     const total3 = marques.length;
     if (total3 !== total) {
