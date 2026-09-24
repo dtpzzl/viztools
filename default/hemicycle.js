@@ -3,7 +3,7 @@
  * @description Sièges d'une assemblée en demi-cercle, un point par votant, coloré par groupe
  * @icon <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="4" cy="17" r="1.6" opacity=".45"/><circle cx="7.2" cy="11.5" r="1.6" opacity=".7"/><circle cx="12" cy="9" r="1.6"/><circle cx="16.8" cy="11.5" r="1.6" opacity=".7"/><circle cx="20" cy="17" r="1.6" opacity=".45"/><circle cx="6.5" cy="21" r="1.4" opacity=".3"/><circle cx="12" cy="14.5" r="1.4" opacity=".85"/><circle cx="17.5" cy="21" r="1.4" opacity=".3"/></svg>
  * @sampleData [{"series":"Groupe A","label":"Pour","value":90},{"series":"Groupe A","label":"Contre","value":12},{"series":"Groupe B","label":"Contre","value":64},{"series":"Groupe B","label":"Abstention","value":9}]
- * @dataFields {"series":{"type":"category","required":true,"label":"Groupe","description":"Groupe politique : chaque groupe occupe des sièges contigus, dans l'ordre du tri choisi"},"label":{"type":"category","required":true,"label":"Sens du vote","description":"Pour, Contre, ou tout autre valeur traitée comme abstention"},"value":{"type":"number","required":true,"label":"Effectif","description":"Nombre de votants — à régler en mode « comptage » pour compter les lignes"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Restreint l'hémicycle à une valeur, par exemple un scrutin"}}
+ * @dataFields {"series":{"type":"category","required":true,"label":"Groupe","description":"Groupe politique : chaque groupe occupe des sièges contigus, dans l'ordre du tri choisi"},"label":{"type":"category","required":true,"label":"Sens du vote","description":"Pour, Contre, ou tout autre valeur traitée comme abstention"},"value":{"type":"number","required":false,"label":"Effectif","description":"Nombre de votants que représente la ligne — à laisser vide si une ligne = un votant"},"votant":{"type":"category","required":false,"label":"Votant","description":"Nom ou identifiant du votant : au survol, l'infobulle le nomme. Suppose une ligne par votant"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Restreint l'hémicycle à une valeur, par exemple un scrutin"}}
  * @params {"votePour":{"group":"visuel","type":"text","label":"Valeur « pour »","default":"Pour"},"voteContre":{"group":"visuel","type":"text","label":"Valeur « contre »","default":"Contre"},"rowCount":{"group":"visuel","type":"number","label":"Nombre de rangées","default":null,"placeholder":"auto"},"innerRatio":{"group":"visuel","type":"range","label":"Trou central","min":0.1,"max":0.8,"step":0.05,"default":0.35},"seatGap":{"group":"visuel","type":"range","label":"Écart entre sièges","min":0,"max":6,"step":0.5,"default":1.5,"unit":"px"},"abstentionStroke":{"group":"visuel","type":"range","label":"Épaisseur de l'anneau d'abstention","min":0.1,"max":0.6,"step":0.02,"default":0.28},"showLegend":{"group":"visuel","type":"toggle","label":"Afficher la légende","default":true},"showResume":{"group":"visuel","type":"toggle","label":"Résumé au centre","default":true},"effectifTotal":{"group":"visuel","type":"number","label":"Sièges de l'assemblée","default":null,"placeholder":"nombre de votants"},"colorSerie1":{"group":"visuel","type":"color","label":"Couleur groupe 1","default":null,"placeholder":"palette automatique"},"colorSerie2":{"group":"visuel","type":"color","label":"Couleur groupe 2","default":null,"placeholder":"palette automatique"},"colorSerie3":{"group":"visuel","type":"color","label":"Couleur groupe 3","default":null,"placeholder":"palette automatique"},"colorSerie4":{"group":"visuel","type":"color","label":"Couleur groupe 4","default":null,"placeholder":"palette automatique"},"colorSerie5":{"group":"visuel","type":"color","label":"Couleur groupe 5","default":null,"placeholder":"palette automatique"},"colorSerie6":{"group":"visuel","type":"color","label":"Couleur groupe 6","default":null,"placeholder":"palette automatique"},"colorSerie7":{"group":"visuel","type":"color","label":"Couleur groupe 7","default":null,"placeholder":"palette automatique"},"colorSerie8":{"group":"visuel","type":"color","label":"Couleur groupe 8","default":null,"placeholder":"palette automatique"},"colorSerie9":{"group":"visuel","type":"color","label":"Couleur groupe 9","default":null,"placeholder":"palette automatique"},"colorSerie10":{"group":"visuel","type":"color","label":"Couleur groupe 10","default":null,"placeholder":"palette automatique"},"colorSerie11":{"group":"visuel","type":"color","label":"Couleur groupe 11","default":null,"placeholder":"palette automatique"},"colorSerie12":{"group":"visuel","type":"color","label":"Couleur groupe 12","default":null,"placeholder":"palette automatique"},"colorSerie13":{"group":"visuel","type":"color","label":"Couleur groupe 13","default":null,"placeholder":"palette automatique"},"colorSerie14":{"group":"visuel","type":"color","label":"Couleur groupe 14","default":null,"placeholder":"palette automatique"},"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité","min":0.1,"max":1,"step":0.05,"default":1},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les effectifs","default":true}}
  */
 function draw(svg, g, data, W, H, color, p) {
@@ -42,16 +42,27 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Effectif par groupe et par sens, puis total : c'est lui qui donne le
   // nombre de sièges à dessiner.
+  // Deux formes de données acceptées, et c'est le champ `value` qui tranche.
+  // Renseigné, la ligne vaut N sièges — c'est le cas d'une source déjà
+  // comptée. Absent, une ligne EST un siège : c'est la forme qui permet de
+  // nommer chaque votant au survol, puisque la ligne source voyage alors
+  // jusqu'à sa marque.
+  const parGroupe = new Map();
+  for (const groupe of groupes) parGroupe.set(groupe, { pour: [], abstention: [], contre: [] });
+  for (const d of data) {
+    const seau = parGroupe.get(d.series);
+    if (!seau) continue;
+    const n = Number.isFinite(+d.value) ? Math.max(0, Math.round(+d.value)) : 1;
+    for (let k = 0; k < n; k++) seau[sensDe(d.label)].push(d);
+  }
   const effectif = new Map();
   let total = 0;
-  for (const groupe of groupes) effectif.set(groupe, { pour: 0, contre: 0, abstention: 0, total: 0 });
-  for (const d of data) {
-    const e = effectif.get(d.series);
-    if (!e) continue;
-    const n = Math.max(0, Math.round(+d.value || 0));
-    e[sensDe(d.label)] += n;
-    e.total += n;
-    total += n;
+  for (const [groupe, seau] of parGroupe) {
+    const e = { pour: seau.pour.length, abstention: seau.abstention.length,
+                contre: seau.contre.length };
+    e.total = e.pour + e.abstention + e.contre;
+    effectif.set(groupe, e);
+    total += e.total;
   }
   if (!total) return;
 
@@ -154,12 +165,14 @@ function draw(svg, g, data, W, H, color, p) {
   let curseur = 0;
   const marques = [];
   groupes.forEach((groupe, i) => {
-    const e = effectif.get(groupe);
+    const seau = parGroupe.get(groupe);
     const couleur = couleurDe(groupe, i);
     for (const sens of ['pour', 'abstention', 'contre']) {
-      for (let k = 0; k < e[sens]; k++) {
+      for (const ligne of seau[sens]) {
         const siege = sieges[curseur++];
-        if (siege) marques.push({ ...siege, groupe, sens, couleur });
+        // `data` porte la ligne d'origine : c'est elle que l'infobulle de la
+        // page de lecture affiche. Avec une ligne par votant, elle le nomme.
+        if (siege) marques.push({ ...siege, groupe, sens, couleur, data: ligne });
       }
     }
   });
