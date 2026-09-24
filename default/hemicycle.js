@@ -76,7 +76,8 @@ function draw(svg, g, data, W, H, color, p) {
     // Les membres dont aucune position n'est enregistrée complètent le
     // groupe. Sur un scrutin où tous ne votent pas — une motion de censure —
     // ils forment l'essentiel de l'hémicycle, et sans eux le dessin ne
-    // montrerait qu'une fraction de l'assemblée.
+    // montrerait qu'une fraction de l'assemblée. Ils rejoignent les
+    // abstentions : ne pas trancher et ne pas se prononcer se confondent ici.
     const attendu = tailleGroupe.get(groupe) ?? 0;
     const places = e.pour + e.abstention + e.contre;
     e.absent = Math.max(0, attendu - places);
@@ -212,8 +213,11 @@ function draw(svg, g, data, W, H, color, p) {
         const siege = sieges[curseur++];
         // `data` porte la ligne d'origine : c'est elle que l'infobulle de la
         // page de lecture affiche. Avec une ligne par votant, elle le nomme.
-        if (siege) marques.push({ ...siege, groupe, sens, couleur, data: ligne,
-                                  absent: !ligne });
+        // Un siège complété n'en a pas ; il lui faut malgré tout un objet de
+        // la même forme, sans quoi l'infobulle retomberait sur la marque
+        // elle-même et afficherait ses coordonnées.
+        if (siege) marques.push({ ...siege, groupe, sens, couleur,
+                                  data: ligne || { series: groupe } });
       }
     }
   });
@@ -252,24 +256,18 @@ function draw(svg, g, data, W, H, color, p) {
   // siège plein — sinon les abstentions paraissent plus petites que les
   // autres sièges, ce qui se lit comme une différence d'importance.
   const epaisseurAnneau = Math.max(0.6, rayonPoint * dans01(p.abstentionStroke, 0.28));
-  // Un siège complété depuis l'effectif du groupe n'est pas une abstention :
-  // son occupant n'a rien exprimé du tout. Dessiné à l'identique, il noierait
-  // les abstentions déclarées — six anneaux perdus parmi quatre cents. Même
-  // anneau donc, mais pâli, pour qu'il se lise comme un fond d'hémicycle.
-  for (const [absent, opacite, facteur] of [[false, 1, 1], [true, 0.3, 0.75]]) {
-    const lot = marques.filter(m => m.sens === 'abstention' && !!m.absent === absent);
-    if (!lot.length) continue;
-    const ep = epaisseurAnneau * facteur;
-    arc.selectAll(absent ? '.sans-position' : '.abstention')
-      .data(lot).enter().append('circle')
-      .attr('cx', d => d.x).attr('cy', d => d.y)
-      .attr('r', Math.max(0.5, rayonPoint - ep / 2))
-      .attr('fill', '#ffffff')
-      .attr('fill-opacity', 0.5)
-      .attr('stroke', d => d.couleur)
-      .attr('stroke-width', ep)
-      .attr('opacity', (p.opacity ?? 1) * opacite);
-  }
+  // Abstentions déclarées et sièges complétés depuis l'effectif du groupe
+  // partagent le même anneau : l'un comme l'autre n'ont pas tranché, et le
+  // visuel ne prétend pas distinguer les raisons de ne pas voter.
+  arc.selectAll('.abstention')
+    .data(marques.filter(m => m.sens === 'abstention')).enter().append('circle')
+    .attr('cx', d => d.x).attr('cy', d => d.y)
+    .attr('r', Math.max(0.5, rayonPoint - epaisseurAnneau / 2))
+    .attr('fill', '#ffffff')
+    .attr('fill-opacity', 0.5)
+    .attr('stroke', d => d.couleur)
+    .attr('stroke-width', epaisseurAnneau)
+    .attr('opacity', p.opacity ?? 1);
 
   const croix = marques.filter(m => m.sens === 'contre');
   const bras = rayonPoint * 0.78;
@@ -289,8 +287,7 @@ function draw(svg, g, data, W, H, color, p) {
   if (p.showResume !== false) {
     const nPour   = marques.filter(m => m.sens === 'pour').length;
     const nContre = marques.filter(m => m.sens === 'contre').length;
-    const nAbst   = marques.filter(m => m.sens === 'abstention' && !m.absent).length;
-    const nAbsent = marques.filter(m => m.absent).length;
+    const nAbst   = marques.filter(m => m.sens === 'abstention').length;
     const votants = nPour + nContre + nAbst;
     const sieges  = Number.isFinite(+p.effectifTotal) && +p.effectifTotal > 0
       ? Math.round(+p.effectifTotal) : null;
@@ -309,10 +306,6 @@ function draw(svg, g, data, W, H, color, p) {
       ['Contre', String(nContre)],
       ['Abstention', String(nAbst)],
     ];
-    // Les sièges complétés depuis l'effectif du groupe ne sont pas des
-    // abstentions : personne n'a pris position pour eux. Ils ne se comptent
-    // donc dans aucune des trois lignes, et n'apparaissent que s'il y en a.
-    if (nAbsent) lignes.push(['Sans position', String(nAbsent)]);
 
     const res = arc.append('g');
     const hauteurLigne = tailleResume * 1.5;
@@ -345,12 +338,10 @@ function draw(svg, g, data, W, H, color, p) {
           .attr('d', `M${x - b},${y - b}L${x + b},${y + b}M${x - b},${y + b}L${x + b},${y - b}`)
           .attr('stroke', '#4a4a5e').attr('stroke-width', 1.5)
           .attr('stroke-linecap', 'round').attr('fill', 'none');
-      } else if (sens === 'abstention' || sens === 'absent') {
+      } else if (sens === 'abstention') {
         cle.append('circle').attr('cx', x).attr('cy', y).attr('r', taille * 0.27)
           .attr('fill', '#ffffff').attr('fill-opacity', 0.5)
-          .attr('stroke', '#4a4a5e')
-          .attr('stroke-width', taille * (sens === 'absent' ? 0.13 : 0.17))
-          .attr('opacity', sens === 'absent' ? 0.3 : 1);
+          .attr('stroke', '#4a4a5e').attr('stroke-width', taille * 0.17);
       } else {
         cle.append('circle').attr('cx', x).attr('cy', y).attr('r', taille * 0.32)
           .attr('fill', '#4a4a5e');
@@ -358,9 +349,7 @@ function draw(svg, g, data, W, H, color, p) {
     };
     let xc = 0;
     const yc = fontSize * 0.75;
-    const entrees = [['pour', 'Pour'], ['abstention', 'Abstention'], ['contre', 'Contre']];
-    if (marques.some(m => m.absent)) entrees.push(['absent', 'Sans position']);
-    for (const [sens, texte] of entrees) {
+    for (const [sens, texte] of [['pour', 'Pour'], ['abstention', 'Abstention'], ['contre', 'Contre']]) {
       symbole(xc + taille * 0.35, yc - taille * 0.3, sens);
       cle.append('text').attr('x', xc + taille).attr('y', yc)
         .attr('font-family', 'DM Mono, monospace').attr('font-size', taille - 1)
