@@ -4,7 +4,7 @@
  * @icon <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="4" cy="17" r="1.6" opacity=".45"/><circle cx="7.2" cy="11.5" r="1.6" opacity=".7"/><circle cx="12" cy="9" r="1.6"/><circle cx="16.8" cy="11.5" r="1.6" opacity=".7"/><circle cx="20" cy="17" r="1.6" opacity=".45"/><circle cx="6.5" cy="21" r="1.4" opacity=".3"/><circle cx="12" cy="14.5" r="1.4" opacity=".85"/><circle cx="17.5" cy="21" r="1.4" opacity=".3"/></svg>
  * @sampleData [{"series":"Groupe A","label":"Pour","value":90},{"series":"Groupe A","label":"Contre","value":12},{"series":"Groupe B","label":"Contre","value":64},{"series":"Groupe B","label":"Abstention","value":9}]
  * @dataFields {"series":{"type":"category","required":true,"label":"Groupe","description":"Groupe politique : chaque groupe occupe des sièges contigus, dans l'ordre du tri choisi"},"label":{"type":"category","required":true,"label":"Sens du vote","description":"Pour, Contre, ou tout autre valeur traitée comme abstention"},"value":{"type":"number","required":true,"label":"Effectif","description":"Nombre de votants — à régler en mode « comptage » pour compter les lignes"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Restreint l'hémicycle à une valeur, par exemple un scrutin"}}
- * @params {"votePour":{"group":"visuel","type":"text","label":"Valeur « pour »","default":"Pour"},"voteContre":{"group":"visuel","type":"text","label":"Valeur « contre »","default":"Contre"},"rowCount":{"group":"visuel","type":"number","label":"Nombre de rangées","default":null,"placeholder":"auto"},"innerRatio":{"group":"visuel","type":"range","label":"Trou central","min":0.1,"max":0.8,"step":0.05,"default":0.35},"seatGap":{"group":"visuel","type":"range","label":"Écart entre sièges","min":0,"max":6,"step":0.5,"default":1.5,"unit":"px"},"showLegend":{"group":"visuel","type":"toggle","label":"Afficher la légende","default":true},"showResume":{"group":"visuel","type":"toggle","label":"Résumé au centre","default":true},"effectifTotal":{"group":"visuel","type":"number","label":"Sièges de l'assemblée","default":null,"placeholder":"nombre de votants"},"colorSerie1":{"group":"visuel","type":"color","label":"Couleur groupe 1","default":null,"placeholder":"palette automatique"},"colorSerie2":{"group":"visuel","type":"color","label":"Couleur groupe 2","default":null,"placeholder":"palette automatique"},"colorSerie3":{"group":"visuel","type":"color","label":"Couleur groupe 3","default":null,"placeholder":"palette automatique"},"colorSerie4":{"group":"visuel","type":"color","label":"Couleur groupe 4","default":null,"placeholder":"palette automatique"},"colorSerie5":{"group":"visuel","type":"color","label":"Couleur groupe 5","default":null,"placeholder":"palette automatique"},"colorSerie6":{"group":"visuel","type":"color","label":"Couleur groupe 6","default":null,"placeholder":"palette automatique"},"colorSerie7":{"group":"visuel","type":"color","label":"Couleur groupe 7","default":null,"placeholder":"palette automatique"},"colorSerie8":{"group":"visuel","type":"color","label":"Couleur groupe 8","default":null,"placeholder":"palette automatique"},"colorSerie9":{"group":"visuel","type":"color","label":"Couleur groupe 9","default":null,"placeholder":"palette automatique"},"colorSerie10":{"group":"visuel","type":"color","label":"Couleur groupe 10","default":null,"placeholder":"palette automatique"},"colorSerie11":{"group":"visuel","type":"color","label":"Couleur groupe 11","default":null,"placeholder":"palette automatique"},"colorSerie12":{"group":"visuel","type":"color","label":"Couleur groupe 12","default":null,"placeholder":"palette automatique"},"colorSerie13":{"group":"visuel","type":"color","label":"Couleur groupe 13","default":null,"placeholder":"palette automatique"},"colorSerie14":{"group":"visuel","type":"color","label":"Couleur groupe 14","default":null,"placeholder":"palette automatique"},"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité","min":0.1,"max":1,"step":0.05,"default":1},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les effectifs","default":true}}
+ * @params {"votePour":{"group":"visuel","type":"text","label":"Valeur « pour »","default":"Pour"},"voteContre":{"group":"visuel","type":"text","label":"Valeur « contre »","default":"Contre"},"rowCount":{"group":"visuel","type":"number","label":"Nombre de rangées","default":null,"placeholder":"auto"},"innerRatio":{"group":"visuel","type":"range","label":"Trou central","min":0.1,"max":0.8,"step":0.05,"default":0.35},"seatGap":{"group":"visuel","type":"range","label":"Écart entre sièges","min":0,"max":6,"step":0.5,"default":1.5,"unit":"px"},"abstentionStroke":{"group":"visuel","type":"range","label":"Épaisseur de l'anneau d'abstention","min":0.1,"max":0.6,"step":0.02,"default":0.28},"showLegend":{"group":"visuel","type":"toggle","label":"Afficher la légende","default":true},"showResume":{"group":"visuel","type":"toggle","label":"Résumé au centre","default":true},"effectifTotal":{"group":"visuel","type":"number","label":"Sièges de l'assemblée","default":null,"placeholder":"nombre de votants"},"colorSerie1":{"group":"visuel","type":"color","label":"Couleur groupe 1","default":null,"placeholder":"palette automatique"},"colorSerie2":{"group":"visuel","type":"color","label":"Couleur groupe 2","default":null,"placeholder":"palette automatique"},"colorSerie3":{"group":"visuel","type":"color","label":"Couleur groupe 3","default":null,"placeholder":"palette automatique"},"colorSerie4":{"group":"visuel","type":"color","label":"Couleur groupe 4","default":null,"placeholder":"palette automatique"},"colorSerie5":{"group":"visuel","type":"color","label":"Couleur groupe 5","default":null,"placeholder":"palette automatique"},"colorSerie6":{"group":"visuel","type":"color","label":"Couleur groupe 6","default":null,"placeholder":"palette automatique"},"colorSerie7":{"group":"visuel","type":"color","label":"Couleur groupe 7","default":null,"placeholder":"palette automatique"},"colorSerie8":{"group":"visuel","type":"color","label":"Couleur groupe 8","default":null,"placeholder":"palette automatique"},"colorSerie9":{"group":"visuel","type":"color","label":"Couleur groupe 9","default":null,"placeholder":"palette automatique"},"colorSerie10":{"group":"visuel","type":"color","label":"Couleur groupe 10","default":null,"placeholder":"palette automatique"},"colorSerie11":{"group":"visuel","type":"color","label":"Couleur groupe 11","default":null,"placeholder":"palette automatique"},"colorSerie12":{"group":"visuel","type":"color","label":"Couleur groupe 12","default":null,"placeholder":"palette automatique"},"colorSerie13":{"group":"visuel","type":"color","label":"Couleur groupe 13","default":null,"placeholder":"palette automatique"},"colorSerie14":{"group":"visuel","type":"color","label":"Couleur groupe 14","default":null,"placeholder":"palette automatique"},"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité","min":0.1,"max":1,"step":0.05,"default":1},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"},"showLabels":{"group":"general","type":"toggle","label":"Afficher les effectifs","default":true}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -14,6 +14,10 @@ function draw(svg, g, data, W, H, color, p) {
   const shown = String(p.filterValue ?? '').trim() || null;
 
   const fontSize = p.fontSize ?? 12;
+  const dans01 = (v, repli) => {
+    const n = +v;
+    return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : repli;
+  };
   const POUR   = String(p.votePour   ?? 'Pour').trim().toLowerCase();
   const CONTRE = String(p.voteContre ?? 'Contre').trim().toLowerCase();
 
@@ -182,14 +186,20 @@ function draw(svg, g, data, W, H, color, p) {
   // confondait avec les teintes claires des groupes voisins — on ne voyait
   // plus à quel groupe le siège appartenait. Le contour, lui, reste à pleine
   // opacité et garde le groupe identifiable.
+  // L'épaisseur du trait est réglable : trop épais, l'anneau redevient un
+  // disque et le blanc central disparaît ; trop fin, le groupe ne se lit plus.
+  // Le rayon est calculé pour que le bord EXTÉRIEUR coïncide avec celui d'un
+  // siège plein — sinon les abstentions paraissent plus petites que les
+  // autres sièges, ce qui se lit comme une différence d'importance.
+  const epaisseurAnneau = Math.max(0.6, rayonPoint * dans01(p.abstentionStroke, 0.28));
   arc.selectAll('.abstention')
     .data(marques.filter(m => m.sens === 'abstention')).enter().append('circle')
     .attr('cx', d => d.x).attr('cy', d => d.y)
-    .attr('r', Math.max(0.8, rayonPoint - rayonPoint * 0.2))
+    .attr('r', Math.max(0.5, rayonPoint - epaisseurAnneau / 2))
     .attr('fill', '#ffffff')
     .attr('fill-opacity', 0.5)
     .attr('stroke', d => d.couleur)
-    .attr('stroke-width', Math.max(0.8, rayonPoint * 0.4))
+    .attr('stroke-width', epaisseurAnneau)
     .attr('opacity', p.opacity ?? 1);
 
   const croix = marques.filter(m => m.sens === 'contre');
@@ -218,8 +228,12 @@ function draw(svg, g, data, W, H, color, p) {
     // La taille du texte suit le trou : sur un petit visuel le résumé doit
     // rétrécir plutôt que déborder sur les premiers sièges.
     const tailleResume = Math.max(7, Math.min(fontSize * 1.15, rInt * 0.17));
+    // « Sièges » et non « votants » : la ligne compte les sièges DESSINÉS.
+    // Sur une motion de censure, l'Assemblée ne recense comme votants que
+    // ceux qui la soutiennent — 146 en juillet 2022 — alors que l'hémicycle
+    // en montre 577. Annoncer « votants » contredirait le chiffre officiel.
     const lignes = [
-      ['Votants', sieges ? `${votants} / ${sieges}` : String(votants)],
+      ['Sièges', sieges ? `${votants} / ${sieges}` : String(votants)],
       ['Pour', String(nPour)],
       ['Contre', String(nContre)],
       ['Abstention', String(nAbst)],
