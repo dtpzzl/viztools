@@ -84,11 +84,15 @@ function draw(svg, g, data, W, H, color, p) {
   const hautCaption = legende || shown !== null ? fontSize + 10 : 0;
   // En bas, deux colonnes : les groupes ayant voté pour, ceux ayant voté
   // contre. Leur hauteur dépend du plus long des deux.
-  const nbPour   = groupes.filter(gr => effectif.get(gr).pour   > 0).length;
-  const nbContre = groupes.filter(gr => effectif.get(gr).contre > 0).length;
-  const hautLegende = legende
-    ? (fontSize + 4) * (Math.max(nbPour, nbContre) + 1) + 14
-    : 0;
+  // Estimation du nombre de lignes que prendra la légende : chaque entrée
+  // occupe le nom du groupe, deux effectifs et leurs deux symboles.
+  const largeurEstimee = groupes.reduce((somme, gr) => {
+    const e = effectif.get(gr);
+    return somme + (String(gr).length + String(e.pour).length + String(e.contre).length)
+                   * (fontSize - 1) * 0.55 + (fontSize - 1) * 4.2 + 22;
+  }, 0);
+  const lignesLegende = Math.max(1, Math.ceil(largeurEstimee / Math.max(1, W)));
+  const hautLegende = legende ? (fontSize + 5) * lignesLegende + 22 : 0;
   const hauteurArc = Math.max(40, H - hautCaption - hautLegende);
 
   if (shown !== null) {
@@ -133,25 +137,14 @@ function draw(svg, g, data, W, H, color, p) {
     rayons.push(rangees === 1 ? (rInt + rExt) / 2
                               : rInt + (rExt - rInt) * (i / (rangees - 1)));
   }
-  // ---- Grille POLAIRE ----------------------------------------------------
-  // Les sièges étaient répartis proportionnellement au rayon : chaque rangée
-  // avait son propre pas angulaire, et comme des rangées voisines tombaient
-  // souvent sur le même effectif, il s'en dégageait des colonnes verticales —
-  // un quadrillage cartésien accidentel, sur un dessin qui est polaire.
-  //
-  // Toutes les rangées partagent désormais les MÊMES angles : pas radial
-  // constant, pas angulaire constant. Les sièges s'alignent donc à la fois
-  // sur les rayons et sur les arcs, ce qui est la régularité propre à un
-  // système de coordonnées polaires.
-  const parRangeeVoulue = Math.ceil(total / rangees);
-  const parRangee = new Array(rangees).fill(parRangeeVoulue);
-  // La division laisse un excédent de places : on le retire de la rangée la
-  // plus INTÉRIEURE, la plus courte, où il se remarque le moins.
-  let excedent = parRangeeVoulue * rangees - total;
-  for (let i = 0; excedent > 0 && i < rangees; i++) {
-    const retire = Math.min(excedent, parRangee[i] - 1);
-    parRangee[i] -= retire;
-    excedent -= retire;
+  const sommeRayons = d3.sum(rayons);
+  const parRangee = rayons.map(r => Math.max(1, Math.floor(total * r / sommeRayons)));
+  // L'arrondi vers le bas laisse des sièges à placer : on les ajoute aux
+  // rangées les plus longues, qui ont le plus de place.
+  let reste = total - d3.sum(parRangee);
+  const ordreLongueur = rayons.map((r, i) => i).sort((a, b) => rayons[b] - rayons[a]);
+  for (let k = 0; reste > 0; k = (k + 1) % ordreLongueur.length, reste--) {
+    parRangee[ordreLongueur[k]]++;
   }
 
   // Positions, puis tri par ANGLE : un hémicycle se lit de gauche à droite,
@@ -161,21 +154,19 @@ function draw(svg, g, data, W, H, color, p) {
   for (let i = 0; i < rangees; i++) {
     const n = parRangee[i];
     const r = rayons[i];
-    // Les rangées amputées restent CENTRÉES sur le demi-cercle : sans ce
-    // décalage, elles commenceraient toutes à gauche et le vide se
-    // retrouverait entièrement à droite.
-    const decalage = (parRangeeVoulue - n) / 2;
     for (let j = 0; j < n; j++) {
-      const t = (j + decalage + 0.5) / parRangeeVoulue;
+      // Demi-tour de π à 0 ; le demi-pas évite d'aligner tous les sièges de
+      // toutes les rangées sur le même rayon, ce qui ferait des colonnes.
+      const t = n === 1 ? 0.5 : (j + 0.5) / n;
       const angle = Math.PI * (1 - t);
       sieges.push({ angle, r, x: Math.cos(angle) * r, y: -Math.sin(angle) * r });
     }
   }
   sieges.sort((a, b) => b.angle - a.angle || a.r - b.r);
 
-  // Taille d'un point : la moitié du pas angulaire sur la rangée la plus
-  // intérieure, où les sièges sont les plus serrés.
-  const pasAngulaire = Math.PI / parRangeeVoulue;
+  // Taille d'un point : la moitié de l'écart disponible le long de la rangée
+  // la plus chargée, moins l'espacement demandé.
+  const pasAngulaire = Math.PI / Math.max(...parRangee);
   const ecartRangees = rangees > 1 ? (rExt - rInt) / (rangees - 1) : rExt - rInt;
   const place = Math.min(pasAngulaire * rInt, ecartRangees);
   const rayonPoint = Math.max(1.2, place / 2 - (p.seatGap ?? 1.5) / 2);
@@ -201,7 +192,13 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Centre de l'arc : au bas de la zone utile, sous le rappel du filtre.
   const cx = W / 2;
-  const cy = hautCaption + hauteurArc;
+  // Les rangées restant serrées les unes contre les autres, le demi-disque
+  // n'occupe pas toute la hauteur offerte : il ne monte qu'à rExt. Le poser
+  // au bas de la zone laissait donc une large bande vide au-dessus. On le
+  // centre sur la place disponible, en réservant au passage de quoi loger le
+  // débord des sièges de la rangée extérieure.
+  const hautDessin = rExt + rayonPoint * 2;
+  const cy = hautCaption + Math.min(hauteurArc, (hauteurArc + hautDessin) / 2);
   const arc = g.append('g').attr('transform', `translate(${cx},${cy})`);
 
   // ---- Sièges ------------------------------------------------------------
@@ -263,12 +260,13 @@ function draw(svg, g, data, W, H, color, p) {
     // La taille du texte suit le trou : sur un petit visuel le résumé doit
     // rétrécir plutôt que déborder sur les premiers sièges.
     const tailleResume = Math.max(7, Math.min(fontSize * 1.15, rInt * 0.17));
-    // « Sièges » et non « votants » : la ligne compte les sièges DESSINÉS.
-    // Sur une motion de censure, l'Assemblée ne recense comme votants que
-    // ceux qui la soutiennent — 146 en juillet 2022 — alors que l'hémicycle
-    // en montre 577. Annoncer « votants » contredirait le chiffre officiel.
+    // La ligne compte les sièges dessinés. Attention sur un scrutin où tous
+    // les députés ne votent pas — une motion de censure, par exemple :
+    // l'Assemblée n'y recense comme votants que ses soutiens, 146 en juillet
+    // 2022, quand l'hémicycle en montre 577. Le chiffre affiché ici peut donc
+    // différer du décompte officiel du scrutin.
     const lignes = [
-      ['Sièges', sieges ? `${votants} / ${sieges}` : String(votants)],
+      ['Votants', sieges ? `${votants} / ${sieges}` : String(votants)],
       ['Pour', String(nPour)],
       ['Contre', String(nContre)],
       ['Abstention', String(nAbst)],
@@ -324,44 +322,89 @@ function draw(svg, g, data, W, H, color, p) {
       xc += texte.length * (taille - 1) * 0.58 + 24;
     }
 
-    // Deux colonnes en bas : qui a voté pour, qui a voté contre. La pastille
-    // et la croix reprennent la couleur du groupe — c'est ce qui permet de
-    // relier une ligne de légende à sa zone dans l'hémicycle.
+    // Une ligne par groupe : son nom, puis ses voix pour et ses voix contre,
+    // chacune précédée du symbole qui les représente dans l'hémicycle, à la
+    // couleur du groupe. Deux colonnes séparées obligeaient à chercher le même
+    // groupe deux fois pour lire sa fracture interne ; ici elle se lit d'un
+    // seul regard.
     const lg = g.append('g').attr('transform', `translate(0,${cy + 16})`);
-    const hLigne = taille + 4;
-    const largeurCol = W / 2;
+    const hLigne = taille + 6;
+    const larg = t => String(t).length * taille * 0.55;
 
-    const colonne = (sens, titre, x) => {
-      lg.append('text').attr('x', x).attr('y', taille)
-        .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
-        .attr('font-weight', 700).attr('fill', '#0f0f1a').text(titre);
-      let ligne = 1;
-      groupes.forEach((groupe, i) => {
-        const n = effectif.get(groupe)[sens];
-        if (!n) return;
-        const y = taille + ligne * hLigne;
-        const couleur = couleurDe(groupe, i);
-        if (sens === 'contre') {
-          const b = taille * 0.32;
-          lg.append('path')
-            .attr('d', `M${x - b + 4},${y - taille * 0.3 - b}L${x + b + 4},${y - taille * 0.3 + b}` +
-                       `M${x - b + 4},${y - taille * 0.3 + b}L${x + b + 4},${y - taille * 0.3 - b}`)
-            .attr('stroke', couleur).attr('stroke-width', 1.8)
-            .attr('stroke-linecap', 'round').attr('fill', 'none');
-        } else {
-          lg.append('circle').attr('cx', x + 4).attr('cy', y - taille * 0.3)
-            .attr('r', taille * 0.34).attr('fill', couleur);
-        }
-        lg.append('text').attr('x', x + 13).attr('y', y)
+    // « Afficher les effectifs » décroché, la légende redevient une simple
+    // liste de groupes : les symboles n'ont plus de chiffre à annoncer.
+    const avecEffectifs = p.showLabels !== false;
+
+    let x = 0, ligne = 0;
+    groupes.forEach((groupe, i) => {
+      const e = effectif.get(groupe);
+      const couleur = couleurDe(groupe, i);
+      const tPour = String(e.pour), tContre = String(e.contre);
+
+      if (!avecEffectifs) {
+        const largeurSimple = larg(groupe) + taille + 18;
+        if (x + largeurSimple > W && x > 0) { x = 0; ligne++; }
+        const yS = taille + ligne * hLigne;
+        lg.append('circle').attr('cx', x + taille * 0.34).attr('cy', yS - taille * 0.3)
+          .attr('r', taille * 0.34).attr('fill', couleur);
+        lg.append('text').attr('x', x + taille).attr('y', yS)
           .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
-          .attr('fill', '#4a4a5e')
-          .text(p.showLabels !== false ? `${groupe} (${n})` : String(groupe));
-        ligne++;
-      });
-    };
+          .attr('fill', '#4a4a5e').text(groupe);
+        x += largeurSimple;
+        return;
+      }
+      // Largeur estimée de l'entrée entière, pour décider du retour à la ligne
+      // AVANT de commencer à la dessiner.
+      const largeurEntree = larg(groupe) + larg(tPour) + larg(tContre) + taille * 4.2 + 22;
+      if (x + largeurEntree > W && x > 0) { x = 0; ligne++; }
+      const y = taille + ligne * hLigne;
 
-    colonne('pour',   'Pour',   0);
-    colonne('contre', 'Contre', largeurCol);
+      lg.append('text').attr('x', x).attr('y', y)
+        .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
+        .attr('font-weight', 500).attr('fill', '#0f0f1a').text(groupe);
+      let xc = x + larg(groupe) + 5;
+
+      lg.append('text').attr('x', xc).attr('y', y)
+        .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
+        .attr('fill', '#b0b0c0').text('(');
+      xc += taille * 0.35;
+
+      // Pastille + effectif « pour »
+      lg.append('circle').attr('cx', xc + taille * 0.32).attr('cy', y - taille * 0.3)
+        .attr('r', taille * 0.32).attr('fill', couleur);
+      xc += taille * 0.95;
+      lg.append('text').attr('x', xc).attr('y', y)
+        .attr('font-family', 'DM Mono, monospace').attr('font-size', taille)
+        .attr('fill', '#4a4a5e').text(tPour);
+      xc += larg(tPour) + 7;
+
+      lg.append('text').attr('x', xc).attr('y', y)
+        .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
+        .attr('fill', '#b0b0c0').text('–');
+      // Le tiret touchait la croix : il lui faut sa propre respiration, la
+      // croix étant dessinée et non écrite, donc sans chasse pour l'espacer.
+      xc += taille * 1.05;
+
+      // Croix + effectif « contre »
+      const b = taille * 0.3;
+      const xx = xc + taille * 0.35;
+      lg.append('path')
+        .attr('d', `M${xx - b},${y - taille * 0.3 - b}L${xx + b},${y - taille * 0.3 + b}` +
+                   `M${xx - b},${y - taille * 0.3 + b}L${xx + b},${y - taille * 0.3 - b}`)
+        .attr('stroke', couleur).attr('stroke-width', 1.8)
+        .attr('stroke-linecap', 'round').attr('fill', 'none');
+      xc += taille * 0.95;
+      lg.append('text').attr('x', xc).attr('y', y)
+        .attr('font-family', 'DM Mono, monospace').attr('font-size', taille)
+        .attr('fill', '#4a4a5e').text(tContre);
+      xc += larg(tContre) + 2;
+
+      lg.append('text').attr('x', xc).attr('y', y)
+        .attr('font-family', 'DM Sans, sans-serif').attr('font-size', taille)
+        .attr('fill', '#b0b0c0').text(')');
+
+      x = xc + taille * 0.35 + 18;
+    });
 
     const total3 = marques.length;
     if (total3 !== total) {
