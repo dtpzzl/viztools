@@ -23,7 +23,9 @@ viztools/
     ├── donut.js
     ├── scatter.js
     ├── stacked-bar-line.js
-    └── warming-stripes.js
+    ├── warming-stripes.js
+    ├── hemicycle.js        # « Assemblée »
+    └── carte.js
 ```
 
 ---
@@ -190,6 +192,8 @@ pour signaler qu'un visuel est inapplicable à un jeu de données.
 | Heatmap | `x`, `y`, `value` | `filter` |
 | Heatmap circulaire | `theta`, `r`, `value` | `filter` |
 | Nuage de points | `x`, `y` | `label`, `series`, `weight`, `filter` |
+| Assemblée | `series`, `label` | `value`, `votant`, `effectifGroupe`, `filter` |
+| Carte | `region`, `value` | `filter` — plus une seconde source, voir `@geoSource` |
 
 **Deux pièges :**
 
@@ -287,6 +291,46 @@ le panneau « paramètres du visuel » une fois le visuel choisi.
    d'appeler `draw` sans aucun paramètre. Attention aux replis multiples pour
    un même paramètre : un texte secondaire s'écrit `(p.fontSize ?? 12) - 1`,
    jamais `p.fontSize ?? 11`, qui rendrait le défaut déclaré faux.
+
+### Seconde source — `@geoSource`
+
+Un visuel cartographique a besoin de deux choses : les données, et le fond de
+carte. Le second ne peut pas venir du DataTool — le sandbox n'a ni réseau ni
+DOM — ni d'un `@params`, qui ne sait porter qu'un nombre, une couleur ou un
+choix dans une liste. Un DataTool déclare donc une **seconde source** :
+
+```
+ * @geoSource {"label":"Fond de carte","pivotLabel":"Propriété de jointure","description":"Un GeoJSON — FeatureCollection ou Feature"}
+```
+
+Sa seule présence dit au Studio d'afficher, en tête du panneau « Données &
+Axes », un bloc de chargement — fichier ou URL — et un sélecteur de propriété
+de jointure. Les trois clés ne servent qu'à l'habiller.
+
+Le fond arrive ensuite sur **`data.geo`**, propriété non énumérable du tableau
+de lignes, exactement comme `data.domains` :
+
+```js
+data.geo  // { features: [...], pivot: 'code' }
+```
+
+Non énumérable pour que `Object.keys(data)` continue de ne rendre que des
+lignes, et que rien d'existant ne s'en trouve changé.
+
+**Deux pièges de d3-geo**, tous deux traités dans `default/carte.js` :
+
+1. **Le sens d'enroulement.** d3-geo raisonne sur la sphère : un anneau
+   parcouru à l'envers ne décrit pas le territoire mais tout le reste du
+   monde, et la carte se réduit à un aplat. Or le sens attendu est l'inverse
+   de celui que prescrit la RFC 7946, que respectent beaucoup de fichiers
+   publics. Mesurer `d3.geoArea` de chaque anneau — au-delà d'un hémisphère,
+   il est à l'envers — puis le retourner.
+2. **Les codes à zéro initial.** « 01 » dans le GeoJSON, `1` dans un CSV relu
+   par un tableur : indexer sur les deux écritures, sinon la Corse et l'Ain
+   disparaissent sans que rien ne le signale.
+
+Côté publication, le fond est déposé dans un bucket public et l'article n'en
+retient que l'URL : voir `datapuzzle-admin/js/geo.js`.
 
 ### Contraintes de sécurité (sandbox buildDrawFn)
 
