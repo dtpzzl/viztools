@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "fonds": [
+    {
+      "id": "monde",
+      "label": "Monde — pays",
+      "fichier": "geo/monde.geojson",
+      "pivot": "ISO_A3",
+      "description": "177 pays. Pivot ISO_A3 (FRA), ou ISO_A2, NAME, NAME_FR.",
+      "source": "Natural Earth 1:110m",
+      "licence": "Domaine public",
+      "traces": 177,
+      "octets": 264394
+    },
+    {
+      "id": "europe",
+      "label": "Europe — pays",
+      "fichier": "geo/europe.geojson",
+      "pivot": "ISO_A3",
+      "description": "39 pays européens, extraits du fond mondial.",
+      "source": "Natural Earth 1:110m",
+      "licence": "Domaine public",
+      "traces": 39,
+      "octets": 49699
+    },
+    {
+      "id": "france-regions",
+      "label": "France — régions",
+      "fichier": "geo/france-regions.geojson",
+      "pivot": "code",
+      "description": "13 régions métropolitaines. Pivot « code » (11 = Île-de-France) ou « nom ».",
+      "source": "france-geojson, d'après le découpage administratif Etalab",
+      "licence": "ODbL (OpenStreetMap)",
+      "traces": 13,
+      "octets": 225494
+    },
+    {
+      "id": "france-departements",
+      "label": "France — départements",
+      "fichier": "geo/france-departements.geojson",
+      "pivot": "code",
+      "description": "96 départements métropolitains. Le code garde son zéro initial — « 01 », « 2A ».",
+      "source": "france-geojson, d'après le découpage administratif Etalab",
+      "licence": "ODbL (OpenStreetMap)",
+      "traces": 96,
+      "octets": 569203
+    },
+    {
+      "id": "france-communes",
+      "label": "France — communes",
+      "pivot": "code",
+      "url": "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes-version-simplifiee.geojson",
+      "description": "34 955 communes. Non vendorisé : 19 Mo, et autant de tracés à dessiner à chaque rendu — illisible à la taille d'un article sur la France entière. À réserver à un territoire restreint.",
+      "source": "france-geojson, d'après le découpage administratif Etalab",
+      "licence": "ODbL (OpenStreetMap)",
+      "traces": 34955,
+      "octets": 19342488
+    }
+  ]
+}

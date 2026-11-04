@@ -12,7 +12,13 @@ Servi via `raw.githubusercontent.com` (ou un CDN si réseau restreint).
 viztools/
 ├── README.md
 ├── config/
-│   └── apis.json           # Config des APIs (URL, facettes, exemples — PAS de clés)
+│   ├── apis.json           # Config des APIs (URL, facettes, exemples — PAS de clés)
+│   └── geojson.json        # Catalogue des fonds de carte courants
+├── geo/                    # Fonds de carte vendorisés, servis par raw.githubusercontent
+│   ├── monde.geojson
+│   ├── europe.geojson
+│   ├── france-regions.geojson
+│   └── france-departements.geojson
 └── default/                # DataTools D3.js built-in
     ├── bar.js
     ├── bar-horizontal.js
@@ -331,6 +337,32 @@ lignes, et que rien d'existant ne s'en trouve changé.
 
 Côté publication, le fond est déposé dans un bucket public et l'article n'en
 retient que l'URL : voir `datapuzzle-admin/js/geo.js`.
+
+#### Catalogue des fonds courants — `config/geojson.json`
+
+Les fonds les plus demandés sont tenus ici pour qu'on n'ait pas à les
+retrouver à chaque article. Le Studio en fait une liste déroulante, au-dessus
+du dépôt de fichier.
+
+| Champ | Rôle |
+|---|---|
+| `id` | identifiant stable, en kebab-case |
+| `label` | ce que lit l'auteur dans la liste |
+| `fichier` | chemin dans ce dépôt — le fond est vendorisé |
+| `url` | adresse absolue — le fond est trop lourd pour être vendorisé |
+| `pivot` | propriété de jointure proposée par défaut |
+| `traces`, `octets` | MESURÉS, pas annoncés : ils s'affichent dans la liste |
+| `source`, `licence` | d'où vient le fond, à quelles conditions |
+
+`fichier` et `url` s'excluent. Un fond vendorisé reste lisible même si
+`raw.githubusercontent.com` est bloqué, le back-office en gardant une copie —
+même raison que pour les DataTools.
+
+**Ajouter un fond :** le simplifier d'abord (un fond non simplifié pèse cinq à
+dix fois plus pour un rendu identique à la taille d'un article), ne garder que
+les propriétés utiles — le fond Natural Earth en portait 168, ramenées à 5, et
+son poids est passé de 819 à 258 Ko — puis mesurer `traces` et `octets` plutôt
+que les estimer.
 
 ### Contraintes de sécurité (sandbox buildDrawFn)
 
