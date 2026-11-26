@@ -63,7 +63,11 @@ function draw(svg, g, data, W, H, color, p) {
     .range([cMin, cMid, cMax])
     .clamp(true);
 
-  const fmtVal = v => formatAxisValue(v, p.unitMode, p.decimals, sMax);
+  // `?? 2` et non le `?? 0` de formatAxisValue : c'est le défaut DÉCLARÉ
+  // dans @params. Sans ce repli, dessiner sans paramètre rendait des bornes
+  // à zéro décimale là où le Studio en affiche deux — la légende n'était
+  // alors pas au même endroit, sa largeur dépendant du texte.
+  const fmtVal = v => formatAxisValue(v, p.unitMode, p.decimals ?? 2, sMax);
 
   // ---- Opacité le long de l'échelle -------------------------------------
   // Une série où la plupart des valeurs sont au plancher se lit mal quand ce
