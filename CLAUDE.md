@@ -205,7 +205,7 @@ pour signaler qu'un visuel est inapplicable à un jeu de données.
 | Assemblée | `series`, `label` | `value`, `votant`, `effectifGroupe`, `filter` |
 | Carte | `region`, `value` | `filter` — plus une seconde source, voir `@geoSource` |
 | Aires rectangulaires | `series`, `label`, `value` | `filter` |
-| Aires circulaires | `series`, `label`, `value` | `filter` |
+| Aires circulaires | `series`, `label`, `value` | `filter` — deux dispositions, voir ci-dessous |
 | Aires hexagonales | `series`, `label`, `value` | `filter` |
 
 Les trois « aires » prennent les mêmes dimensions et ne diffèrent que par la
@@ -215,6 +215,23 @@ hexagones, et un visuel unique afficherait des réglages sans effet dans deux
 cas sur trois — ce que la règle « les `@params` déclarés correspondent aux
 `p.*` lus » existe précisément pour éviter. C'est aussi la convention déjà
 suivie par Barres et Barres horizontales.
+
+Les Aires circulaires offrent deux dispositions. **Emboîtées** : un disque par
+groupe, contenant ses sous-catégories — lisible quand les groupes comptent.
+**Aimantées** : une seule grappe, sans disque englobant, où un point d'ancrage
+par groupe garde les bulles d'une même couleur voisines. La place que
+l'emboîtement réserve au pourtour de chaque disque revient alors aux bulles.
+
+La simulation de forces tourne **pas à pas** (`sim.stop()` puis `sim.tick()`) :
+le bac à sable n'a pas de minuteur, et un export PNG ou SVG doit saisir un
+dessin déjà stabilisé. Les positions de départ suivent une spirale d'angle
+d'or et non un tirage au sort — le dessin doit être REPRODUCTIBLE, un article
+qui ne ressemble pas à l'aperçu du Studio serait inexploitable.
+
+Remettre les bulles dans le cadre CRÉE des recouvrements : deux bulles
+repoussées contre le même bord se retrouvent l'une sur l'autre, et la première
+simulation n'a plus d'énergie pour les séparer. Un second passage, de
+collision seule, reprend le cadre à chaque pas.
 
 **La proportionnalité n'est pas la même selon la forme**, et cela se mesure :
 
