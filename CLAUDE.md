@@ -364,6 +364,40 @@ les propriétés utiles — le fond Natural Earth en portait 168, ramenées à 5
 son poids est passé de 819 à 258 Ko — puis mesurer `traces` et `octets` plutôt
 que les estimer.
 
+### Calques d'export — `data-calque`
+
+L'export SVG remet le dessin en quatre calques — **Données, Axes, Légende,
+Titre** — que les éditeurs vectoriels lisent comme des groupes nommés de
+premier niveau. Sans eux, retoucher les données dans Illustrator oblige à
+détourer les axes à la main.
+
+Trois des quatre se déduisent seuls :
+
+| Calque | Comment il est reconnu |
+|---|---|
+| Titre | les `<text>` posés par le Studio en enfants **directs** du `<svg>` |
+| Axes | un `<g>` dont un enfant DIRECT est un `path.domain` ou un `g.tick` — la signature de `d3.axisBottom` et consorts |
+| Données | tout le reste |
+
+La légende, non : chaque DataTool la dessine à sa façon. Elle se marque donc
+explicitement, sur le groupe qui la contient :
+
+```js
+const legende = g.append('g').attr('data-calque', 'legende');
+```
+
+Le critère des axes porte sur les enfants **directs**, et c'est essentiel :
+le groupe principal contient lui aussi des ticks, plus bas dans l'arbre, et
+un critère par descendance ferait basculer tout le dessin dans les axes.
+
+Un visuel qui ne pose pas le marqueur reste exportable — sa légende tombe
+simplement dans les données. C'est un avertissement du contrôle de
+conformité, pas une erreur.
+
+La répartition ne DÉPLACE rien : chaque calque est une copie de l'arbre
+entier dont on a retiré ce qui ne lui appartient pas. Sortir un groupe de son
+parent lui ferait perdre sa transformation, et le dessin se décalerait.
+
 ### Contraintes de sécurité (sandbox buildDrawFn)
 
 Le code est exécuté dans `new Function('d3', …)` avec `"use strict"`.

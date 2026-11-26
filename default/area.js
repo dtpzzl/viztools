@@ -227,7 +227,7 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Légende en haut
   if (grouped) {
-    const legend = g.append('g');
+    const legend = g.append('g').attr('data-calque', 'legende');
     let cursor = 0;
     keys.forEach((key, i) => {
       const item = legend.append('g').attr('transform', `translate(${cursor},0)`);

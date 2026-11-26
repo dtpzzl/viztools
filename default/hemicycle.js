@@ -383,7 +383,7 @@ function draw(svg, g, data, W, H, color, p) {
     const taille = fontSize - 1;
 
     // Clé des trois écritures, en haut à gauche.
-    const cle = g.append('g');
+    const cle = g.append('g').attr('data-calque', 'legende');
     const symbole = (x, y, sens) => {
       if (sens === 'contre') {
         const b = taille * 0.32;
@@ -415,7 +415,7 @@ function draw(svg, g, data, W, H, color, p) {
     // couleur du groupe. Deux colonnes séparées obligeaient à chercher le même
     // groupe deux fois pour lire sa fracture interne ; ici elle se lit d'un
     // seul regard.
-    const lg = g.append('g').attr('transform', `translate(0,${cy + 16})`);
+    const lg = g.append('g').attr('data-calque', 'legende').attr('transform', `translate(0,${cy + 16})`);
     const hLigne = taille + 6;
 
     // Les largeurs étaient estimées à `longueur × taille × 0.55`. Sur un nom
