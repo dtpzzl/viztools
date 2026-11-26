@@ -286,6 +286,40 @@
         "Chômage — une_rt_m",
         "Inflation — prc_hicp_manr"
       ]
+    },
+    {
+      "id": "assemblee-nationale",
+      "name": "Assemblée nationale",
+      "url": "https://www.nosdeputes.fr",
+      "type": "assemblee-nationale",
+      "builtin": true,
+      "status": "active",
+      "auth": "none",
+      "doc_url": "https://www.nosdeputes.fr/api",
+      "description": "Activité et identité des députés, et les groupes avec leurs couleurs — servis par NosDéputés.fr",
+      "facets": [
+        {
+          "key": "jeu",
+          "label": "Jeu de données",
+          "type": "select",
+          "values": [
+            "synthese",
+            "deputes",
+            "groupes"
+          ],
+          "labels": {
+            "synthese": "Activité des députés",
+            "deputes": "Députés en mandat",
+            "groupes": "Groupes parlementaires"
+          }
+        }
+      ],
+      "example_queries": [
+        "Activité des députés — une ligne par député, ses présences et ses interventions",
+        "Groupes parlementaires — sigle, nom et couleur officielle de chaque groupe",
+        "Députés en mandat — identité, circonscription, profession"
+      ],
+      "notes": "L'Assemblée n'expose pas d'API interrogeable : data.assemblee-nationale.fr publie des archives à télécharger. NosDéputés.fr, de Regards Citoyens, sert les mêmes données en JSON. Le service est lent et irrégulier — de quelques secondes à plus d'une minute pour le même jeu. Les scrutins nominatifs ne passent pas par ici : ils se récupèrent en fichiers sur le site de l'Assemblée, puis par l'import."
     }
   ]
 }

@@ -80,6 +80,7 @@ Fichier de configuration des sources de données, chargé au démarrage du back-
 | `insee-bdm` | Proxy `/api/insee` — SDMX → JSON plat |
 | `meteofrance` | Proxy `/api/meteofrance` — clé via `METEOFRANCE_KEY` ou oneshot |
 | `eurostat` | Via proxy générique |
+| `assemblee-nationale` | Jeu choisi par la facette `jeu`, via NosDéputés.fr — réponse dépliée, l'API enveloppant deux fois |
 | `generic` | Via proxy générique — tente `?q=mot-clé` |
 
 ### Valeurs de facettes data.gouv.fr (topic)
