@@ -31,6 +31,8 @@ viztools/
     ├── stacked-bar-line.js
     ├── warming-stripes.js
     ├── aires-rectangulaires.js
+    ├── aires-circulaires.js
+    ├── aires-hexagonales.js
     ├── hemicycle.js        # « Assemblée »
     └── carte.js
 ```
@@ -203,6 +205,31 @@ pour signaler qu'un visuel est inapplicable à un jeu de données.
 | Assemblée | `series`, `label` | `value`, `votant`, `effectifGroupe`, `filter` |
 | Carte | `region`, `value` | `filter` — plus une seconde source, voir `@geoSource` |
 | Aires rectangulaires | `series`, `label`, `value` | `filter` |
+| Aires circulaires | `series`, `label`, `value` | `filter` |
+| Aires hexagonales | `series`, `label`, `value` | `filter` |
+
+Les trois « aires » prennent les mêmes dimensions et ne diffèrent que par la
+forme. Elles sont **trois DataTools et non un seul à trois modes** : la
+découpe ne vaut que pour les rectangles, le nombre d'hexagones que pour les
+hexagones, et un visuel unique afficherait des réglages sans effet dans deux
+cas sur trois — ce que la règle « les `@params` déclarés correspondent aux
+`p.*` lus » existe précisément pour éviter. C'est aussi la convention déjà
+suivie par Barres et Barres horizontales.
+
+**La proportionnalité n'est pas la même selon la forme**, et cela se mesure :
+
+| forme | écart maximal à la part réelle |
+|---|---|
+| Rectangles, écarts à 0 | 0 % — exact |
+| Rectangles, écarts par défaut | 4,3 % |
+| Cercles | 0 % — exact, même avec les écarts |
+| Hexagones, 400 cases | 3,7 % |
+| Hexagones, 1 200 cases | 1,7 % |
+
+Les écarts entre formes coûtent une bordure de largeur fixe, donc une part
+proportionnellement plus grande aux petites cellules. Les hexagones, eux,
+comptent des cases : la mesure est arrondie, et d'autant plus fine qu'on en
+demande.
 
 **Deux pièges :**
 
