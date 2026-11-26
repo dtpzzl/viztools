@@ -30,6 +30,7 @@ viztools/
     ├── scatter.js
     ├── stacked-bar-line.js
     ├── warming-stripes.js
+    ├── aires-rectangulaires.js
     ├── hemicycle.js        # « Assemblée »
     └── carte.js
 ```
@@ -201,6 +202,7 @@ pour signaler qu'un visuel est inapplicable à un jeu de données.
 | Nuage de points | `x`, `y` | `label`, `series`, `weight`, `filter` |
 | Assemblée | `series`, `label` | `value`, `votant`, `effectifGroupe`, `filter` |
 | Carte | `region`, `value` | `filter` — plus une seconde source, voir `@geoSource` |
+| Aires rectangulaires | `series`, `label`, `value` | `filter` |
 
 **Deux pièges :**
 

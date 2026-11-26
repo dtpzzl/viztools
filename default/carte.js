@@ -174,7 +174,10 @@ function draw(svg, g, data, W, H, color, p) {
 
   // ---- Tracés ------------------------------------------------------------
   const bord = p.borderColor || '#ffffff';
-  const epaisseurBord = Math.max(0, +p.borderWidth ?? 0.75);
+  // `+p.borderWidth ?? 0.75` rendait NaN : `+undefined` vaut NaN, que `??`
+  // laisse passer. Les frontières disparaissaient donc dès qu'on dessinait
+  // sans paramètre — l'aperçu de la bibliothèque, notamment.
+  const epaisseurBord = Math.max(0, Number.isFinite(+p.borderWidth) ? +p.borderWidth : 0.75);
   const carte = g.append('g');
   carte.selectAll('path')
     .data(marques).enter().append('path')
