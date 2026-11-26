@@ -1,10 +1,10 @@
 /**
  * @name Aires circulaires
- * @description Cercles emboîtés — un disque par groupe, un cercle par sous-catégorie, la surface suivant la valeur
+ * @description Cercles proportionnels — emboîtés par groupe, ou aimantés en une grappe où chaque groupe reste d'un tenant
  * @icon <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="9" r="6"/><circle cx="17.5" cy="7" r="4" opacity=".62"/><circle cx="16" cy="17" r="5" opacity=".38"/><circle cx="5.5" cy="18.5" r="3.5" opacity=".8"/></svg>
  * @sampleData [{"series":"Transport","label":"Routier","value":128},{"series":"Transport","label":"Aérien","value":47},{"series":"Bâtiment","label":"Résidentiel","value":94},{"series":"Bâtiment","label":"Tertiaire","value":38},{"series":"Industrie","label":"Chimie","value":61}]
  * @dataFields {"series":{"type":"category","required":true,"label":"Groupe","description":"Premier niveau : chaque groupe reçoit une couleur et son propre espace"},"label":{"type":"category","required":true,"label":"Sous-catégorie","description":"Second niveau : une forme par sous-catégorie, à l'intérieur de son groupe"},"value":{"type":"number","required":true,"label":"Valeur","description":"Ce que l'aire représente — les surfaces lui sont proportionnelles"},"filter":{"type":"category","required":false,"label":"Filtre","description":"Restreint le visuel à une valeur ; sans valeur choisie, tout est cumulé"}}
- * @params {"labelMode":{"group":"visuel","type":"select","label":"Étiquettes","default":"valeur","options":[{"value":"nom","label":"Nom seul"},{"value":"valeur","label":"Nom et valeur"},{"value":"pourcentage","label":"Nom et pourcentage"},{"value":"les-deux","label":"Nom, valeur et pourcentage"}]},"percentBase":{"group":"visuel","type":"select","label":"Pourcentage rapporté à","default":"total","options":[{"value":"total","label":"L'ensemble"},{"value":"serie","label":"Son groupe"}]},"showSeriesLabel":{"group":"visuel","type":"toggle","label":"Nommer les groupes","default":true},"showLegend":{"group":"visuel","type":"toggle","label":"Afficher la légende","default":true},"cellGap":{"group":"visuel","type":"range","label":"Écart entre cercles","min":0,"max":8,"step":0.5,"default":2,"unit":"px"},"groupGap":{"group":"visuel","type":"range","label":"Marge des groupes","min":0,"max":20,"step":1,"default":6,"unit":"px"},"showGroupCircle":{"group":"visuel","type":"toggle","label":"Cercle de groupe visible","default":true},"groupes":{"group":"visuel","type":"series-map","field":"series","label":"Groupes — ordre, nom, couleur","default":null,"description":"L'ordre des lignes range les groupes. Le nom saisi l'emporte sur la valeur de la colonne, la couleur sur la palette."},"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité","min":0.1,"max":1,"step":0.05,"default":1},"showLabels":{"group":"general","type":"toggle","label":"Afficher les étiquettes","default":true},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
+ * @params {"disposition":{"group":"visuel","type":"select","label":"Disposition","default":"emboitees","options":[{"value":"emboitees","label":"Cercles emboîtés"},{"value":"aimantees","label":"Bulles aimantées"}]},"labelMode":{"group":"visuel","type":"select","label":"Étiquettes","default":"valeur","options":[{"value":"nom","label":"Nom seul"},{"value":"valeur","label":"Nom et valeur"},{"value":"pourcentage","label":"Nom et pourcentage"},{"value":"les-deux","label":"Nom, valeur et pourcentage"}]},"percentBase":{"group":"visuel","type":"select","label":"Pourcentage rapporté à","default":"total","options":[{"value":"total","label":"L'ensemble"},{"value":"serie","label":"Son groupe"}]},"showSeriesLabel":{"group":"visuel","type":"toggle","label":"Nommer les groupes","default":true},"showLegend":{"group":"visuel","type":"toggle","label":"Afficher la légende","default":true},"cellGap":{"group":"visuel","type":"range","label":"Écart entre cercles","min":0,"max":8,"step":0.5,"default":2,"unit":"px"},"groupGap":{"group":"visuel","type":"range","label":"Marge des groupes","min":0,"max":20,"step":1,"default":6,"unit":"px"},"showGroupCircle":{"group":"visuel","type":"toggle","label":"Cercle de groupe visible","default":true},"clusterForce":{"group":"visuel","type":"range","label":"Cohésion des groupes","min":0,"max":1,"step":0.05,"default":0.45,"description":"Bulles aimantées seulement : à 0 les bulles se répartissent sans égard au groupe, à 1 chaque groupe se serre autour de son point"},"groupes":{"group":"visuel","type":"series-map","field":"series","label":"Groupes — ordre, nom, couleur","default":null,"description":"L'ordre des lignes range les groupes. Le nom saisi l'emporte sur la valeur de la colonne, la couleur sur la palette."},"filterValue":{"group":"visuel","type":"text","label":"Valeur du filtre","default":null,"placeholder":"toutes cumulées"},"opacity":{"group":"general","type":"range","label":"Opacité","min":0.1,"max":1,"step":0.05,"default":1},"showLabels":{"group":"general","type":"toggle","label":"Afficher les étiquettes","default":true},"unitMode":{"group":"general","type":"select","label":"Unité","default":"auto","options":[{"value":"auto","label":"Automatique"},{"value":"unit","label":"Unité"},{"value":"k","label":"Milliers (k)"},{"value":"M","label":"Millions (M)"},{"value":"Md","label":"Milliards (Md)"}]},"decimals":{"group":"general","type":"range","label":"Décimales","min":0,"max":3,"step":1,"default":0},"fontSize":{"group":"general","type":"range","label":"Taille du texte","min":8,"max":24,"step":1,"default":12,"unit":"px"}}
  */
 function draw(svg, g, data, W, H, color, p) {
   if (!data || !data.length) return;
@@ -76,17 +76,111 @@ function draw(svg, g, data, W, H, color, p) {
   const nommerGroupes = p.showSeriesLabel !== false && groupes.length > 1;
   const margeGroupe = Math.max(0, nombre(p.groupGap, 6)) + (nommerGroupes ? fs : 0);
 
-  const racine = d3.hierarchy({
-    enfants: groupes.map(nom => ({ nom, enfants: feuilles.filter(f => f.series === nom) }))
-                    .filter(x => x.enfants.length),
-  }, n => n.enfants)
-    .sum(d => d.value || 0)
-    .sort((a, b) => b.value - a.value);
+  const ecartBulles = Math.max(0, nombre(p.cellGap, 2));
+  const aimantees = p.disposition === 'aimantees';
 
-  d3.pack()
-    .size([W, hautDessin])
-    .padding(n => (n.depth === 0 ? margeGroupe : Math.max(0, nombre(p.cellGap, 2))))
-    (racine);
+  // `cellules` porte ce que les deux dispositions ont en commun : une
+  // position, un rayon, et la feuille d'origine. Le reste du dessin ne sait
+  // pas laquelle des deux l'a produite.
+  let cellules = [];
+  let racine = null;
+
+  if (!aimantees) {
+    racine = d3.hierarchy({
+      enfants: groupes.map(nom => ({ nom, enfants: feuilles.filter(f => f.series === nom) }))
+                      .filter(x => x.enfants.length),
+    }, n => n.enfants)
+      .sum(d => d.value || 0)
+      .sort((a, b) => b.value - a.value);
+
+    d3.pack()
+      .size([W, hautDessin])
+      .padding(n => (n.depth === 0 ? margeGroupe : ecartBulles))
+      (racine);
+
+    cellules = racine.leaves().filter(n => n.r > 0.5)
+      .map(n => ({ x: n.x, y: n.y, r: n.r, data: n.data }));
+  } else {
+    // ---- Bulles aimantées ------------------------------------------------
+    // Pas de disque englobant : les bulles se touchent directement, et c'est
+    // un point d'ancrage par groupe qui les garde voisines. L'emboîtement
+    // réserve à chaque groupe un disque entier, dont le pourtour reste vide ;
+    // ici cette place revient aux bulles.
+    //
+    // Le rayon suit la racine de la valeur, pour que l'AIRE lui soit
+    // proportionnelle. Le facteur de remplissage tient compte de ce qu'un
+    // empilement de disques inégaux ne couvre jamais toute la surface.
+    const sommeValeurs = d3.sum(feuilles, f => f.value);
+    const k = Math.sqrt((0.46 * W * hautDessin) / (Math.PI * sommeValeurs));
+    const noeuds = feuilles.map(f => ({
+      f, r: Math.max(1.5, k * Math.sqrt(f.value)), x: W / 2, y: hautDessin / 2,
+    }));
+
+    // Un point d'ancrage par groupe, posés sur une ellipse dans l'ordre de la
+    // table : les groupes voisins dans la liste le restent à l'écran.
+    const ancres = new Map();
+    const nb = groupes.length;
+    groupes.forEach((nom, i) => {
+      if (nb === 1) { ancres.set(nom, { x: W / 2, y: hautDessin / 2 }); return; }
+      const a = (2 * Math.PI * i) / nb - Math.PI / 2;
+      ancres.set(nom, {
+        x: W / 2 + Math.cos(a) * W * 0.22,
+        y: hautDessin / 2 + Math.sin(a) * hautDessin * 0.22,
+      });
+    });
+    // Départ près de leur ancre plutôt qu'au centre : la simulation converge
+    // en bien moins de pas, et les groupes ne se traversent pas en chemin.
+    //
+    // L'écartement suit une spirale d'angle d'or, et non un tirage au sort.
+    // Deux raisons : il ne doit pas rester deux points confondus, que la
+    // simulation ne saurait séparer qu'en les secouant au hasard ; et surtout
+    // le dessin doit être REPRODUCTIBLE — un article qui ne ressemble pas à
+    // l'aperçu du Studio, ni à lui-même d'une visite à l'autre, serait
+    // inexploitable.
+    const ANGLE_OR = Math.PI * (3 - Math.sqrt(5));
+    noeuds.forEach((n, i) => {
+      const a = ancres.get(n.f.series);
+      const d = 4 + 3 * Math.sqrt(i);
+      n.x = a.x + Math.cos(i * ANGLE_OR) * d;
+      n.y = a.y + Math.sin(i * ANGLE_OR) * d;
+    });
+
+    const cohesion = Math.max(0, Math.min(1, nombre(p.clusterForce, 0.45)));
+    const sim = d3.forceSimulation(noeuds)
+      .force('collide', d3.forceCollide(n => n.r + ecartBulles / 2).strength(0.95).iterations(4))
+      .force('x', d3.forceX(n => ancres.get(n.f.series).x).strength(0.02 + cohesion * 0.12))
+      .force('y', d3.forceY(n => ancres.get(n.f.series).y).strength(0.02 + cohesion * 0.12))
+      // Un rappel faible vers le centre resserre la grappe entière, sans quoi
+      // les groupes restent écartés sur leur ellipse.
+      .force('cx', d3.forceX(W / 2).strength(0.012))
+      .force('cy', d3.forceY(hautDessin / 2).strength(0.012))
+      .stop();
+    // Pas à pas et non en animation : le bac à sable n'a pas de minuteur, et
+    // un export PNG ou SVG doit saisir un dessin déjà stabilisé.
+    for (let i = 0; i < 320; i++) sim.tick();
+
+    // Ce qui dépasse est ramené dans le cadre. Une bulle à moitié coupée se
+    // lit comme une valeur plus petite qu'elle n'est.
+    const dansLeCadre = () => {
+      for (const n of noeuds) {
+        n.x = Math.max(n.r, Math.min(W - n.r, n.x));
+        n.y = Math.max(n.r, Math.min(hautDessin - n.r, n.y));
+      }
+    };
+    dansLeCadre();
+
+    // Mais remettre dans le cadre CRÉE des recouvrements : deux bulles
+    // repoussées contre le même bord se retrouvent l'une sur l'autre, et la
+    // première simulation n'a plus d'énergie pour les séparer. Un dernier
+    // passage, de collision seule, les écarte — en reprenant le cadre à
+    // chaque pas, pour que la collision tienne compte des murs.
+    const finition = d3.forceSimulation(noeuds)
+      .force('collide', d3.forceCollide(n => n.r + ecartBulles / 2).strength(1).iterations(8))
+      .alpha(0.7).alphaDecay(0.015)
+      .stop();
+    for (let i = 0; i < 220; i++) { finition.tick(); dansLeCadre(); }
+    cellules = noeuds.map(n => ({ x: n.x, y: n.y, r: n.r, data: n.f }));
+  }
 
   const scene = g.append('g').attr('transform', `translate(0,${hautFiltre})`);
 
@@ -108,7 +202,7 @@ function draw(svg, g, data, W, H, color, p) {
   };
 
   // ---- Cercles de groupe --------------------------------------------------
-  if (p.showGroupCircle !== false && groupes.length > 1) {
+  if (!aimantees && p.showGroupCircle !== false && groupes.length > 1) {
     scene.selectAll('.groupe').data(racine.children || []).enter().append('circle')
       .attr('cx', n => n.x).attr('cy', n => n.y).attr('r', n => n.r)
       .attr('fill', 'none')
@@ -118,7 +212,6 @@ function draw(svg, g, data, W, H, color, p) {
   }
 
   // ---- Cercles de sous-catégorie ------------------------------------------
-  const cellules = racine.leaves().filter(n => n.r > 0.5);
   const cel = scene.selectAll('.part').data(cellules).enter().append('g');
 
   cel.append('circle')
@@ -178,7 +271,10 @@ function draw(svg, g, data, W, H, color, p) {
   // ---- Nom des groupes ----------------------------------------------------
   // Au-dessus du disque et non dedans : à l'intérieur il se poserait sur les
   // sous-catégories, qui occupent toute la surface.
-  if (nommerGroupes) {
+  // Dans une grappe il n'y a pas de disque au-dessus duquel écrire, et une
+  // étiquette posée sur les bulles couvrirait celles qu'elle désigne. C'est
+  // la légende qui nomme les groupes dans cette disposition.
+  if (nommerGroupes && !aimantees) {
     const regleG = scene.append('text').attr('opacity', 0)
       .attr('font-family', 'DM Sans, sans-serif').attr('font-size', fs).attr('font-weight', 500);
     const largeurG = t => {
