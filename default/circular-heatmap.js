@@ -293,7 +293,7 @@ function draw(svg, g, data, W, H, color, p) {
     const lw = Math.min(220, W * 0.6);
     const lx = (W - lw) / 2;
     const ly = H - legendH + 14;
-    const lg = g.append('g');
+    const lg = g.append('g').attr('data-calque', 'legende');
 
     lg.append('rect')
       .attr('x', lx).attr('y', ly)

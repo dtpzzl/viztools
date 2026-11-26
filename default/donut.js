@@ -152,7 +152,7 @@ function draw(svg, g, data, W, H, color, p) {
   // Légende à droite, dans la bande qui lui a été réservée. L'interligne se
   // resserre plutôt que de déborder quand les parts sont nombreuses.
   const rowH = Math.min(26, dispoH / data.length);
-  const legend = g.append('g')
+  const legend = g.append('g').attr('data-calque', 'legende')
     .attr('transform', `translate(${dispoW + 16}, ${Math.max(captionH, cy - data.length * rowH / 2)})`);
 
   data.forEach((d, i) => {

@@ -252,7 +252,7 @@ function draw(svg, g, data, W, H, color, p) {
 
   // Légende
   if (legendH) {
-    const legend = g.append('g');
+    const legend = g.append('g').attr('data-calque', 'legende');
     let cursor = 0;
     const entries = keys.map((k, i) => ({ nom: grouped ? k : 'Valeur', couleur: palette[i], trait: false }));
     if (hasLine) entries.push({ nom: 'Courbe', couleur: lineColor, trait: true });

@@ -148,7 +148,7 @@ function draw(svg, g, data, W, H, color, p) {
     grad.append('stop').attr('offset', '100%').attr('stop-color', cMax)
       .attr('stop-opacity', oMax === 1 ? null : oMax);
 
-    const gl = g.append('g');
+    const gl = g.append('g').attr('data-calque', 'legende');
     gl.append('text')
       .attr('x', barreX - 6).attr('y', barreY + barreH)
       .attr('text-anchor', 'end')
